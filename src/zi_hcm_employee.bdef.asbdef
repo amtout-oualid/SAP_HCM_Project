@@ -1,0 +1,302 @@
+managed implementation in class zcl_bp_i_hcm_employee unique;
+strict ( 2 );
+
+define behavior for ZI_HCM_Employee alias Employee
+with unmanaged save
+lock master
+authorization master ( instance )
+etag master LocalLastChangedAt
+{
+  create;
+  update;
+  delete;
+
+  field ( readonly, numbering : managed )
+    EmployeeId;
+
+  field ( readonly )
+    HireDate, CreatedBy, CreatedAt, LastChangedBy, LastChangedAt, LocalLastChangedAt;
+
+  field ( mandatory )
+    FirstName, LastName, DateOfBirth, Nationality;
+
+  determination setDefaultStatus on modify { create; }
+
+  association _Contact { create; }
+  association _OrgAssign { create; }
+  association _LegalContract { create; }
+  association _BankDetails { create; }
+  association _Education { create; }
+  association _Skills { create; }
+  association _Emergency { create; }
+  association _Dependents { create; }
+  association _Documents { create; }
+
+  mapping for zhcm_employee
+  {
+    EmployeeId            = employee_id;
+    FirstName             = first_name;
+    LastName             = last_name;
+    DateOfBirth            = date_of_birth;
+    PlaceOfBirth           = place_of_birth;
+    MaritalStatus          = marital_status;
+    Nationality            = nationality;
+    Gender               = gender;
+    EmployeeStatus          = employee_status;
+    PhotoUrl             = photo_url;
+    HireDate             = hire_date;
+    TerminationDate         = termination_date;
+    CreatedBy             = created_by;
+    CreatedAt             = created_at;
+    LastChangedBy          = last_changed_by;
+    LastChangedAt          = last_changed_at;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_Contact alias Contact
+persistent table zhcm_contact
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+
+  field ( readonly, numbering : managed )
+    ContactId;
+
+  field ( readonly )
+    EmployeeId;
+
+  association _Employee;
+
+  mapping for zhcm_contact
+  {
+    ContactId             = contact_id;
+    EmployeeId            = employee_id;
+    PersonalAddress         = personal_address;
+    PhoneNumber            = phone_number;
+    PersonalEmail          = personal_email;
+    WorkEmail             = work_email;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_OrgAssign alias OrgAssignment
+persistent table zhcm_orgassign
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+
+  field ( readonly, numbering : managed )
+    AssignId;
+
+  field ( readonly )
+    EmployeeId;
+
+  association _Employee;
+
+  mapping for zhcm_orgassign
+  {
+    AssignId             = org_assignment_id;
+    EmployeeId            = employee_id;
+    PositionId            = position_id;
+    OrgUnitId             = org_unit_id;
+    JobTitle             = job_title;
+    Department            = department;
+    ManagerId             = manager_id;
+    ValidFrom             = valid_from;
+    ValidTo              = valid_to;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_LegalCtr alias LegalContract
+persistent table zhcm_legal_ctr
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+
+  field ( readonly )
+    ContractId, EmployeeId;
+
+  association _Employee;
+
+  mapping for zhcm_legal_ctr
+  {
+    ContractId            = contract_id;
+    EmployeeId            = employee_id;
+    NationalId            = national_id;
+    Ssn                 = ssn;
+    ContractType           = contract_type;
+    AgreedHours            = agreed_hours;
+    ContractDocUrl          = contract_doc_url;
+    ValidFrom             = valid_from;
+    ValidTo              = valid_to;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_BankDetl alias BankDetails
+persistent table zhcm_bankdetl
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+
+  field ( readonly )
+    BankId, EmployeeId;
+
+  association _Employee;
+
+  mapping for zhcm_bankdetl
+  {
+    BankId               = bank_detail_id;
+    EmployeeId            = employee_id;
+    BankName             = bank_name;
+    AccountNumber          = account_number;
+    Iban                = iban;
+    BicSwift             = bic_swift;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_Education alias Education
+persistent table zhcm_education
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+
+  field ( readonly )
+    EducationId, EmployeeId;
+
+  association _Employee;
+
+  mapping for zhcm_education
+  {
+    EducationId            = education_id;
+    EmployeeId            = employee_id;
+    Degree               = degree;
+    FieldOfStudy           = field_of_study;
+    Institution            = institution;
+    GraduationDate          = graduation_date;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_Skill alias Skill
+persistent table zhcm_skill
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+
+  field ( readonly )
+    SkillId, EmployeeId;
+
+  association _Employee;
+
+  mapping for zhcm_skill
+  {
+    SkillId              = skill_id;
+    EmployeeId            = employee_id;
+    SkillName             = skill_name;
+    Proficiency            = proficiency;
+    CertName             = cert_name;
+    IssuingBody            = issuing_body;
+    IssueDate             = issue_date;
+    ExpiryDate            = expiry_date;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_Emergency alias EmergencyContact
+persistent table zhcm_emergency
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+
+  field ( readonly )
+    EmContactId, EmployeeId;
+
+  association _Employee;
+
+  mapping for zhcm_emergency
+  {
+    EmContactId            = em_contact_id;
+    EmployeeId            = employee_id;
+    ContactName            = contact_name;
+    Relationship           = relationship;
+    Phone               = phone_number;
+    IsPrimary             = is_primary;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_Dependent alias Dependent
+persistent table zhcm_dependent
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+
+  field ( readonly )
+    DependentId, EmployeeId;
+
+  association _Employee;
+
+  mapping for zhcm_dependent
+  {
+    DependentId            = dependent_id;
+    EmployeeId            = employee_id;
+    Name                = name;
+    Relationship           = relationship;
+    DateOfBirth            = date_of_birth;
+    Gender               = gender;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_Document alias Document
+persistent table zhcm_document
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update;
+  delete;
+
+  field ( readonly )
+    DocumentId, EmployeeId;
+
+  association _Employee;
+
+  mapping for zhcm_document
+  {
+    DocumentId            = document_id;
+    EmployeeId            = employee_id;
+    DocType              = doc_type;
+    DriveUrl             = drive_url;
+    UploadDate            = upload_date;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}

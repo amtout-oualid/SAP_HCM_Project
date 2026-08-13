@@ -1,14 +1,10 @@
-class ZCL_BP_I_HCM_TALENTPOOL definition
-  public
-  final
-  create public .
-
-public section.
-protected section.
-private section.
+CLASS zcl_bp_i_hcm_talentpool DEFINITION
+  PUBLIC
+  ABSTRACT
+  FINAL
+  FOR BEHAVIOR OF ZI_HCM_TalentPool.
 ENDCLASS.
 
-
-
-CLASS ZCL_BP_I_HCM_TALENTPOOL IMPLEMENTATION.
+CLASS zcl_bp_i_hcm_talentpool IMPLEMENTATION.
 ENDCLASS.
+

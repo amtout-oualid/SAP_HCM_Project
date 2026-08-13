@@ -1,14 +1,10 @@
-class ZCL_BP_I_HCM_ORGUNIT definition
-  public
-  final
-  create public .
-
-public section.
-protected section.
-private section.
+CLASS zcl_bp_i_hcm_orgunit DEFINITION
+  PUBLIC
+  ABSTRACT
+  FINAL
+  FOR BEHAVIOR OF ZI_HCM_OrgUnit.
 ENDCLASS.
 
-
-
-CLASS ZCL_BP_I_HCM_ORGUNIT IMPLEMENTATION.
+CLASS zcl_bp_i_hcm_orgunit IMPLEMENTATION.
 ENDCLASS.
+
