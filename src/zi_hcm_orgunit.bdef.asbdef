@@ -1,0 +1,62 @@
+managed implementation in class zcl_bp_i_hcm_orgunit unique;
+strict ( 2 );
+
+define behavior for ZI_HCM_OrgUnit alias OrgUnit
+persistent table zhcm_orgunit
+lock master
+authorization master ( instance )
+etag master LocalLastChangedAt
+early numbering
+{
+  create;
+  update;
+  delete;
+
+  field ( readonly )
+    OrgUnitId;
+
+  validation validateDelete on save { delete; }
+
+  association _Positions { create; }
+
+  mapping for zhcm_orgunit
+  {
+    OrgUnitId             = org_unit_id;
+    UnitName             = unit_name;
+    ParentOrgUnitId         = parent_org_unit_id;
+    CostCenter            = cost_center;
+    Status               = status;
+    CreatedBy             = created_by;
+    CreatedAt             = created_at;
+    LastChangedBy          = last_changed_by;
+    LastChangedAt          = last_changed_at;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_Position alias Position
+persistent table zhcm_position
+lock dependent by _OrgUnit
+authorization dependent by _OrgUnit
+etag master LocalLastChangedAt
+early numbering
+{
+  update;
+  delete;
+
+  field ( readonly )
+    PositionId, OrgUnitId;
+
+  association _OrgUnit;
+
+  mapping for zhcm_position
+  {
+    PositionId            = position_id;
+    OrgUnitId             = org_unit_id;
+    JobTitle             = job_title;
+    IsManager             = is_manager;
+    FteValue             = fte_value;
+    Status               = status;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
