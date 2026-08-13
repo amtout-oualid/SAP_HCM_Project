@@ -1,0 +1,10 @@
+CLASS zcl_bp_i_hcm_candidate DEFINITION
+  PUBLIC
+  ABSTRACT
+  FINAL
+  FOR BEHAVIOR OF ZI_HCM_Candidate.
+ENDCLASS.
+
+CLASS zcl_bp_i_hcm_candidate IMPLEMENTATION.
+ENDCLASS.
+

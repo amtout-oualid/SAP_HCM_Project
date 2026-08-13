@@ -1,0 +1,30 @@
+managed implementation in class zcl_bp_i_hcm_candidate unique;
+strict ( 2 );
+
+define behavior for ZI_HCM_Candidate alias Candidate
+persistent table zhcm_candidate
+lock master
+authorization master ( instance )
+etag master LocalLastChangedAt
+early numbering
+{
+  create;
+  update;
+  delete;
+
+  field ( readonly )
+    CandidateId, CreatedAt, LastChangedAt, LocalLastChangedAt;
+
+  mapping for zhcm_candidate
+  {
+    CandidateId            = candidate_id;
+    FirstName             = first_name;
+    LastName             = last_name;
+    Email               = email;
+    Phone               = phone;
+    Cin                 = cin;
+    CreatedAt             = created_at;
+    LastChangedAt          = last_changed_at;
+    LocalLastChangedAt        = local_last_changed_at;
+  }
+}
