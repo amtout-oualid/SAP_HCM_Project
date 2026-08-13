@@ -1,14 +1,11 @@
-class ZCL_BP_I_HCM_JOBOFFER definition
-  public
-  final
-  create public .
-
-public section.
-protected section.
-private section.
+CLASS zcl_bp_i_hcm_joboffer DEFINITION
+  PUBLIC
+  ABSTRACT
+  FINAL
+  FOR BEHAVIOR OF ZI_HCM_JobOffer.
 ENDCLASS.
 
+CLASS zcl_bp_i_hcm_joboffer IMPLEMENTATION.
 
-
-CLASS ZCL_BP_I_HCM_JOBOFFER IMPLEMENTATION.
 ENDCLASS.
+

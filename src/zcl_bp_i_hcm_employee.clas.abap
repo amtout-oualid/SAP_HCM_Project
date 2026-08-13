@@ -1,14 +1,10 @@
-class ZCL_BP_I_HCM_EMPLOYEE definition
-  public
-  final
-  create public .
-
-public section.
-protected section.
-private section.
+CLASS zcl_bp_i_hcm_employee DEFINITION
+  PUBLIC
+  ABSTRACT
+  FINAL
+  FOR BEHAVIOR OF ZI_HCM_Employee.
 ENDCLASS.
 
-
-
-CLASS ZCL_BP_I_HCM_EMPLOYEE IMPLEMENTATION.
+CLASS zcl_bp_i_hcm_employee IMPLEMENTATION.
 ENDCLASS.
+

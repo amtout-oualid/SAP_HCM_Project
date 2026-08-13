@@ -1,14 +1,10 @@
-class ZCL_BP_I_HCM_ONBOARDING definition
-  public
-  final
-  create public .
-
-public section.
-protected section.
-private section.
+CLASS zcl_bp_i_hcm_onboarding DEFINITION
+  PUBLIC
+  ABSTRACT
+  FINAL
+  FOR BEHAVIOR OF ZI_HCM_Onboarding.
 ENDCLASS.
 
-
-
-CLASS ZCL_BP_I_HCM_ONBOARDING IMPLEMENTATION.
+CLASS zcl_bp_i_hcm_onboarding IMPLEMENTATION.
 ENDCLASS.
+
