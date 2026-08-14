@@ -1,0 +1,6 @@
+@EndUserText.label: 'Web API for React Candidate Portal'
+define service ZAPI_HCM_RECRUIT {
+  expose ZC_HCM_Application as Application;
+  expose ZC_HCM_Candidate   as Candidate;
+  expose ZC_HCM_Onboarding  as Onboarding;
+}
