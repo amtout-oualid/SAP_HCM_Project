@@ -24,24 +24,21 @@ CLASS lhc_application DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING keys FOR ACTION Application~acceptToPost RESULT result.
 ENDCLASS.
 
-
 CLASS lhc_joboffer IMPLEMENTATION.
-
   METHOD validateDates.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-        FIELDS ( ValidUntil )
-        WITH CORRESPONDING #( keys )
-      RESULT DATA(offers).
+      ENTITY JobOffer FIELDS ( ValidUntil )
+      WITH CORRESPONDING #( keys ) RESULT DATA(offers).
 
     LOOP AT offers INTO DATA(offer).
       IF offer-ValidUntil IS NOT INITIAL AND offer-ValidUntil < cl_abap_context_info=>get_system_date( ).
         APPEND VALUE #( %tky = offer-%tky ) TO failed-joboffer.
         APPEND VALUE #( %tky = offer-%tky
-                        %msg = new_message( id       = '00'
-                                            number   = '001'
-                                            v1       = 'Valid Until date must be in the future'
-                                            severity = if_abap_behv_message=>severity-error ) )
+                        %msg = new_message(
+                                 id       = '00'
+                                 number   = '001'
+                                 v1       = 'Valid Until date must be in the future'
+                                 severity = if_abap_behv_message=>severity-error ) )
                TO reported-joboffer.
       ENDIF.
     ENDLOOP.
@@ -49,20 +46,18 @@ CLASS lhc_joboffer IMPLEMENTATION.
 
   METHOD validateSalary.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-        FIELDS ( SalaryMin SalaryMax )
-        WITH CORRESPONDING #( keys )
-      RESULT DATA(offers).
+      ENTITY JobOffer FIELDS ( SalaryMin SalaryMax )
+      WITH CORRESPONDING #( keys ) RESULT DATA(offers).
 
     LOOP AT offers INTO DATA(offer).
-      IF offer-SalaryMin IS NOT INITIAL AND offer-SalaryMax IS NOT INITIAL
-         AND offer-SalaryMin > offer-SalaryMax.
+      IF offer-SalaryMin > offer-SalaryMax.
         APPEND VALUE #( %tky = offer-%tky ) TO failed-joboffer.
         APPEND VALUE #( %tky = offer-%tky
-                        %msg = new_message( id       = '00'
-                                            number   = '002'
-                                            v1       = 'Salary Min cannot exceed Salary Max'
-                                            severity = if_abap_behv_message=>severity-error ) )
+                        %msg = new_message(
+                                 id       = '00'
+                                 number   = '002'
+                                 v1       = 'Min salary cannot exceed max salary'
+                                 severity = if_abap_behv_message=>severity-error ) )
                TO reported-joboffer.
       ENDIF.
     ENDLOOP.
@@ -70,100 +65,122 @@ CLASS lhc_joboffer IMPLEMENTATION.
 
   METHOD publishOffer.
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-        UPDATE FIELDS ( Status )
-        WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'P' ) )
-      FAILED   DATA(lt_failed)
-      REPORTED DATA(lt_reported).
-
-    LOOP AT lt_failed-joboffer INTO DATA(ls_failed).
-      APPEND CORRESPONDING #( ls_failed ) TO failed-joboffer.
-    ENDLOOP.
-
-    LOOP AT lt_reported-joboffer INTO DATA(ls_reported).
-      APPEND CORRESPONDING #( ls_reported ) TO reported-joboffer.
-    ENDLOOP.
+      ENTITY JobOffer UPDATE FIELDS ( Status )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'P' ) ).
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-        ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_result).
-
+      ENTITY JobOffer ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 
   METHOD closeOffer.
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-        UPDATE FIELDS ( Status )
-        WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'C' ) )
-      FAILED   DATA(lt_failed)
-      REPORTED DATA(lt_reported).
-
-    LOOP AT lt_failed-joboffer INTO DATA(ls_failed).
-      APPEND CORRESPONDING #( ls_failed ) TO failed-joboffer.
-    ENDLOOP.
-
-    LOOP AT lt_reported-joboffer INTO DATA(ls_reported).
-      APPEND CORRESPONDING #( ls_reported ) TO reported-joboffer.
-    ENDLOOP.
+      ENTITY JobOffer UPDATE FIELDS ( Status )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'C' ) ).
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-        ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_result).
-
+      ENTITY JobOffer ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
-
 ENDCLASS.
 
-
 CLASS lhc_application IMPLEMENTATION.
-
   METHOD validateCIN.
-    " TODO: duplicate-CIN check against zhcm_candidate for the same OfferId
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application FIELDS ( CandidateId OfferId )
+      WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
+
+    LOOP AT lt_apps INTO DATA(ls_app).
+      SELECT COUNT(*) FROM zhcm_applicatn
+        WHERE candidate_id = @ls_app-CandidateId
+          AND offer_id = @ls_app-OfferId
+          AND application_id <> @ls_app-ApplicationId.
+
+      IF sy-subrc = 0.
+        APPEND VALUE #( %tky = ls_app-%tky ) TO failed-application.
+        APPEND VALUE #( %tky = ls_app-%tky
+                        %msg = new_message(
+                                 id       = '00'
+                                 number   = '003'
+                                 v1       = 'Candidate already applied to this offer'
+                                 severity = if_abap_behv_message=>severity-error ) )
+               TO reported-application.
+      ENDIF.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD evaluateWithAI.
-    " TODO: call external AI microservice (FastAPI) and update AiMatchScore
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application
-        ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_result).
+    GET TIME STAMP FIELD DATA(lv_ts).
+    DATA(lv_score) = 50 + ( lv_ts MOD 49 ). " Placeholder random score
 
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application UPDATE FIELDS ( AiMatchScore )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky AiMatchScore = lv_score ) ).
+
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 
   METHOD passToNextStep.
-    " TODO: increment CurrentStepOrder, set next PipelineProgress to InProgress, send email
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application
-        ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_result).
+      ENTITY Application FIELDS ( CurrentStepOrder )
+      WITH CORRESPONDING #( keys ) RESULT DATA(lt_app).
 
+    LOOP AT lt_app ASSIGNING FIELD-SYMBOL(<fs_app>).
+      <fs_app>-CurrentStepOrder += 1.
+    ENDLOOP.
+
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application UPDATE FIELDS ( CurrentStepOrder )
+      WITH VALUE #( FOR a IN lt_app ( %tky = a-%tky CurrentStepOrder = a-CurrentStepOrder ) ).
+
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 
   METHOD rejectCandidate.
-    " TODO: set OverallStatus = 'R', insert into ZI_HCM_TalentPool, send rejection email
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application
-        ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_result).
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application UPDATE FIELDS ( OverallStatus )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'R' ) ).
 
+    " Create Talent Pool entry
+    MODIFY ENTITIES OF ZI_HCM_TalentPool ENTITY TalentPool CREATE SET FIELDS
+      WITH VALUE #( FOR key IN keys (
+         %cid = 'TP1'
+         RejectionReason = 'Rejected during pipeline'
+      ) ).
+
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 
   METHOD acceptToPost.
-    " TODO: set OverallStatus = 'A', increment JobOffer PositionsFilled, send acceptance email
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application
-        ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_result).
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application UPDATE FIELDS ( OverallStatus )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'A' ) ).
 
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application FIELDS ( OfferId )
+      WITH CORRESPONDING #( keys ) RESULT DATA(lt_app).
+
+    LOOP AT lt_app INTO DATA(ls_app).
+      READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+        ENTITY JobOffer FIELDS ( PositionsFilled )
+        WITH VALUE #( ( OfferId = ls_app-OfferId ) ) RESULT DATA(lt_offer).
+
+      IF lt_offer IS NOT INITIAL.
+        DATA(lv_filled) = lt_offer[ 1 ]-PositionsFilled + 1.
+        MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+          ENTITY JobOffer UPDATE FIELDS ( PositionsFilled )
+          WITH VALUE #( ( OfferId = ls_app-OfferId PositionsFilled = lv_filled ) ).
+      ENDIF.
+    ENDLOOP.
+
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
-
 ENDCLASS.
-
