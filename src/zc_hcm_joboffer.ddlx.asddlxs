@@ -1,0 +1,71 @@
+@Metadata.layer: #CUSTOMER
+@UI.headerInfo: {
+  typeName: 'Job Offer',
+  typeNamePlural: 'Job Offers',
+  title: { type: #STANDARD, value: 'Title' },
+  description: { type: #STANDARD, value: 'Department' }
+}
+annotate view ZC_HCM_JobOffer with
+{
+  @UI.facet: [
+    { id: 'GeneralInfo', type: #IDENTIFICATION_REFERENCE, label: 'General Information', position: 10 },
+    { id: 'PipelineSteps', type: #LINEITEM_REFERENCE, label: 'Pipeline Steps', position: 20, targetElement: '_Steps' },
+    { id: 'Applications', type: #LINEITEM_REFERENCE, label: 'Applications', position: 30, targetElement: '_Applications' }
+  ]
+
+  @UI.hidden: true
+  OfferId;
+
+  @UI.lineItem: [{ position: 10, importance: #HIGH }, 
+                 { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' }, 
+                 { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' }]
+  @UI.identification: [{ position: 10 }]
+  @Search.defaultSearchElement: true
+  Title;
+
+  @UI.identification: [{ position: 20 }]
+  Description;
+
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 30 }]
+  @UI.selectionField: [{ position: 20 }]
+  Department;
+
+  @UI.identification: [{ position: 40 }]
+  RequiredSkills;
+
+  @UI.identification: [{ position: 50 }]
+  ExperienceLevel;
+
+  @UI.identification: [{ position: 60 }]
+  ContractType;
+
+  @UI.identification: [{ position: 70 }]
+  Location;
+
+  @UI.lineItem: [{ position: 40 }]
+  @UI.identification: [{ position: 80 }]
+  PositionsNeeded;
+
+  @UI.lineItem: [{ position: 50 }]
+  @UI.identification: [{ position: 90 }]
+  PositionsFilled;
+
+  @UI.identification: [{ position: 100 }]
+  SalaryMin;
+
+  @UI.identification: [{ position: 110 }]
+  SalaryMax;
+
+  @UI.hidden: true
+  CurrencyCode;
+
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 140 }]
+  @UI.selectionField: [{ position: 10 }]
+  Status;
+
+  @UI.lineItem: [{ position: 60 }]
+  @UI.identification: [{ position: 130 }]
+  ValidUntil;
+}

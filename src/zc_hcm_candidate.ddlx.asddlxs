@@ -1,0 +1,24 @@
+@Metadata.layer: #CUSTOMER
+@UI.headerInfo: {
+  typeName: 'Candidate',
+  typeNamePlural: 'Candidates'
+}
+annotate view ZC_HCM_Candidate with
+{
+  @UI.facet: [{ id: 'CandDetails', type: #IDENTIFICATION_REFERENCE, label: 'Details', position: 10 }]
+
+  @UI.hidden: true
+  CandidateId;
+
+  @UI.lineItem: [{ position: 10 }]
+  @UI.identification: [{ position: 10 }]
+  FirstName;
+
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 20 }]
+  LastName;
+
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 30 }]
+  Email;
+}

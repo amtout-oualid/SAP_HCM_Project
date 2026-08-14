@@ -1,0 +1,48 @@
+@Metadata.layer: #CUSTOMER
+@UI.headerInfo: {
+  typeName: 'Application',
+  typeNamePlural: 'Applications'
+}
+annotate view ZC_HCM_Application with
+{
+  @UI.facet: [
+    { id: 'General', type: #IDENTIFICATION_REFERENCE, label: 'Application Details', position: 10 },
+    { id: 'Pipeline', type: #LINEITEM_REFERENCE, label: 'Pipeline Progress', position: 20, targetElement: '_Progress' }
+  ]
+
+  @UI.hidden: true
+  ApplicationId;
+
+  @UI.hidden: true
+  OfferId;
+
+  @UI.lineItem: [{ position: 10 }]
+  @UI.identification: [{ position: 10 }]
+  CandidateId;
+
+  @UI.identification: [{ position: 20 }]
+  ResumeUrl;
+
+  @UI.identification: [{ position: 30 }]
+  CoverLetter;
+
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 40 }]
+  AppliedAt;
+
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 50 }]
+  CurrentStepOrder;
+
+  @UI.lineItem: [{ position: 50 },
+                 { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate with AI' },
+                 { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Pass to Next Step' },
+                 { type: #FOR_ACTION, dataAction: 'rejectCandidate', label: 'Reject' },
+                 { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept to Post' }]
+  @UI.identification: [{ position: 60 }]
+  OverallStatus;
+
+  @UI.lineItem: [{ position: 40 }]
+  @UI.identification: [{ position: 70 }]
+  AiMatchScore;
+}

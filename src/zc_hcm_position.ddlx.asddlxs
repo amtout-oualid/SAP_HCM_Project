@@ -1,0 +1,32 @@
+@Metadata.layer: #CUSTOMER
+@UI.headerInfo: {
+  typeName: 'Position',
+  typeNamePlural: 'Positions',
+  title: { type: #STANDARD, value: 'JobTitle' }
+}
+annotate view ZC_HCM_Position with
+{
+  @UI.facet: [{ id: 'PosDetails', type: #IDENTIFICATION_REFERENCE, label: 'Details', position: 10 }]
+
+  @UI.hidden: true
+  PositionId;
+  
+  @UI.hidden: true
+  OrgUnitId;
+
+  @UI.lineItem: [{ position: 10 }]
+  @UI.identification: [{ position: 10 }]
+  JobTitle;
+
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 20 }]
+  IsManager;
+
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 30 }]
+  FteValue;
+
+  @UI.lineItem: [{ position: 40 }]
+  @UI.identification: [{ position: 40 }]
+  Status;
+}

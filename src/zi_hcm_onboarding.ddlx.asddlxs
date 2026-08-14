@@ -1,0 +1,30 @@
+@Metadata.layer: #CUSTOMER
+@UI.headerInfo: {
+  typeName: 'Onboarding Form',
+  typeNamePlural: 'Onboarding Forms'
+}
+annotate view ZC_HCM_Onboarding with
+{
+  @UI.facet: [
+    { id: 'PersonalInfo', type: #IDENTIFICATION_REFERENCE, label: 'Personal Information', position: 10 },
+    { id: 'BankInfo', type: #IDENTIFICATION_REFERENCE, label: 'Bank & Legal', position: 20 }
+  ]
+
+  @UI.hidden: true
+  FormId;
+
+  @UI.lineItem: [{ position: 10 }]
+  @UI.identification: [{ position: 10 }]
+  FirstName;
+
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 20 }]
+  LastName;
+
+  @UI.lineItem: [{ position: 30 },
+                 { type: #FOR_ACTION, dataAction: 'submitForm', label: 'Submit' },
+                 { type: #FOR_ACTION, dataAction: 'approveAndCreateEmployee', label: 'Approve & Hire' },
+                 { type: #FOR_ACTION, dataAction: 'rejectForm', label: 'Reject' }]
+  @UI.identification: [{ position: 60 }]
+  Status;
+}

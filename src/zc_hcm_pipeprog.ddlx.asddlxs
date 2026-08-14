@@ -1,0 +1,38 @@
+@Metadata.layer: #CUSTOMER
+@UI.headerInfo: {
+  typeName: 'Progress',
+  typeNamePlural: 'Progress Steps'
+}
+annotate view ZC_HCM_PipeProg with
+{
+  @UI.facet: [{ id: 'ProgDetails', type: #IDENTIFICATION_REFERENCE, label: 'Progress Details', position: 10 }]
+
+  @UI.hidden: true
+  ProgressId;
+  
+  @UI.hidden: true
+  ApplicationId;
+  
+  @UI.hidden: true
+  OfferId;
+
+  @UI.lineItem: [{ position: 10 }]
+  @UI.identification: [{ position: 10 }]
+  StepOrder;
+
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 20 }]
+  StepName;
+
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 30 }]
+  Status;
+
+  @UI.lineItem: [{ position: 40 }]
+  @UI.identification: [{ position: 40 }]
+  Score;
+
+  @UI.lineItem: [{ position: 50 }]
+  @UI.identification: [{ position: 50 }]
+  Notes;
+}
