@@ -13,7 +13,9 @@ define view entity ZC_HCM_PipeProg
   Notes,
   CompletedAt,
   LocalLastChangedAt,
+  OfferId,
   
   /* Associations */
-  _Application : redirected to parent ZC_HCM_Application
+  _Application : redirected to parent ZC_HCM_Application ,
+  _Offer : redirected to ZC_HCM_JobOffer
 }

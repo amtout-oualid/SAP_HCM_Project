@@ -1,0 +1,9 @@
+projection;
+strict ( 2 );
+
+define behavior for ZC_HCM_TalentPool alias TalentPool
+use etag
+{
+  use create;
+  use delete;
+}

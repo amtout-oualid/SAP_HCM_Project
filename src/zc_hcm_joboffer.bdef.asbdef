@@ -1,0 +1,45 @@
+projection;
+strict ( 2 );
+
+define behavior for ZC_HCM_JobOffer alias JobOffer
+use etag
+{
+  use create;
+  use update;
+  use delete;
+
+  use action publishOffer;
+  use action closeOffer;
+
+  use association _Steps { create; }
+  use association _Applications { create; }
+}
+
+define behavior for ZC_HCM_PipeTmpl alias PipelineStep
+use etag
+{
+  use update;
+  use delete;
+  use association _Offer;
+}
+
+define behavior for ZC_HCM_Application alias Application
+use etag
+{
+  use update;
+  use action evaluateWithAI;
+  use action passToNextStep;
+  use action rejectCandidate;
+  use action acceptToPost;
+
+  use association _Progress { create; }
+  use association _Offer;
+}
+
+define behavior for ZC_HCM_PipeProg alias PipelineProgress
+use etag
+{
+  use update;
+  use association _Application;
+  use association _Offer;
+}

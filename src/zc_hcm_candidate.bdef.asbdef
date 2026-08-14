@@ -1,0 +1,10 @@
+projection;
+strict ( 2 );
+
+define behavior for ZC_HCM_Candidate alias Candidate
+use etag
+{
+  use create;
+  use update;
+  use delete;
+}

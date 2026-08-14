@@ -1,0 +1,92 @@
+projection;
+strict ( 2 );
+
+define behavior for ZC_HCM_Employee alias Employee
+use etag
+{
+  use create;
+  use update;
+  use delete;
+
+  use association _Contact { create; }
+  use association _OrgAssign { create; }
+  use association _LegalContract { create; }
+  use association _BankDetails { create; }
+  use association _Education { create; }
+  use association _Skills { create; }
+  use association _Emergency { create; }
+  use association _Dependents { create; }
+  use association _Documents { create; }
+}
+
+define behavior for ZC_HCM_Contact alias Contact
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee;
+}
+
+define behavior for ZC_HCM_OrgAssign alias OrgAssignment
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee;
+}
+
+define behavior for ZC_HCM_LegalCtr alias LegalContract
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee;
+}
+
+define behavior for ZC_HCM_BankDetl alias BankDetails
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee;
+}
+
+define behavior for ZC_HCM_Education alias Education
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee;
+}
+
+define behavior for ZC_HCM_Skill alias Skill
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee;
+}
+
+define behavior for ZC_HCM_Emergency alias EmergencyContact
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee;
+}
+
+define behavior for ZC_HCM_Dependent alias Dependent
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee;
+}
+
+define behavior for ZC_HCM_Document alias Document
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee;
+}

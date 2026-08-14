@@ -1,0 +1,20 @@
+projection;
+strict ( 2 );
+
+define behavior for ZC_HCM_OrgUnit alias OrgUnit
+use etag
+{
+  use create;
+  use update;
+  use delete;
+
+  use association _Positions { create; }
+}
+
+define behavior for ZC_HCM_Position alias Position
+use etag
+{
+  use update;
+  use delete;
+  use association _OrgUnit;
+}
