@@ -6,14 +6,17 @@ persistent table zhcm_candidate
 lock master
 authorization master ( instance )
 etag master LocalLastChangedAt
-early numbering
 {
   create;
   update;
   delete;
 
+  field ( readonly, numbering : managed )
+  CandidateId;
+
   field ( readonly )
-    CandidateId, CreatedAt, LastChangedAt, LocalLastChangedAt;
+  CreatedAt, LastChangedAt, LocalLastChangedAt;
+
 
   mapping for zhcm_candidate
   {
