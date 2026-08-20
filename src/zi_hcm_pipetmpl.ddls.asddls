@@ -10,8 +10,9 @@ define view entity ZI_HCM_PipeTmpl
       step_name               as StepName,
       step_order              as StepOrder,
       step_type               as StepType,
+      step_desc               as StepDescription, 
       @Semantics.systemDateTime.localInstanceLastChangedAt: true
       local_last_changed_at      as LocalLastChangedAt,
-
+       
       _Offer
 }

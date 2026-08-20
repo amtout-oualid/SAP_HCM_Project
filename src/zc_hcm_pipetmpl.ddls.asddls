@@ -9,6 +9,7 @@ define view entity ZC_HCM_PipeTmpl
   StepName,
   StepOrder,
   StepType,
+  StepDescription,
   LocalLastChangedAt,
   
   /* Associations */

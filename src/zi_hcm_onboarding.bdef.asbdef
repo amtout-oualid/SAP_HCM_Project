@@ -1,61 +1,42 @@
 managed implementation in class zcl_bp_i_hcm_onboarding unique;
 strict ( 2 );
+with draft;
 
 define behavior for ZI_HCM_Onboarding alias Onboarding
 persistent table zhcm_onboardng
+draft table zhcm_d_onboardn
 lock master
+total etag LastChangedAt
 authorization master ( instance )
 etag master LocalLastChangedAt
 {
   create;
   update;
+  delete;
 
-  // Added numbering : managed to FormId
+  draft action Edit;
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare;
+
   field ( readonly, numbering : managed ) FormId;
-
-  field ( readonly )
-    EmployeeId, ApprovedBy, ApprovedAt;
-
-  field ( mandatory )
-    FirstName, LastName, DateOfBirth, NationalId;
+  field ( readonly ) CreatedAt, LastChangedAt, LocalLastChangedAt;
 
   action submitForm result [1] $self;
   action approveAndCreateEmployee result [1] $self;
   action rejectForm result [1] $self;
 
-  validation validateMandatory on save { create; field FirstName, LastName, DateOfBirth, NationalId, BankAccount; }
-
-  mapping for zhcm_onboardng
-  {
-    FormId               = form_id;
-    ApplicationId          = application_id;
-    EmployeeId            = employee_id;
-    FirstName             = first_name;
-    LastName             = last_name;
-    DateOfBirth            = date_of_birth;
-    PlaceOfBirth           = place_of_birth;
-    Nationality            = nationality;
-    MaritalStatus          = marital_status;
-    Gender               = gender;
-    NationalId            = national_id;
-    Ssn                 = ssn;
-    Address              = address;
-    Phone               = phone;
-    PersonalEmail          = personal_email;
-    BankName             = bank_name;
-    BankAccount            = bank_account;
-    Iban                = iban;
-    EmergencyName          = emergency_name;
-    EmergencyPhone          = emergency_phone;
-    EmergencyRelation         = emergency_relation;
-    Status               = status;
-    SubmittedAt            = submitted_at;
-    ApprovedBy            = approved_by;
-    ApprovedAt            = approved_at;
-    CreatedBy             = created_by;
-    CreatedAt             = created_at;
-    LastChangedBy          = last_changed_by;
-    LastChangedAt          = last_changed_at;
-    LocalLastChangedAt        = local_last_changed_at;
+  mapping for zhcm_onboardng {
+    FormId = form_id; ApplicationId = application_id; EmployeeId = employee_id;
+    FirstName = first_name; LastName = last_name; DateOfBirth = date_of_birth;
+    PlaceOfBirth = place_of_birth; Nationality = nationality; MaritalStatus = marital_status;
+    Gender = gender; NationalId = national_id; Ssn = ssn; Address = address;
+    Phone = phone; PersonalEmail = personal_email; BankName = bank_name;
+    BankAccount = bank_account; Iban = iban; EmergencyName = emergency_name;
+    EmergencyPhone = emergency_phone; EmergencyRelation = emergency_relation;
+    Status = status; SubmittedAt = submitted_at; ApprovedBy = approved_by;
+    ApprovedAt = approved_at; CreatedBy = created_by; CreatedAt = created_at;
+    LastChangedBy = last_changed_by; LastChangedAt = last_changed_at; LocalLastChangedAt = local_last_changed_at;
   }
 }

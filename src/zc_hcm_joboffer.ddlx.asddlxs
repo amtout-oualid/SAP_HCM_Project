@@ -16,56 +16,60 @@ annotate view ZC_HCM_JobOffer with
   @UI.hidden: true
   OfferId;
 
-  @UI.lineItem: [{ position: 10, importance: #HIGH }, 
+  @UI.lineItem: [{ position: 10, importance: #HIGH, label: 'Title' }, 
                  { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' }, 
-                 { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' }]
-  @UI.identification: [{ position: 10 }]
+                 { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' },
+                 { type: #FOR_ACTION, dataAction: 'delete', label: 'Delete' }]
+  @UI.identification: [{ position: 10, label: 'Job Title' }]
   @Search.defaultSearchElement: true
   Title;
 
-  @UI.identification: [{ position: 20 }]
+  @UI.identification: [{ position: 20, label: 'Description' }]
   Description;
 
-  @UI.lineItem: [{ position: 20 }]
-  @UI.identification: [{ position: 30 }]
+  @UI.lineItem: [{ position: 20, label: 'Department' }]
+  @UI.identification: [{ position: 30, label: 'Department' }]
   @UI.selectionField: [{ position: 20 }]
   Department;
 
-  @UI.identification: [{ position: 40 }]
+  @UI.identification: [{ position: 40, label: 'Required Skills' }]
   RequiredSkills;
 
-  @UI.identification: [{ position: 50 }]
+  @UI.identification: [{ position: 50, label: 'Experience Level' }]
   ExperienceLevel;
 
-  @UI.identification: [{ position: 60 }]
+  @UI.identification: [{ position: 60, label: 'Contract Type' }]
   ContractType;
 
-  @UI.identification: [{ position: 70 }]
+  @UI.identification: [{ position: 70, label: 'Location' }]
   Location;
 
-  @UI.lineItem: [{ position: 40 }]
-  @UI.identification: [{ position: 80 }]
+  @UI.lineItem: [{ position: 40, label: 'Needed' }]
+  @UI.identification: [{ position: 80, label: 'Positions Needed' }]
   PositionsNeeded;
 
-  @UI.lineItem: [{ position: 50 }]
-  @UI.identification: [{ position: 90 }]
+  @UI.lineItem: [{ position: 50, label: 'Filled' }]
+  @UI.identification: [{ position: 90, label: 'Positions Filled' }]
   PositionsFilled;
 
-  @UI.identification: [{ position: 100 }]
+  @UI.identification: [{ position: 100, label: 'Minimum Salary' }]
   SalaryMin;
 
-  @UI.identification: [{ position: 110 }]
+  @UI.identification: [{ position: 110, label: 'Maximum Salary' }]
   SalaryMax;
 
-  @UI.hidden: true
+  @UI.identification: [{ position: 115, label: 'Currency' }]
   CurrencyCode;
 
-  @UI.lineItem: [{ position: 30 }]
-  @UI.identification: [{ position: 140 }]
-  @UI.selectionField: [{ position: 10 }]
+  @UI.hidden: true
   Status;
 
-  @UI.lineItem: [{ position: 60 }]
-  @UI.identification: [{ position: 130 }]
+  @UI.lineItem: [{ position: 30, label: 'Status' }]
+  @UI.identification: [{ position: 140, label: 'Status' }]
+  @UI.selectionField: [{ position: 10 }]
+  statustext;
+
+  @UI.lineItem: [{ position: 60, label: 'Valid Until' }]
+  @UI.identification: [{ position: 130, label: 'Valid Until' }]
   ValidUntil;
 }

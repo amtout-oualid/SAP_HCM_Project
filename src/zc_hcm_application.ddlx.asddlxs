@@ -16,33 +16,51 @@ annotate view ZC_HCM_Application with
   @UI.hidden: true
   OfferId;
 
-  @UI.lineItem: [{ position: 10 }]
-  @UI.identification: [{ position: 10 }]
+  @UI.hidden: true
   CandidateId;
 
-  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 10, label: 'First Name' }]
+  @UI.identification: [{ position: 5, label: 'First Name' }]
+  candidatefirstname;
+
+  @UI.lineItem: [{ position: 20, label: 'Last Name' }]
+  @UI.identification: [{ position: 6, label: 'Last Name' }]
+  candidatelastname;
+
+  @UI.lineItem: [{ position: 30, label: 'Email' }]
+  @UI.identification: [{ position: 7, label: 'Email' }]
+  candidateemail;
+
+  @UI.lineItem: [{ position: 40, label: 'Resume', type: #WITH_URL, url: 'ResumeUrl' }]
+  @UI.identification: [{ position: 20, label: 'Resume URL' }]
   ResumeUrl;
 
-  @UI.identification: [{ position: 30 }]
+  @UI.identification: [{ position: 30, label: 'Cover Letter' }]
   CoverLetter;
 
-  @UI.lineItem: [{ position: 20 }]
-  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 50, label: 'Applied On' }]
+  @UI.identification: [{ position: 40, label: 'Applied On' }]
   AppliedAt;
 
-  @UI.lineItem: [{ position: 30 }]
-  @UI.identification: [{ position: 50 }]
+  @UI.lineItem: [{ position: 60, label: 'Step' }]
+  @UI.identification: [{ position: 50, label: 'Current Step' }]
   CurrentStepOrder;
 
-  @UI.lineItem: [{ position: 50 },
+  @UI.lineItem: [{ position: 80, label: 'AI Score' }]
+  @UI.identification: [{ position: 70, label: 'AI Match Score' }]
+  AiMatchScore;
+
+  @UI.lineItem: [{ position: 70, label: 'Status' },
                  { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate with AI' },
                  { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Pass to Next Step' },
                  { type: #FOR_ACTION, dataAction: 'rejectCandidate', label: 'Reject' },
                  { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept to Post' }]
-  @UI.identification: [{ position: 60 }]
+  @UI.identification: [{ position: 60, label: 'Overall Status' }]
   OverallStatus;
 
-  @UI.lineItem: [{ position: 40 }]
-  @UI.identification: [{ position: 70 }]
-  AiMatchScore;
+  @UI.identification: [{ position: 80, label: 'Notice Period' }]
+  NoticePeriod;
+
+  @UI.identification: [{ position: 90, label: 'Salary Expectation' }]
+  SalaryExpectation;
 }

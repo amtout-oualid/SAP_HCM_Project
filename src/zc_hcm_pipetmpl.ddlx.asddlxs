@@ -1,7 +1,9 @@
 @Metadata.layer: #CUSTOMER
 @UI.headerInfo: {
   typeName: 'Pipeline Step',
-  typeNamePlural: 'Pipeline Steps'
+  typeNamePlural: 'Pipeline Steps',
+  title: { type: #STANDARD, value: 'StepName' },
+  description: { type: #STANDARD, value: 'StepType' }
 }
 annotate view ZC_HCM_PipeTmpl with
 {
@@ -13,15 +15,18 @@ annotate view ZC_HCM_PipeTmpl with
   @UI.hidden: true
   OfferId;
 
-  @UI.lineItem: [{ position: 10 }]
-  @UI.identification: [{ position: 10 }]
+  @UI.lineItem: [{ position: 10, label: 'Step Name' }]
+  @UI.identification: [{ position: 10, label: 'Step Name' }]
   StepName;
 
-  @UI.lineItem: [{ position: 20 }]
-  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20, label: 'Order' }]
+  @UI.identification: [{ position: 20, label: 'Step Order' }]
   StepOrder;
 
-  @UI.lineItem: [{ position: 30 }]
-  @UI.identification: [{ position: 30 }]
+  @UI.lineItem: [{ position: 30, label: 'Type' }]
+  @UI.identification: [{ position: 30, label: 'Step Type' }]
   StepType;
+
+  @UI.lineItem: [{ position: 40, label: 'Changed On' }]
+  LocalLastChangedAt;
 }

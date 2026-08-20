@@ -21,6 +21,7 @@ define root view entity ZC_HCM_JobOffer
   SalaryMax,
   CurrencyCode,
   Status,
+  StatusText,
   ValidUntil,
   CreatedBy,
   CreatedAt,

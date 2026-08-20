@@ -1,5 +1,6 @@
 projection;
 strict ( 2 );
+use draft;
 
 define behavior for ZC_HCM_JobOffer alias JobOffer
 use etag
@@ -8,11 +9,17 @@ use etag
   use update;
   use delete;
 
+  use action Edit;
+  use action Activate;
+  use action Discard;
+  use action Resume;
+  use action Prepare;
+
   use action publishOffer;
   use action closeOffer;
 
-  use association _Steps { create; }
-  use association _Applications { create; }
+  use association _Steps { create; with draft; }
+  use association _Applications { create; with draft; }
 }
 
 define behavior for ZC_HCM_PipeTmpl alias PipelineStep
@@ -20,7 +27,7 @@ use etag
 {
   use update;
   use delete;
-  use association _Offer;
+  use association _Offer { with draft; }
 }
 
 define behavior for ZC_HCM_Application alias Application
@@ -32,14 +39,14 @@ use etag
   use action rejectCandidate;
   use action acceptToPost;
 
-  use association _Progress { create; }
-  use association _Offer;
+  use association _Progress { create; with draft; }
+  use association _Offer { with draft; }
 }
 
 define behavior for ZC_HCM_PipeProg alias PipelineProgress
 use etag
 {
   use update;
-  use association _Application;
-  use association _Offer;
+  use association _Application { with draft; }
+  use association _Offer { with draft; }
 }

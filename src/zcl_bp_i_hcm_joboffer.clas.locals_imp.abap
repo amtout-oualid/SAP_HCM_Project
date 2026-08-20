@@ -150,17 +150,40 @@ CLASS lhc_application IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD passToNextStep.
+    " 1. Read current application data (step + offer ID)
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application FIELDS ( CurrentStepOrder )
+      ENTITY Application FIELDS ( CurrentStepOrder OfferId )
       WITH CORRESPONDING #( keys ) RESULT DATA(lt_app).
 
     LOOP AT lt_app ASSIGNING FIELD-SYMBOL(<fs_app>).
+      " 2. Count total pipeline steps for this offer
+      DATA lv_total_steps TYPE i.
+      SELECT COUNT( * ) FROM zhcm_pipe_tmpl
+        WHERE offer_id = @<fs_app>-OfferId
+        INTO @lv_total_steps.
+
+      " 3. Guard: block if already at or beyond the last step
+      IF <fs_app>-CurrentStepOrder >= lv_total_steps.
+        APPEND VALUE #( %tky = <fs_app>-%tky ) TO failed-application.
+        APPEND VALUE #( %tky = <fs_app>-%tky
+                        %msg = new_message(
+                                 id       = '00'
+                                 number   = '001'
+                                 v1       = 'Already at the final pipeline step'
+                                 severity = if_abap_behv_message=>severity-error ) )
+               TO reported-application.
+        CONTINUE.
+      ENDIF.
+
+      " 4. Increment
       <fs_app>-CurrentStepOrder += 1.
     ENDLOOP.
 
+    " 5. Write back only the ones that passed the guard
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application UPDATE FIELDS ( CurrentStepOrder )
-      WITH VALUE #( FOR a IN lt_app ( %tky = a-%tky CurrentStepOrder = a-CurrentStepOrder ) ).
+      WITH VALUE #( FOR a IN lt_app WHERE ( CurrentStepOrder IS NOT INITIAL )
+                    ( %tky = a-%tky CurrentStepOrder = a-CurrentStepOrder ) ).
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
@@ -178,17 +201,39 @@ CLASS lhc_application IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD acceptToPost.
-    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application UPDATE FIELDS ( OverallStatus )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'A' ) ).
-
+    " 1. Read application data
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application FIELDS ( OfferId )
+      ENTITY Application FIELDS ( CurrentStepOrder OfferId )
       WITH CORRESPONDING #( keys ) RESULT DATA(lt_app).
 
     LOOP AT lt_app INTO DATA(ls_app).
+      " 2. Count total pipeline steps
+      DATA lv_total TYPE i.
+      SELECT COUNT( * ) FROM zhcm_pipe_tmpl
+        WHERE offer_id = @ls_app-OfferId
+        INTO @lv_total.
+
+      " 3. Guard: only allow accept if at final step
+      IF lv_total > 0 AND ls_app-CurrentStepOrder < lv_total.
+        APPEND VALUE #( %tky = ls_app-%tky ) TO failed-application.
+        APPEND VALUE #( %tky = ls_app-%tky
+                        %msg = new_message(
+                                 id       = '00'
+                                 number   = '001'
+                                 v1       = 'Must complete all pipeline steps first'
+                                 severity = if_abap_behv_message=>severity-error ) )
+               TO reported-application.
+        CONTINUE.
+      ENDIF.
+
+      " 4. Set status to Accepted
+      MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+        ENTITY Application UPDATE FIELDS ( OverallStatus )
+        WITH VALUE #( ( %tky = ls_app-%tky OverallStatus = 'A' ) ).
+
+      " 5. Increment PositionsFilled on parent offer
       READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-        ENTITY JobOffer FIELDS ( PositionsFilled )
+        ENTITY JobOffer FIELDS ( PositionsFilled PositionsNeeded )
         WITH VALUE #( ( OfferId = ls_app-OfferId ) ) RESULT DATA(lt_offer).
 
       IF lt_offer IS NOT INITIAL.
@@ -196,6 +241,13 @@ CLASS lhc_application IMPLEMENTATION.
         MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
           ENTITY JobOffer UPDATE FIELDS ( PositionsFilled )
           WITH VALUE #( ( OfferId = ls_app-OfferId PositionsFilled = lv_filled ) ).
+
+        " 6. Auto-close offer if all positions are filled
+        IF lv_filled >= lt_offer[ 1 ]-PositionsNeeded.
+          MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+            ENTITY JobOffer UPDATE FIELDS ( Status )
+            WITH VALUE #( ( OfferId = ls_app-OfferId Status = 'C' ) ).
+        ENDIF.
       ENDIF.
     ENDLOOP.
 
