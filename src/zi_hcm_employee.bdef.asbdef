@@ -3,7 +3,7 @@ strict ( 2 );
 with draft;
 
 define behavior for ZI_HCM_Employee alias Employee
-with unmanaged save
+persistent table zhcm_employee
 draft table zhcm_employ_d
 lock master
 total etag LastChangedAt
@@ -31,6 +31,27 @@ etag master LocalLastChangedAt
 
   association _Contact { create; with draft; }
   association _BankDetails { create; with draft; }
+
+  mapping for zhcm_employee
+  {
+    EmployeeId = employee_id;
+    FirstName = first_name;
+    LastName = last_name;
+    DateOfBirth = date_of_birth;
+    PlaceOfBirth = place_of_birth;
+    MaritalStatus = marital_status;
+    Nationality = nationality;
+    Gender = gender;
+    EmployeeStatus = employee_status;
+    PhotoUrl = photo_url;
+    HireDate = hire_date;
+    TerminationDate = termination_date;
+    CreatedBy = created_by;
+    CreatedAt = created_at;
+    LastChangedBy = last_changed_by;
+    LastChangedAt = last_changed_at;
+    LocalLastChangedAt = local_last_changed_at;
+  }
 }
 
 define behavior for ZI_HCM_Contact alias Contact
@@ -44,9 +65,20 @@ etag master LocalLastChangedAt
   field ( readonly, numbering : managed ) ContactId;
   field ( readonly ) EmployeeId;
   association _Employee { with draft; }
+
+  mapping for zhcm_contact
+  {
+    ContactId = contact_id;
+    EmployeeId = employee_id;
+    PersonalAddress = personal_address;
+    PhoneNumber = phone_number;
+    PersonalEmail = personal_email;
+    WorkEmail = work_email;
+    LocalLastChangedAt = local_last_changed_at;
+  }
 }
 
-define behavior for ZI_HCM_BANKDETL alias BankDetails
+define behavior for ZI_HCM_BankDetl alias BankDetails
 persistent table zhcm_bankdetl
 draft table zhcm_bankdt_d
 lock dependent by _Employee
@@ -57,4 +89,15 @@ etag master LocalLastChangedAt
   field ( readonly, numbering : managed ) BankId;
   field ( readonly ) EmployeeId;
   association _Employee { with draft; }
+
+  mapping for zhcm_bankdetl
+  {
+    BankId = bank_detail_id;
+    EmployeeId = employee_id;
+    BankName = bank_name;
+    AccountNumber = account_number;
+    Iban = iban;
+    BicSwift = bic_swift;
+    LocalLastChangedAt = local_last_changed_at;
+  }
 }

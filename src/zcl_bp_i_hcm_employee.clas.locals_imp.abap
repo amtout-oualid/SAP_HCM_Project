@@ -44,7 +44,6 @@ CLASS lhc_employee IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD promoteEmployee.
-    " Record the promotion in the history table using the parameters
     LOOP AT keys INTO DATA(ls_key).
       DATA(lv_hist_id) = cl_system_uuid=>create_uuid_x16_static( ).
       INSERT INTO zhcm_emp_hist VALUES @( VALUE #(
@@ -153,34 +152,6 @@ CLASS lhc_employee IMPLEMENTATION.
     READ ENTITIES OF ZI_HCM_Employee IN LOCAL MODE
       ENTITY Employee ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
-  ENDMETHOD.
-ENDCLASS.
-
-CLASS lsc_employee DEFINITION INHERITING FROM cl_abap_behavior_saver.
-  PROTECTED SECTION.
-    METHODS save_modified REDEFINITION.
-ENDCLASS.
-
-CLASS lsc_employee IMPLEMENTATION.
-  METHOD save_modified.
-    IF create-employee IS NOT INITIAL.
-      MODIFY zhcm_employee FROM TABLE @( VALUE #( FOR c IN create-employee (
-          client = sy-mandt employee_id = c-EmployeeId first_name = c-FirstName last_name = c-LastName
-          date_of_birth = c-DateOfBirth nationality = c-Nationality
-          employee_status = c-EmployeeStatus hire_date = c-HireDate ) ) ).
-    ENDIF.
-
-    IF update-employee IS NOT INITIAL.
-      MODIFY zhcm_employee FROM TABLE @( VALUE #( FOR u IN update-employee (
-          client = sy-mandt employee_id = u-EmployeeId first_name = u-FirstName last_name = u-LastName
-          date_of_birth = u-DateOfBirth nationality = u-Nationality
-          employee_status = u-EmployeeStatus hire_date = u-HireDate ) ) ).
-    ENDIF.
-
-    IF delete-employee IS NOT INITIAL.
-      DELETE zhcm_employee FROM TABLE @( VALUE #( FOR d IN delete-employee (
-          client = sy-mandt employee_id = d-EmployeeId ) ) ).
-    ENDIF.
   ENDMETHOD.
 ENDCLASS.
 
