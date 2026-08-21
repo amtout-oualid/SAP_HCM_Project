@@ -17,36 +17,31 @@ use etag
 
   use action publishOffer;
   use action closeOffer;
+  use action reopenOffer;
 
-  use association _Steps { create; with draft; }
   use association _Applications { create; with draft; }
-}
 
-define behavior for ZC_HCM_PipeTmpl alias PipelineStep
-use etag
-{
-  use update;
-  use delete;
-  use association _Offer { with draft; }
+  // Commented out until we fully build Pipeline Steps in the backend ZI
+  // use association _Steps { create; with draft; }
 }
 
 define behavior for ZC_HCM_Application alias Application
 use etag
 {
   use update;
+  use delete;
+
   use action evaluateWithAI;
   use action passToNextStep;
   use action rejectCandidate;
   use action acceptToPost;
 
-  use association _Progress { create; with draft; }
-  use association _Offer { with draft; }
-}
+  use action putOnHold;
+  use action addNote;
+  use action sendMail;
 
-define behavior for ZC_HCM_PipeProg alias PipelineProgress
-use etag
-{
-  use update;
-  use association _Application { with draft; }
   use association _Offer { with draft; }
+
+  // Commented out until we fully build Pipeline Progress in the backend ZI
+  // use association _Progress { create; with draft; }
 }

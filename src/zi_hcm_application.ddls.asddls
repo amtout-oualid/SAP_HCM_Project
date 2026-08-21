@@ -4,7 +4,7 @@ define view entity ZI_HCM_Application
   as select from zhcm_applicatn
   association to parent ZI_HCM_JobOffer as _Offer
     on $projection.OfferId = _Offer.OfferId
-  composition [0..*] of ZI_HCM_PipeProg as _Progress
+  //composition [0..*] of ZI_HCM_PipeProg as _Progress
   association [1] to ZI_HCM_Candidate as _Candidate
     on $projection.CandidateId = _Candidate.CandidateId
 {
@@ -31,6 +31,6 @@ define view entity ZI_HCM_Application
       local_last_changed_at    as LocalLastChangedAt,
 
       _Offer,
-      _Progress,
+      //_Progress,
       _Candidate
 }

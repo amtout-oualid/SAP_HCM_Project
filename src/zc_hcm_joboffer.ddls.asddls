@@ -30,6 +30,6 @@ define root view entity ZC_HCM_JobOffer
   LocalLastChangedAt,
   
   /* Associations */
-  _Steps : redirected to composition child ZC_HCM_PipeTmpl,
+  //_Steps : redirected to composition child ZC_HCM_PipeTmpl,
   _Applications : redirected to composition child ZC_HCM_Application
 }

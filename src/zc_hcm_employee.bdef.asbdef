@@ -1,5 +1,6 @@
 projection;
 strict ( 2 );
+use draft;
 
 define behavior for ZC_HCM_Employee alias Employee
 use etag
@@ -8,15 +9,30 @@ use etag
   use update;
   use delete;
 
-  use association _Contact { create; }
-  use association _OrgAssign { create; }
-  use association _LegalContract { create; }
-  use association _BankDetails { create; }
-  use association _Education { create; }
-  use association _Skills { create; }
-  use association _Emergency { create; }
-  use association _Dependents { create; }
-  use association _Documents { create; }
+  use action Edit;
+  use action Activate;
+  use action Discard;
+  use action Resume;
+  use action Prepare;
+
+  use action promoteEmployee;
+  use action terminateEmployee;
+  use action transferEmployee;
+  use action suspendEmployee;
+  use action activateEmployee;
+
+  use association _Contact { create; with draft; }
+  use association _BankDetails { create; with draft; }
+
+  /* We comment out the other associations for now because they aren't
+     defined in the ZI Behavior Definition yet. We can add them later! */
+  // use association _OrgAssign { create; }
+  // use association _LegalContract { create; }
+  // use association _Education { create; }
+  // use association _Skills { create; }
+  // use association _Emergency { create; }
+  // use association _Dependents { create; }
+  // use association _Documents { create; }
 }
 
 define behavior for ZC_HCM_Contact alias Contact
@@ -24,23 +40,7 @@ use etag
 {
   use update;
   use delete;
-  use association _Employee;
-}
-
-define behavior for ZC_HCM_OrgAssign alias OrgAssignment
-use etag
-{
-  use update;
-  use delete;
-  use association _Employee;
-}
-
-define behavior for ZC_HCM_LegalCtr alias LegalContract
-use etag
-{
-  use update;
-  use delete;
-  use association _Employee;
+  use association _Employee { with draft; }
 }
 
 define behavior for ZC_HCM_BankDetl alias BankDetails
@@ -48,45 +48,5 @@ use etag
 {
   use update;
   use delete;
-  use association _Employee;
-}
-
-define behavior for ZC_HCM_Education alias Education
-use etag
-{
-  use update;
-  use delete;
-  use association _Employee;
-}
-
-define behavior for ZC_HCM_Skill alias Skill
-use etag
-{
-  use update;
-  use delete;
-  use association _Employee;
-}
-
-define behavior for ZC_HCM_Emergency alias EmergencyContact
-use etag
-{
-  use update;
-  use delete;
-  use association _Employee;
-}
-
-define behavior for ZC_HCM_Dependent alias Dependent
-use etag
-{
-  use update;
-  use delete;
-  use association _Employee;
-}
-
-define behavior for ZC_HCM_Document alias Document
-use etag
-{
-  use update;
-  use delete;
-  use association _Employee;
+  use association _Employee { with draft; }
 }
