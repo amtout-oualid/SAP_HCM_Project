@@ -10,9 +10,7 @@ total etag LastChangedAt
 authorization master ( instance )
 etag master LocalLastChangedAt
 {
-  create;
-  update;
-  delete;
+  create; update; delete;
 
   draft action Edit;
   draft action Activate optimized;
@@ -21,47 +19,16 @@ etag master LocalLastChangedAt
   draft determine action Prepare;
 
   field ( readonly, numbering : managed ) OfferId;
-  field ( readonly ) PositionsFilled, CreatedBy, CreatedAt, LastChangedBy, LastChangedAt, LocalLastChangedAt;
-  field ( readonly : update ) Department;
-  field ( mandatory : create ) Title, Department, PositionsNeeded;
 
-  action publishOffer result [1] $self;
-  action closeOffer result [1] $self;
+  action ( features : instance ) publishOffer result [1] $self;
+  action ( features : instance ) closeOffer result [1] $self;
+  action ( features : instance ) reopenOffer result [1] $self;
 
-  validation validateDates on save { create; field ValidUntil; }
-  validation validateSalary on save { create; field SalaryMin, SalaryMax; }
+  validation validateBeforePublish on save { create; update; }
+  validation validateApplicationDeadline on save { create; update; }
 
-  association _Steps { create; with draft; }
+  determination autoCloseOnDeadline on save { field AppDeadline; }
   association _Applications { create; with draft; }
-
-  mapping for zhcm_joboffer {
-    OfferId = offer_id; Title = title; Description = description; Department = department;
-    RequiredSkills = required_skills; ExperienceLevel = experience_level; ContractType = contract_type;
-    Location = location; PositionsNeeded = positions_needed; PositionsFilled = positions_filled;
-    SalaryMin = salary_min; SalaryMax = salary_max; CurrencyCode = currency_code;
-    Status = status; ValidUntil = valid_until; CreatedBy = created_by; CreatedAt = created_at;
-    LastChangedBy = last_changed_by; LastChangedAt = last_changed_at; LocalLastChangedAt = local_last_changed_at;
-  }
-}
-
-define behavior for ZI_HCM_PipeTmpl alias PipelineStep
-persistent table zhcm_pipe_tmpl
-draft table zhcm_d_pipetmpl
-lock dependent by _Offer
-authorization dependent by _Offer
-etag master LocalLastChangedAt
-{
-  update;
-  delete;
-  field ( readonly, numbering : managed ) TemplateId;
-  field ( readonly ) OfferId;
-  association _Offer { with draft; }
-
-  mapping for zhcm_pipe_tmpl {
-    TemplateId = template_id; OfferId = offer_id; StepName = step_name;
-    StepOrder = step_order; StepType = step_type; StepDescription = step_desc;
-    LocalLastChangedAt = local_last_changed_at;
-  }
 }
 
 define behavior for ZI_HCM_Application alias Application
@@ -71,47 +38,20 @@ lock dependent by _Offer
 authorization dependent by _Offer
 etag master LocalLastChangedAt
 {
-  update;
+  update; delete;
   field ( readonly, numbering : managed ) ApplicationId;
-  field ( readonly ) OfferId, AiMatchScore, OverallStatus, CurrentStepOrder, AppliedAt;
+  field ( readonly ) OfferId;
 
   action evaluateWithAI result [1] $self;
   action passToNextStep result [1] $self;
-  action rejectCandidate result [1] $self;
   action acceptToPost result [1] $self;
 
-  validation validateCIN on save { create; field CandidateId; }
+  action putOnHold result [1] $self;
+  action addNote parameter ZA_HCM_AddNote result [1] $self;
+  action rejectCandidate parameter ZA_HCM_Reject result [1] $self;
+  action sendMail parameter ZA_HCM_SendMail result [1] $self;
 
-  association _Progress { create; with draft; }
+  validation preventDuplicateApplication on save { create; }
+
   association _Offer { with draft; }
-
-  mapping for zhcm_applicatn {
-    ApplicationId = application_id; OfferId = offer_id; CandidateId = candidate_id;
-    ResumeUrl = resume_url; CoverLetter = cover_letter; AppliedAt = applied_at;
-    CurrentStepOrder = current_step_order; OverallStatus = overall_status;
-    AiMatchScore = ai_match_score; NoticePeriod = notice_period;
-    SalaryExpectation = salary_expectation; CurrencyCode = currency_code;
-    LocalLastChangedAt = local_last_changed_at;
-  }
-}
-
-define behavior for ZI_HCM_PipeProg alias PipelineProgress
-persistent table zhcm_pipe_prog
-draft table zhcm_d_pipeprog
-lock dependent by _Offer
-authorization dependent by _Offer
-etag master LocalLastChangedAt
-{
-  update;
-  field ( readonly, numbering : managed ) ProgressId;
-  field ( readonly ) ApplicationId, StepOrder, StepName, OfferId;
-
-  association _Application { with draft; }
-  association _Offer { with draft; }
-
-  mapping for zhcm_pipe_prog {
-    ProgressId = progress_id; ApplicationId = application_id; StepOrder = step_order;
-    StepName = step_name; Status = status; Score = score; Notes = notes;
-    CompletedAt = completed_at; LocalLastChangedAt = local_last_changed_at;
-  }
 }

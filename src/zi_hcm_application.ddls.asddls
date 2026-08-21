@@ -9,21 +9,26 @@ define view entity ZI_HCM_Application
     on $projection.CandidateId = _Candidate.CandidateId
 {
   key application_id           as ApplicationId,
-      offer_id                as OfferId,
+      offer_id                 as OfferId,
       candidate_id             as CandidateId,
-      resume_url              as ResumeUrl,
+      resume_url               as ResumeUrl,
       cover_letter             as CoverLetter,
       @Semantics.systemDateTime.createdAt: true
       applied_at               as AppliedAt,
-      current_step_order         as CurrentStepOrder,
-      overall_status            as OverallStatus,
-      ai_match_score            as AiMatchScore,
-      notice_period             as NoticePeriod,
+      current_step_order       as CurrentStepOrder,
+      overall_status           as OverallStatus,
+      ai_match_score           as AiMatchScore,
+      notice_period            as NoticePeriod,
       @Semantics.amount.currencyCode: 'CurrencyCode'
-      salary_expectation          as SalaryExpectation,
-      currency_code             as CurrencyCode,
+      salary_expectation       as SalaryExpectation,
+      currency_code            as CurrencyCode,
+      
+      /* ADDED THESE TWO TO FIX ABAP ERRORS */
+      rejection_reason         as RejectionReason,
+      internal_notes           as InternalNotes,
+      
       @Semantics.systemDateTime.localInstanceLastChangedAt: true
-      local_last_changed_at        as LocalLastChangedAt,
+      local_last_changed_at    as LocalLastChangedAt,
 
       _Offer,
       _Progress,

@@ -1,19 +1,21 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'Talent Pool - Projection'
+@EndUserText.label: 'Talent Pool Projection'
 @Metadata.allowExtensions: true
-define root view entity ZC_HCM_TalentPool
+define root view entity ZC_HCM_TALENTPOOL
   provider contract transactional_query
-  as projection on ZI_HCM_TalentPool
+  as projection on ZI_HCM_TALENTPOOL
 {
   key PoolId,
   CandidateId,
-  FirstName,
-  LastName,
-  Email,
-  Cin,
+  OriginalOfferId,
+  CandidateName,
+  CandidateEmail,
   ResumeUrl,
-  OriginalOffer,
-  RejectionReason,
+  AiScore,
+  Skills,
+  Status,
   AddedAt,
-  LocalLastChangedAt
+  Notes,
+  RejectionReason,
+  LastChangedAt
 }

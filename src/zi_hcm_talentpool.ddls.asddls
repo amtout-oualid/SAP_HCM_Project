@@ -1,19 +1,18 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'Talent Pool - Interface'
-define root view entity ZI_HCM_TalentPool
-  as select from zhcm_talntpool
+@EndUserText.label: 'Talent Pool'
+define root view entity ZI_HCM_TALENTPOOL as select from zhcm_talntpool
 {
-  key pool_id                as PoolId,
-      candidate_id             as CandidateId,
-      first_name              as FirstName,
-      last_name               as LastName,
-      email                  as Email,
-      cin                    as Cin,
-      resume_url              as ResumeUrl,
-      original_offer            as OriginalOffer,
-      rejection_reason          as RejectionReason,
-      @Semantics.systemDateTime.createdAt: true
-      added_at                as AddedAt,
-      @Semantics.systemDateTime.localInstanceLastChangedAt: true
-      local_last_changed_at      as LocalLastChangedAt
+  key pool_id as PoolId,
+  candidate_id as CandidateId,
+  original_offer_id as OriginalOfferId,
+  candidate_name as CandidateName,
+  candidate_email as CandidateEmail,
+  resume_url as ResumeUrl,
+  ai_score as AiScore,
+  skills as Skills,
+  status as Status,
+  added_at as AddedAt,
+  notes as Notes,
+  rejection_reason as RejectionReason,
+  last_changed_at as LastChangedAt
 }
