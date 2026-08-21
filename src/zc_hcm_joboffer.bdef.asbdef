@@ -20,9 +20,6 @@ use etag
   use action reopenOffer;
 
   use association _Applications { create; with draft; }
-
-  // Commented out until we fully build Pipeline Steps in the backend ZI
-  // use association _Steps { create; with draft; }
 }
 
 define behavior for ZC_HCM_Application alias Application
@@ -41,7 +38,4 @@ use etag
   use action sendMail;
 
   use association _Offer { with draft; }
-
-  // Commented out until we fully build Pipeline Progress in the backend ZI
-  // use association _Progress { create; with draft; }
 }

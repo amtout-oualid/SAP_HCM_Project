@@ -5,27 +5,30 @@ define behavior for ZI_HCM_TalentPool alias TalentPool
 persistent table zhcm_talntpool
 lock master
 authorization master ( instance )
-etag master LocalLastChangedAt
+etag master LastChangedAt
 early numbering
 {
   create;
   delete;
 
   field ( readonly )
-    PoolId, CandidateId, FirstName, LastName, Email, Cin, ResumeUrl, OriginalOffer, RejectionReason, AddedAt, LocalLastChangedAt;
+    PoolId, CandidateId, OriginalOfferId, CandidateName, CandidateEmail,
+    ResumeUrl, AiScore, Skills, Status, AddedAt, Notes, RejectionReason, LastChangedAt;
 
   mapping for zhcm_talntpool
   {
-    PoolId               = pool_id;
-    CandidateId            = candidate_id;
-    FirstName             = first_name;
-    LastName             = last_name;
-    Email               = email;
-    Cin                 = cin;
-    ResumeUrl             = resume_url;
-    OriginalOffer          = original_offer;
-    RejectionReason         = rejection_reason;
-    AddedAt              = added_at;
-    LocalLastChangedAt        = local_last_changed_at;
+    PoolId             = pool_id;
+    CandidateId        = candidate_id;
+    OriginalOfferId    = original_offer_id;
+    CandidateName      = candidate_name;
+    CandidateEmail     = candidate_email;
+    ResumeUrl          = resume_url;
+    AiScore            = ai_score;
+    Skills             = skills;
+    Status             = status;
+    AddedAt            = added_at;
+    Notes              = notes;
+    RejectionReason    = rejection_reason;
+    LastChangedAt      = last_changed_at;
   }
 }

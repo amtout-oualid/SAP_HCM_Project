@@ -110,6 +110,8 @@ CLASS lhc_application DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS rejectCandidate FOR MODIFY IMPORTING keys FOR ACTION Application~rejectCandidate RESULT result.
     METHODS sendMail FOR MODIFY IMPORTING keys FOR ACTION Application~sendMail RESULT result.
     METHODS passToNextStep FOR MODIFY IMPORTING keys FOR ACTION Application~passToNextStep RESULT result.
+    METHODS acceptToPost FOR MODIFY IMPORTING keys FOR ACTION Application~acceptToPost RESULT result.
+    METHODS evaluateWithAI FOR MODIFY IMPORTING keys FOR ACTION Application~evaluateWithAI RESULT result.
     METHODS preventDuplicateApplication FOR VALIDATE ON SAVE IMPORTING keys FOR Application~preventDuplicateApplication.
 ENDCLASS.
 
@@ -184,19 +186,6 @@ CLASS lhc_application IMPLEMENTATION.
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 
-  METHOD preventDuplicateApplication.
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application FIELDS ( CandidateId OfferId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
-    LOOP AT lt_apps INTO DATA(app).
-      SELECT COUNT(*) FROM zhcm_applicatn WHERE candidate_id = @app-CandidateId AND offer_id = @app-OfferId AND application_id <> @app-ApplicationId.
-      IF sy-subrc = 0.
-        APPEND VALUE #( %tky = app-%tky ) TO failed-application.
-        APPEND VALUE #( %tky = app-%tky
-                        %msg = new_message( id = '00' number = '003' v1 = 'Candidate already applied!' severity = if_abap_behv_message=>severity-error ) ) TO reported-application.
-      ENDIF.
-    ENDLOOP.
-  ENDMETHOD.
-
   METHOD passToNextStep.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application FIELDS ( CurrentStepOrder )
@@ -224,6 +213,37 @@ CLASS lhc_application IMPLEMENTATION.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
+  ENDMETHOD.
+
+  METHOD acceptToPost.
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application UPDATE FIELDS ( OverallStatus )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'A' ) ).
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
+    result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
+  ENDMETHOD.
+
+  METHOD evaluateWithAI.
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application UPDATE FIELDS ( AiMatchScore )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky AiMatchScore = 75 ) ).
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
+    result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
+  ENDMETHOD.
+
+  METHOD preventDuplicateApplication.
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application FIELDS ( CandidateId OfferId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
+    LOOP AT lt_apps INTO DATA(app).
+      SELECT COUNT(*) FROM zhcm_applicatn WHERE candidate_id = @app-CandidateId AND offer_id = @app-OfferId AND application_id <> @app-ApplicationId.
+      IF sy-subrc = 0.
+        APPEND VALUE #( %tky = app-%tky ) TO failed-application.
+        APPEND VALUE #( %tky = app-%tky
+                        %msg = new_message( id = '00' number = '003' v1 = 'Candidate already applied!' severity = if_abap_behv_message=>severity-error ) ) TO reported-application.
+      ENDIF.
+    ENDLOOP.
   ENDMETHOD.
 ENDCLASS.
 
