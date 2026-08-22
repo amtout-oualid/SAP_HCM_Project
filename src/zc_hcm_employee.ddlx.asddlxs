@@ -10,14 +10,15 @@ annotate view ZC_HCM_Employee with
   @UI.facet: [
     { id: 'Core', type: #IDENTIFICATION_REFERENCE, label: 'Core Data', position: 10 },
     { id: 'Contact', type: #LINEITEM_REFERENCE, label: 'Contact', position: 20, targetElement: '_Contact' },
-    { id: 'OrgAssign', type: #LINEITEM_REFERENCE, label: 'Org Assignment', position: 30, targetElement: '_OrgAssign' },
-    { id: 'Legal', type: #LINEITEM_REFERENCE, label: 'Legal Contract', position: 40, targetElement: '_LegalContract' },
-    { id: 'Bank', type: #LINEITEM_REFERENCE, label: 'Bank Details', position: 50, targetElement: '_BankDetails' },
-    { id: 'Education', type: #LINEITEM_REFERENCE, label: 'Education', position: 60, targetElement: '_Education' },
-    { id: 'Skills', type: #LINEITEM_REFERENCE, label: 'Skills', position: 70, targetElement: '_Skills' },
-    { id: 'Emergency', type: #LINEITEM_REFERENCE, label: 'Emergency Contacts', position: 80, targetElement: '_Emergency' },
-    { id: 'Dependents', type: #LINEITEM_REFERENCE, label: 'Dependents', position: 90, targetElement: '_Dependents' },
-    { id: 'Documents', type: #LINEITEM_REFERENCE, label: 'Documents', position: 100, targetElement: '_Documents' }
+    { id: 'Bank', type: #LINEITEM_REFERENCE, label: 'Bank Details', position: 50, targetElement: '_BankDetails' }
+    
+    // { id: 'OrgAssign', type: #LINEITEM_REFERENCE, label: 'Org Assignment', position: 30, targetElement: '_OrgAssign' },
+    // { id: 'Legal', type: #LINEITEM_REFERENCE, label: 'Legal Contract', position: 40, targetElement: '_LegalContract' },
+    // { id: 'Education', type: #LINEITEM_REFERENCE, label: 'Education', position: 60, targetElement: '_Education' },
+    // { id: 'Skills', type: #LINEITEM_REFERENCE, label: 'Skills', position: 70, targetElement: '_Skills' },
+    // { id: 'Emergency', type: #LINEITEM_REFERENCE, label: 'Emergency Contacts', position: 80, targetElement: '_Emergency' },
+    // { id: 'Dependents', type: #LINEITEM_REFERENCE, label: 'Dependents', position: 90, targetElement: '_Dependents' },
+    // { id: 'Documents', type: #LINEITEM_REFERENCE, label: 'Documents', position: 100, targetElement: '_Documents' }
   ]
 
   @UI.hidden: true
