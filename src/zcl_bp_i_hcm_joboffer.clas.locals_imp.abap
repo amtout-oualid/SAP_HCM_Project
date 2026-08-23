@@ -1,5 +1,9 @@
 CLASS lhc_joboffer DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
+    " -> ADDED MISSING AUTHORIZATION METHOD
+    METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
+      IMPORTING keys REQUEST requested_authorizations FOR JobOffer RESULT result.
+
     METHODS get_instance_features FOR INSTANCE FEATURES
       IMPORTING keys REQUEST requested_features FOR JobOffer RESULT result.
 
@@ -19,6 +23,18 @@ CLASS lhc_joboffer DEFINITION INHERITING FROM cl_abap_behavior_handler.
 ENDCLASS.
 
 CLASS lhc_joboffer IMPLEMENTATION.
+  " -> ADDED MISSING AUTHORIZATION IMPLEMENTATION (Grants Full Access)
+  METHOD get_instance_authorizations.
+    LOOP AT keys INTO DATA(key).
+      APPEND VALUE #( %tky = key-%tky
+                      %update = if_abap_behv=>auth-allowed
+                      %delete = if_abap_behv=>auth-allowed
+                      %action-publishOffer = if_abap_behv=>auth-allowed
+                      %action-closeOffer = if_abap_behv=>auth-allowed
+                      %action-reopenOffer = if_abap_behv=>auth-allowed ) TO result.
+    ENDLOOP.
+  ENDMETHOD.
+
   METHOD get_instance_features.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY JobOffer FIELDS ( Status ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).

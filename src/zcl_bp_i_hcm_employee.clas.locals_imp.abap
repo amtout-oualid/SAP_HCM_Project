@@ -1,5 +1,9 @@
 CLASS lhc_employee DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
+    " -> ADDED MISSING AUTHORIZATION METHOD
+    METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
+      IMPORTING keys REQUEST requested_authorizations FOR Employee RESULT result.
+
     METHODS get_instance_features FOR INSTANCE FEATURES
       IMPORTING keys REQUEST requested_features FOR Employee RESULT result.
 
@@ -19,6 +23,20 @@ CLASS lhc_employee DEFINITION INHERITING FROM cl_abap_behavior_handler.
 ENDCLASS.
 
 CLASS lhc_employee IMPLEMENTATION.
+  " -> ADDED MISSING AUTHORIZATION IMPLEMENTATION
+  METHOD get_instance_authorizations.
+    LOOP AT keys INTO DATA(key).
+      APPEND VALUE #( %tky = key-%tky
+                      %update = if_abap_behv=>auth-allowed
+                      %delete = if_abap_behv=>auth-allowed
+                      %action-promoteEmployee = if_abap_behv=>auth-allowed
+                      %action-terminateEmployee = if_abap_behv=>auth-allowed
+                      %action-transferEmployee = if_abap_behv=>auth-allowed
+                      %action-suspendEmployee = if_abap_behv=>auth-allowed
+                      %action-activateEmployee = if_abap_behv=>auth-allowed ) TO result.
+    ENDLOOP.
+  ENDMETHOD.
+
   METHOD get_instance_features.
     READ ENTITIES OF ZI_HCM_Employee IN LOCAL MODE
       ENTITY Employee FIELDS ( EmployeeStatus ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_emp).

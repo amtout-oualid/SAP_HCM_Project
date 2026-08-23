@@ -13,5 +13,6 @@ define root view entity ZC_HCM_Candidate
   Cin,
   CreatedAt,
   LastChangedAt,
+  @Semantics.systemDateTime.localInstanceLastChangedAt: true
   LocalLastChangedAt
 }

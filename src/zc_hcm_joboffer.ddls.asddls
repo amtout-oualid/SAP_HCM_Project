@@ -26,10 +26,11 @@ define root view entity ZC_HCM_JobOffer
   CreatedBy,
   CreatedAt,
   LastChangedBy,
+  @Semantics.systemDateTime.lastChangedAt: true
   LastChangedAt,
+  @Semantics.systemDateTime.localInstanceLastChangedAt: true
   LocalLastChangedAt,
   
   /* Associations */
-  //_Steps : redirected to composition child ZC_HCM_PipeTmpl,
   _Applications : redirected to composition child ZC_HCM_Application
 }

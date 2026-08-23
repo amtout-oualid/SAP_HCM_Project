@@ -33,7 +33,9 @@ define root view entity ZC_HCM_Onboarding
   CreatedBy,
   CreatedAt,
   LastChangedBy,
+  @Semantics.systemDateTime.lastChangedAt: true
   LastChangedAt,
+  @Semantics.systemDateTime.localInstanceLastChangedAt: true
   LocalLastChangedAt,
   
   /* Associations */

@@ -20,10 +20,10 @@ define view entity ZC_HCM_Application
   @Semantics.amount.currencyCode: 'CurrencyCode'
   SalaryExpectation,
   CurrencyCode,
+  @Semantics.systemDateTime.localInstanceLastChangedAt: true
   LocalLastChangedAt,
   
   /* Associations */
   _Offer : redirected to parent ZC_HCM_JobOffer,
-  //_Progress : redirected to composition child ZC_HCM_PipeProg,
   _Candidate : redirected to ZC_HCM_Candidate
 }

@@ -1,7 +1,9 @@
 CLASS lhc_onboarding DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
-    METHODS validateMandatory FOR VALIDATE ON SAVE
-      IMPORTING keys FOR Onboarding~validateMandatory.
+    " -> ADDED MISSING AUTHORIZATION METHOD
+    METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
+      IMPORTING keys REQUEST requested_authorizations FOR Onboarding RESULT result.
+
     METHODS submitForm FOR MODIFY
       IMPORTING keys FOR ACTION Onboarding~submitForm RESULT result.
     METHODS approveAndCreateEmployee FOR MODIFY
@@ -11,19 +13,15 @@ CLASS lhc_onboarding DEFINITION INHERITING FROM cl_abap_behavior_handler.
 ENDCLASS.
 
 CLASS lhc_onboarding IMPLEMENTATION.
-  METHOD validateMandatory.
-    READ ENTITIES OF ZI_HCM_Onboarding IN LOCAL MODE
-      ENTITY Onboarding FIELDS ( FirstName LastName DateOfBirth NationalId BankAccount )
-      WITH CORRESPONDING #( keys ) RESULT DATA(forms).
-
-    LOOP AT forms INTO DATA(form).
-      IF form-FirstName IS INITIAL OR form-LastName IS INITIAL
-         OR form-DateOfBirth IS INITIAL OR form-NationalId IS INITIAL.
-
-        APPEND VALUE #( %tky = form-%tky ) TO failed-onboarding.
-        APPEND VALUE #( %tky = form-%tky
-                        %msg = new_message( id = '00' number = '004' v1 = 'Mandatory fields missing' severity = if_abap_behv_message=>severity-error ) ) TO reported-onboarding.
-      ENDIF.
+  " -> ADDED MISSING AUTHORIZATION IMPLEMENTATION
+  METHOD get_instance_authorizations.
+    LOOP AT keys INTO DATA(key).
+      APPEND VALUE #( %tky = key-%tky
+                      %update = if_abap_behv=>auth-allowed
+                      %delete = if_abap_behv=>auth-allowed
+                      %action-submitForm = if_abap_behv=>auth-allowed
+                      %action-approveAndCreateEmployee = if_abap_behv=>auth-allowed
+                      %action-rejectForm = if_abap_behv=>auth-allowed ) TO result.
     ENDLOOP.
   ENDMETHOD.
 
@@ -87,3 +85,4 @@ CLASS lhc_onboarding IMPLEMENTATION.
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 ENDCLASS.
+
