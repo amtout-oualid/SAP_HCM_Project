@@ -2,7 +2,7 @@
 @EndUserText.label: 'Job Offer - Interface'
 define root view entity ZI_HCM_JobOffer
   as select from zhcm_joboffer
-  //composition [0..*] of ZI_HCM_PipeTmpl as _Steps
+  composition [0..*] of ZI_HCM_PipeTmpl as _Steps
   composition [0..*] of ZI_HCM_Application as _Applications
 {
   key offer_id                as OfferId,
@@ -31,8 +31,6 @@ define root view entity ZI_HCM_JobOffer
       
       app_deadline            as AppDeadline, 
       valid_until             as ValidUntil,
-      
-      /* ADDED THIS FIELD TO FIX ABAP ERROR */
       published_at            as PublishedAt,
 
       @Semantics.user.createdBy: true
@@ -46,6 +44,6 @@ define root view entity ZI_HCM_JobOffer
       @Semantics.systemDateTime.localInstanceLastChangedAt: true
       local_last_changed_at   as LocalLastChangedAt,
 
-      //_Steps,
+      _Steps,
       _Applications
 }

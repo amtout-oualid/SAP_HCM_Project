@@ -26,10 +26,36 @@ etag master LocalLastChangedAt
 
   validation validateBeforePublish on save { create; update; }
   validation validateApplicationDeadline on save { create; update; }
-
   determination autoCloseOnDeadline on save { field AppDeadline; }
 
   association _Applications { create; with draft; }
+  association _Steps { create; with draft; }
+
+  mapping for zhcm_joboffer
+  {
+    OfferId = offer_id;
+    Title = title;
+    Description = description;
+    Department = department;
+    RequiredSkills = required_skills;
+    ExperienceLevel = experience_level;
+    ContractType = contract_type;
+    Location = location;
+    PositionsNeeded = positions_needed;
+    PositionsFilled = positions_filled;
+    SalaryMin = salary_min;
+    SalaryMax = salary_max;
+    CurrencyCode = currency_code;
+    Status = status;
+    AppDeadline = app_deadline;
+    ValidUntil = valid_until;
+    PublishedAt = published_at;
+    CreatedBy = created_by;
+    CreatedAt = created_at;
+    LastChangedBy = last_changed_by;
+    LastChangedAt = last_changed_at;
+    LocalLastChangedAt = local_last_changed_at;
+  }
 }
 
 define behavior for ZI_HCM_Application alias Application
@@ -55,4 +81,46 @@ etag master LocalLastChangedAt
   validation preventDuplicateApplication on save { create; }
 
   association _Offer { with draft; }
+
+  mapping for zhcm_applicatn
+  {
+    ApplicationId = application_id;
+    OfferId = offer_id;
+    CandidateId = candidate_id;
+    ResumeUrl = resume_url;
+    CoverLetter = cover_letter;
+    AppliedAt = applied_at;
+    CurrentStepOrder = current_step_order;
+    OverallStatus = overall_status;
+    AiMatchScore = ai_match_score;
+    NoticePeriod = notice_period;
+    SalaryExpectation = salary_expectation;
+    CurrencyCode = currency_code;
+    LocalLastChangedAt = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_PipeTmpl alias PipeTmpl
+persistent table zhcm_pipe_tmpl
+draft table zhcm_d_pipetmpl
+lock dependent by _Offer
+authorization dependent by _Offer
+etag master LocalLastChangedAt
+{
+  update; delete;
+  field ( readonly, numbering : managed ) TemplateId;
+  field ( readonly ) OfferId;
+
+  association _Offer { with draft; }
+
+  mapping for zhcm_pipe_tmpl
+  {
+    TemplateId = template_id;
+    OfferId = offer_id;
+    StepName = step_name;
+    StepOrder = step_order;
+    StepType = step_type;
+    StepDescription = step_desc;
+    LocalLastChangedAt = local_last_changed_at;
+  }
 }

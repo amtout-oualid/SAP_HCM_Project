@@ -19,10 +19,15 @@ define root view entity ZC_HCM_JobOffer
   SalaryMin,
   @Semantics.amount.currencyCode: 'CurrencyCode'
   SalaryMax,
+  
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
   CurrencyCode,
+  
   Status,
   StatusText,
+  AppDeadline,
   ValidUntil,
+  PublishedAt,
   CreatedBy,
   CreatedAt,
   LastChangedBy,
@@ -32,5 +37,6 @@ define root view entity ZC_HCM_JobOffer
   LocalLastChangedAt,
   
   /* Associations */
+  _Steps : redirected to composition child ZC_HCM_PipeTmpl,
   _Applications : redirected to composition child ZC_HCM_Application
 }

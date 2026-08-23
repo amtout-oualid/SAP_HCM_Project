@@ -18,21 +18,23 @@ annotate view ZC_HCM_JobOffer with
 
   @UI.lineItem: [{ position: 10, importance: #HIGH, label: 'Title' }, 
                  { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' }, 
-                 { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' },
-                 { type: #FOR_ACTION, dataAction: 'delete', label: 'Delete' }]
+                 { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' }]
   @UI.identification: [{ position: 10, label: 'Job Title' }]
   @Search.defaultSearchElement: true
   Title;
 
   @UI.identification: [{ position: 20, label: 'Description' }]
+  @UI.multiLineText: true
   Description;
 
   @UI.lineItem: [{ position: 20, label: 'Department' }]
   @UI.identification: [{ position: 30, label: 'Department' }]
   @UI.selectionField: [{ position: 20 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZC_HCM_OrgUnit', element: 'UnitName' } }]
   Department;
 
-  @UI.identification: [{ position: 40, label: 'Required Skills' }]
+  @UI.identification: [{ position: 40, label: 'Required Skills (Comma Separated)' }]
+  @UI.multiLineText: true
   RequiredSkills;
 
   @UI.identification: [{ position: 50, label: 'Experience Level' }]
@@ -67,7 +69,7 @@ annotate view ZC_HCM_JobOffer with
   @UI.lineItem: [{ position: 30, label: 'Status' }]
   @UI.identification: [{ position: 140, label: 'Status' }]
   @UI.selectionField: [{ position: 10 }]
-  statustext;
+  StatusText;
 
   @UI.lineItem: [{ position: 60, label: 'Valid Until' }]
   @UI.identification: [{ position: 130, label: 'Valid Until' }]
