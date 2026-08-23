@@ -38,9 +38,11 @@ annotate view ZC_HCM_JobOffer with
   RequiredSkills;
 
   @UI.identification: [{ position: 50, label: 'Experience Level' }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_ExpLevel', element: 'ExperienceLevel' } }]
   ExperienceLevel;
 
   @UI.identification: [{ position: 60, label: 'Contract Type' }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_ContractType', element: 'ContractType' } }]
   ContractType;
 
   @UI.identification: [{ position: 70, label: 'Location' }]
@@ -60,7 +62,9 @@ annotate view ZC_HCM_JobOffer with
   @UI.identification: [{ position: 110, label: 'Maximum Salary' }]
   SalaryMax;
 
-  @UI.identification: [{ position: 115, label: 'Currency' }]
+  /* Hiding this so Fiori only displays it directly inside the Min/Max Salary fields! */
+  @UI.hidden: true
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
   CurrencyCode;
 
   @UI.hidden: true
@@ -69,6 +73,7 @@ annotate view ZC_HCM_JobOffer with
   @UI.lineItem: [{ position: 30, label: 'Status' }]
   @UI.identification: [{ position: 140, label: 'Status' }]
   @UI.selectionField: [{ position: 10 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_JobStatus', element: 'Status' } }]
   StatusText;
 
   @UI.lineItem: [{ position: 60, label: 'Valid Until' }]

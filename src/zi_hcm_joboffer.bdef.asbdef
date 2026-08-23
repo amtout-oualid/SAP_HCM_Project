@@ -28,6 +28,8 @@ etag master LocalLastChangedAt
   validation validateApplicationDeadline on save { create; update; }
   determination autoCloseOnDeadline on save { field AppDeadline; }
 
+  determination setDefaultValues on modify { create; }
+
   association _Applications { create; with draft; }
   association _Steps { create; with draft; }
 

@@ -1,6 +1,5 @@
 CLASS lhc_joboffer DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
-    " -> ADDED MISSING AUTHORIZATION METHOD
     METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
       IMPORTING keys REQUEST requested_authorizations FOR JobOffer RESULT result.
 
@@ -20,10 +19,12 @@ CLASS lhc_joboffer DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING keys FOR JobOffer~validateApplicationDeadline.
     METHODS autoCloseOnDeadline FOR DETERMINE ON SAVE
       IMPORTING keys FOR JobOffer~autoCloseOnDeadline.
+
+    METHODS setDefaultValues FOR DETERMINE ON MODIFY
+      IMPORTING keys FOR JobOffer~setDefaultValues.
 ENDCLASS.
 
 CLASS lhc_joboffer IMPLEMENTATION.
-  " -> ADDED MISSING AUTHORIZATION IMPLEMENTATION (Grants Full Access)
   METHOD get_instance_authorizations.
     LOOP AT keys INTO DATA(key).
       APPEND VALUE #( %tky = key-%tky
@@ -116,6 +117,19 @@ CLASS lhc_joboffer IMPLEMENTATION.
                         %msg = new_message( id = '00' number = '002' v1 = 'App Deadline must be before Valid Until' severity = if_abap_behv_message=>severity-error ) ) TO reported-joboffer.
       ENDIF.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD setDefaultValues.
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer FIELDS ( Status CurrencyCode ) WITH CORRESPONDING #( keys ) RESULT DATA(offers).
+
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer UPDATE FIELDS ( Status CurrencyCode )
+      WITH VALUE #( FOR offer IN offers (
+          %tky = offer-%tky
+          Status = 'D'
+          CurrencyCode = 'USD'
+      ) ).
   ENDMETHOD.
 ENDCLASS.
 

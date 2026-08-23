@@ -23,6 +23,33 @@ CLASS zcl_hcm_generate_mock_data IMPLEMENTATION.
       DELETE FROM zhcm_pipe_tmpl.
 
       " ---------------------------------------------------------------------
+      " NEW: Populating the Dropdown Value Help Tables
+      " ---------------------------------------------------------------------
+      DELETE FROM zhcm_explvl.
+      DELETE FROM zhcm_conttyp.
+      DELETE FROM zhcm_jobstat.
+
+      INSERT zhcm_explvl FROM TABLE @( VALUE #(
+        ( client = sy-mandt exp_level = 'Junior' description = '0-2 years experience' )
+        ( client = sy-mandt exp_level = 'Mid-Level' description = '3-5 years experience' )
+        ( client = sy-mandt exp_level = 'Senior' description = '5+ years experience' )
+        ( client = sy-mandt exp_level = 'Lead' description = 'Team Lead / Manager' )
+      ) ).
+
+      INSERT zhcm_conttyp FROM TABLE @( VALUE #(
+        ( client = sy-mandt contract_type = 'Full-Time' description = 'Permanent Full-Time' )
+        ( client = sy-mandt contract_type = 'Part-Time' description = 'Permanent Part-Time' )
+        ( client = sy-mandt contract_type = 'Contract' description = 'Fixed-term Contract' )
+        ( client = sy-mandt contract_type = 'Freelance' description = 'Freelancer / External' )
+      ) ).
+
+      INSERT zhcm_jobstat FROM TABLE @( VALUE #(
+        ( client = sy-mandt status = 'D' description = 'Draft' )
+        ( client = sy-mandt status = 'P' description = 'Published' )
+        ( client = sy-mandt status = 'C' description = 'Closed' )
+      ) ).
+
+      " ---------------------------------------------------------------------
       " Offer 1: Senior ABAP Developer
       " ---------------------------------------------------------------------
       DATA(lv_offer1_id) = cl_system_uuid=>create_uuid_x16_static( ).
