@@ -6,8 +6,9 @@ define service ZUI_HCM_RECRUIT {
   expose ZC_HCM_TALENTPOOL      as TalentPool;
   expose ZC_HCM_Onboarding      as Onboarding;
   expose ZC_HCM_OrgUnit         as OrgUnit;
-  expose ZI_HCM_VH_ExpLevel as ExpLevelVH;
+  expose ZI_HCM_VH_ExpLevel     as ExpLevelVH;
   expose ZI_HCM_VH_ContractType as ContractTypeVH;
-  expose ZI_HCM_VH_JobStatus as JobStatusVH;
+  expose ZI_HCM_VH_JobStatus    as JobStatusVH;
   expose I_Currency             as CurrencyVH;
+  expose ZC_HCM_PipeTmpl        as PipeTmpl;
 }

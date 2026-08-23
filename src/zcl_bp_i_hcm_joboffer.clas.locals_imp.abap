@@ -42,7 +42,7 @@ CLASS lhc_joboffer IMPLEMENTATION.
 
     result = VALUE #( FOR offer IN lt_offers (
       %tky = offer-%tky
-      %action-publishOffer = COND #( WHEN offer-Status = 'D' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
+      %action-publishOffer = COND #( WHEN offer-Status = 'D' OR offer-Status = 'C' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
       %action-closeOffer   = COND #( WHEN offer-Status = 'P' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
       %action-reopenOffer  = COND #( WHEN offer-Status = 'C' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
     ) ).

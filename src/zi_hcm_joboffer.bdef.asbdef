@@ -19,6 +19,7 @@ etag master LocalLastChangedAt
   draft determine action Prepare;
 
   field ( readonly, numbering : managed ) OfferId;
+  field ( mandatory ) Title, Department;
 
   action ( features : instance ) publishOffer result [1] $self;
   action ( features : instance ) closeOffer result [1] $self;
