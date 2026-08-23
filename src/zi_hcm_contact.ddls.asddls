@@ -1,5 +1,5 @@
 @AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'Employee Contact - Interface'
+@EndUserText.label: 'Contact - Interface'
 define view entity ZI_HCM_Contact
   as select from zhcm_contact
   association to parent ZI_HCM_Employee as _Employee
@@ -13,6 +13,5 @@ define view entity ZI_HCM_Contact
       work_email               as WorkEmail,
       @Semantics.systemDateTime.localInstanceLastChangedAt: true
       local_last_changed_at        as LocalLastChangedAt,
-
       _Employee
 }

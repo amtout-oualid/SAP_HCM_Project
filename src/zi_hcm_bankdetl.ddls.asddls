@@ -13,6 +13,5 @@ define view entity ZI_HCM_BankDetl
       bic_swift               as BicSwift,
       @Semantics.systemDateTime.localInstanceLastChangedAt: true
       local_last_changed_at        as LocalLastChangedAt,
-
       _Employee
 }

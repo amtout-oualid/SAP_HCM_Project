@@ -20,8 +20,11 @@ define root view entity ZC_HCM_Employee
   CreatedBy,
   CreatedAt,
   LastChangedBy,
+  @Semantics.systemDateTime.lastChangedAt: true
   LastChangedAt,
+  @Semantics.systemDateTime.localInstanceLastChangedAt: true
   LocalLastChangedAt,
+
   
   /* Associations */
   _Contact : redirected to composition child ZC_HCM_Contact,

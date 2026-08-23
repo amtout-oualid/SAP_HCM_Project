@@ -10,6 +10,7 @@ define view entity ZC_HCM_Contact
   PhoneNumber,
   PersonalEmail,
   WorkEmail,
+  @Semantics.systemDateTime.localInstanceLastChangedAt: true
   LocalLastChangedAt,
   
   /* Associations */

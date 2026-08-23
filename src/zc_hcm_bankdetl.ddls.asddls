@@ -10,7 +10,9 @@ define view entity ZC_HCM_BankDetl
   AccountNumber,
   Iban,
   BicSwift,
+  @Semantics.systemDateTime.localInstanceLastChangedAt: true
   LocalLastChangedAt,
+  
   
   /* Associations */
   _Employee : redirected to parent ZC_HCM_Employee
