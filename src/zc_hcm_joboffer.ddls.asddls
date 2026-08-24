@@ -15,8 +15,10 @@ define root view entity ZC_HCM_JobOffer
   Location,
   PositionsNeeded,
   PositionsFilled,
+  
   @Semantics.amount.currencyCode: 'CurrencyCode'
   SalaryMin,
+  
   @Semantics.amount.currencyCode: 'CurrencyCode'
   SalaryMax,
   
@@ -31,8 +33,10 @@ define root view entity ZC_HCM_JobOffer
   CreatedBy,
   CreatedAt,
   LastChangedBy,
+  
   @Semantics.systemDateTime.lastChangedAt: true
   LastChangedAt,
+  
   @Semantics.systemDateTime.localInstanceLastChangedAt: true
   LocalLastChangedAt,
   
