@@ -11,4 +11,5 @@ define service ZUI_HCM_RECRUIT {
   expose ZI_HCM_VH_JobStatus    as JobStatusVH;
   expose I_Currency             as CurrencyVH;
   expose ZC_HCM_PipeTmpl        as PipeTmpl;
+  expose ZI_HCM_VH_StepType     as StepTypeVH;
 }

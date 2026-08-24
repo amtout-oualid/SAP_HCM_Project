@@ -18,17 +18,16 @@ CLASS zcl_hcm_generate_mock_data IMPLEMENTATION.
     TRY.
       GET TIME STAMP FIELD DATA(lv_ts).
 
-      " Clear existing data (optional, to avoid duplicates if you run it multiple times)
+      " Clear existing data
       DELETE FROM zhcm_joboffer.
       DELETE FROM zhcm_pipe_tmpl.
-
-      " ---------------------------------------------------------------------
-      " NEW: Populating the Dropdown Value Help Tables
-      " ---------------------------------------------------------------------
       DELETE FROM zhcm_explvl.
       DELETE FROM zhcm_conttyp.
       DELETE FROM zhcm_jobstat.
+      DELETE FROM zhcm_orgunit.
+      DELETE FROM zhcm_step_type.
 
+      " Populate Value Helps
       INSERT zhcm_explvl FROM TABLE @( VALUE #(
         ( client = sy-mandt exp_level = 'Junior' description = '0-2 years experience' )
         ( client = sy-mandt exp_level = 'Mid-Level' description = '3-5 years experience' )
@@ -49,15 +48,27 @@ CLASS zcl_hcm_generate_mock_data IMPLEMENTATION.
         ( client = sy-mandt status = 'C' description = 'Closed' )
       ) ).
 
-      " ---------------------------------------------------------------------
-      " Offer 1: Senior ABAP Developer
-      " ---------------------------------------------------------------------
+      INSERT zhcm_orgunit FROM TABLE @( VALUE #(
+        ( client = sy-mandt org_unit_id = cl_system_uuid=>create_uuid_x16_static( ) unit_name = 'Engineering' status = 'A' )
+        ( client = sy-mandt org_unit_id = cl_system_uuid=>create_uuid_x16_static( ) unit_name = 'Consulting' status = 'A' )
+        ( client = sy-mandt org_unit_id = cl_system_uuid=>create_uuid_x16_static( ) unit_name = 'Human Resources' status = 'A' )
+        ( client = sy-mandt org_unit_id = cl_system_uuid=>create_uuid_x16_static( ) unit_name = 'Sales' status = 'A' )
+      ) ).
+
+      INSERT zhcm_step_type FROM TABLE @( VALUE #(
+        ( client = sy-mandt step_type = 'SCREEN' description = 'AI / HR Screening' )
+        ( client = sy-mandt step_type = 'INTERV' description = 'Interview' )
+        ( client = sy-mandt step_type = 'TECH' description = 'Technical Test' )
+        ( client = sy-mandt step_type = 'OFFER' description = 'Offer Stage' )
+      ) ).
+
+      " Offer 1
       DATA(lv_offer1_id) = cl_system_uuid=>create_uuid_x16_static( ).
       APPEND VALUE #(
         offer_id = lv_offer1_id
         title = 'Senior ABAP RAP Developer'
         description = 'We are looking for an experienced SAP ABAP developer with strong RAP skills to build our next generation APIs.'
-        department = 'IT & Engineering'
+        department = 'Engineering'
         required_skills = 'ABAP, RAP, OData V4, Fiori Elements'
         experience_level = 'Senior'
         contract_type = 'Full-Time'
@@ -67,20 +78,40 @@ CLASS zcl_hcm_generate_mock_data IMPLEMENTATION.
         salary_min = 120000
         salary_max = 160000
         currency_code = 'USD'
-        status = 'P' " P = Published
+        status = 'P'
         valid_until = '20261231'
         created_at = lv_ts
         local_last_changed_at = lv_ts
       ) TO lt_job_offers.
 
-      " Insert Pipeline Steps for Offer 1
-      APPEND VALUE #( template_id = cl_system_uuid=>create_uuid_x16_static( ) offer_id = lv_offer1_id step_name = 'Screening' step_order = 1 step_type = 'SCREEN' ) TO lt_pipe_steps.
-      APPEND VALUE #( template_id = cl_system_uuid=>create_uuid_x16_static( ) offer_id = lv_offer1_id step_name = 'Technical Interview' step_order = 2 step_type = 'INTERV' ) TO lt_pipe_steps.
-      APPEND VALUE #( template_id = cl_system_uuid=>create_uuid_x16_static( ) offer_id = lv_offer1_id step_name = 'Offer' step_order = 3 step_type = 'OFFER' ) TO lt_pipe_steps.
+      APPEND VALUE #(
+        template_id = cl_system_uuid=>create_uuid_x16_static( )
+        offer_id = lv_offer1_id
+        step_name = 'Screening'
+        step_order = 1
+        step_type = 'SCREEN'
+        step_desc = 'We will review your resume using our AI system.'
+      ) TO lt_pipe_steps.
 
-      " ---------------------------------------------------------------------
-      " Offer 2: SAP Fiori Consultant
-      " ---------------------------------------------------------------------
+      APPEND VALUE #(
+        template_id = cl_system_uuid=>create_uuid_x16_static( )
+        offer_id = lv_offer1_id
+        step_name = 'Technical Interview'
+        step_order = 2
+        step_type = 'INTERV'
+        step_desc = 'You will receive an email with a Teams link for your interview.'
+      ) TO lt_pipe_steps.
+
+      APPEND VALUE #(
+        template_id = cl_system_uuid=>create_uuid_x16_static( )
+        offer_id = lv_offer1_id
+        step_name = 'Offer'
+        step_order = 3
+        step_type = 'OFFER'
+        step_desc = 'Final offer stage and negotiations.'
+      ) TO lt_pipe_steps.
+
+      " Offer 2
       DATA(lv_offer2_id) = cl_system_uuid=>create_uuid_x16_static( ).
       APPEND VALUE #(
         offer_id = lv_offer2_id
@@ -96,16 +127,29 @@ CLASS zcl_hcm_generate_mock_data IMPLEMENTATION.
         salary_min = 80000
         salary_max = 110000
         currency_code = 'GBP'
-        status = 'P' " P = Published
+        status = 'P'
         valid_until = '20261031'
         created_at = lv_ts
         local_last_changed_at = lv_ts
       ) TO lt_job_offers.
 
-      " Insert Pipeline Steps for Offer 2
-      APPEND VALUE #( template_id = cl_system_uuid=>create_uuid_x16_static( ) offer_id = lv_offer2_id step_name = 'AI Resume Parse' step_order = 1 step_type = 'SCREEN' ) TO lt_pipe_steps.
-      APPEND VALUE #( template_id = cl_system_uuid=>create_uuid_x16_static( ) offer_id = lv_offer2_id step_name = 'Manager Interview' step_order = 2 step_type = 'INTERV' ) TO lt_pipe_steps.
-      APPEND VALUE #( template_id = cl_system_uuid=>create_uuid_x16_static( ) offer_id = lv_offer2_id step_name = 'Background Check' step_order = 3 step_type = 'CHECK' ) TO lt_pipe_steps.
+      APPEND VALUE #(
+        template_id = cl_system_uuid=>create_uuid_x16_static( )
+        offer_id = lv_offer2_id
+        step_name = 'HR Phone Screen'
+        step_order = 1
+        step_type = 'SCREEN'
+        step_desc = 'A quick 15 minute chat to discuss your experience.'
+      ) TO lt_pipe_steps.
+
+      APPEND VALUE #(
+        template_id = cl_system_uuid=>create_uuid_x16_static( )
+        offer_id = lv_offer2_id
+        step_name = 'Manager Interview'
+        step_order = 2
+        step_type = 'INTERV'
+        step_desc = 'In-depth discussion with the hiring manager.'
+      ) TO lt_pipe_steps.
 
       " Save to Database
       INSERT zhcm_joboffer FROM TABLE @lt_job_offers.

@@ -5,6 +5,7 @@
   title: { type: #STANDARD, value: 'StepName' },
   description: { type: #STANDARD, value: 'StepType' }
 }
+@UI.presentationVariant: [{ sortOrder: [{ by: 'StepOrder', direction: #ASC }] }]
 annotate view ZC_HCM_PipeTmpl with
 {
   @UI.facet: [{ id: 'StepDetails', type: #IDENTIFICATION_REFERENCE, label: 'Step Details', position: 10 }]
@@ -15,18 +16,24 @@ annotate view ZC_HCM_PipeTmpl with
   @UI.hidden: true
   OfferId;
 
-  @UI.lineItem: [{ position: 10, label: 'Step Name' }]
-  @UI.identification: [{ position: 10, label: 'Step Name' }]
-  StepName;
-
-  @UI.lineItem: [{ position: 20, label: 'Order' }]
-  @UI.identification: [{ position: 20, label: 'Step Order' }]
+  @UI.lineItem: [{ position: 10, label: 'Order' }]
+  @UI.identification: [{ position: 10, label: 'Step Order' }]
   StepOrder;
+
+  @UI.lineItem: [{ position: 20, label: 'Step Name' }]
+  @UI.identification: [{ position: 20, label: 'Step Name' }]
+  StepName;
 
   @UI.lineItem: [{ position: 30, label: 'Type' }]
   @UI.identification: [{ position: 30, label: 'Step Type' }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_StepType', element: 'StepType' } }]
   StepType;
 
-  @UI.lineItem: [{ position: 40, label: 'Changed On' }]
+  @UI.lineItem: [{ position: 40, label: 'Message to Candidate' }]
+  @UI.identification: [{ position: 40, label: 'Message to Candidate' }]
+  @UI.multiLineText: true
+  StepDescription;
+
+  @UI.hidden: true
   LocalLastChangedAt;
 }

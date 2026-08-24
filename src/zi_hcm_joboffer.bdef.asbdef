@@ -114,6 +114,8 @@ etag master LocalLastChangedAt
   field ( readonly, numbering : managed ) TemplateId;
   field ( readonly ) OfferId;
 
+  field ( mandatory ) StepName, StepType, StepOrder;
+
   association _Offer { with draft; }
 
   mapping for zhcm_pipe_tmpl
