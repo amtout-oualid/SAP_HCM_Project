@@ -22,6 +22,9 @@ CLASS lhc_joboffer DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS setDefaultValues FOR DETERMINE ON MODIFY
       IMPORTING keys FOR JobOffer~setDefaultValues.
+
+    METHODS validateMandatoryFields FOR VALIDATE ON SAVE
+      IMPORTING keys FOR JobOffer~validateMandatoryFields.
 ENDCLASS.
 
 CLASS lhc_joboffer IMPLEMENTATION.
@@ -130,6 +133,21 @@ CLASS lhc_joboffer IMPLEMENTATION.
           Status = 'D'
           CurrencyCode = 'USD'
       ) ).
+  ENDMETHOD.
+
+  METHOD validateMandatoryFields.
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer FIELDS ( Title Department ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
+
+    LOOP AT lt_offers INTO DATA(offer).
+      IF offer-Title IS INITIAL OR offer-Department IS INITIAL.
+        APPEND VALUE #( %tky = offer-%tky ) TO failed-joboffer.
+        APPEND VALUE #( %tky = offer-%tky
+                        %msg = new_message( id = '00' number = '004' v1 = 'Title and Department are required!' severity = if_abap_behv_message=>severity-error )
+                        %element-Title = if_abap_behv=>mk-on
+                        %element-Department = if_abap_behv=>mk-on ) TO reported-joboffer.
+      ENDIF.
+    ENDLOOP.
   ENDMETHOD.
 ENDCLASS.
 
@@ -272,6 +290,28 @@ CLASS lhc_application IMPLEMENTATION.
         APPEND VALUE #( %tky = app-%tky ) TO failed-application.
         APPEND VALUE #( %tky = app-%tky
                         %msg = new_message( id = '00' number = '003' v1 = 'Candidate already applied!' severity = if_abap_behv_message=>severity-error ) ) TO reported-application.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lhc_pipetmpl DEFINITION INHERITING FROM cl_abap_behavior_handler.
+  PRIVATE SECTION.
+    METHODS validateMandatorySteps FOR VALIDATE ON SAVE IMPORTING keys FOR PipeTmpl~validateMandatorySteps.
+ENDCLASS.
+
+CLASS lhc_pipetmpl IMPLEMENTATION.
+  METHOD validateMandatorySteps.
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY PipeTmpl FIELDS ( StepName StepType StepOrder ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_steps).
+
+    LOOP AT lt_steps INTO DATA(step).
+      IF step-StepName IS INITIAL OR step-StepType IS INITIAL OR step-StepOrder IS INITIAL.
+        APPEND VALUE #( %tky = step-%tky ) TO failed-pipetmpl.
+        APPEND VALUE #( %tky = step-%tky
+                        %msg = new_message( id = '00' number = '005' v1 = 'Step Name, Type, and Order are required!' severity = if_abap_behv_message=>severity-error )
+                        %element-StepName = if_abap_behv=>mk-on
+                        %element-StepType = if_abap_behv=>mk-on ) TO reported-pipetmpl.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.

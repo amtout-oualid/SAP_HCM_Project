@@ -27,6 +27,7 @@ etag master LocalLastChangedAt
 
   validation validateBeforePublish on save { create; update; }
   validation validateApplicationDeadline on save { create; update; }
+  validation validateMandatoryFields on save { create; update; field Title, Department; }
   determination autoCloseOnDeadline on save { field AppDeadline; }
 
   determination setDefaultValues on modify { create; }
@@ -115,6 +116,8 @@ etag master LocalLastChangedAt
   field ( readonly ) OfferId;
 
   field ( mandatory ) StepName, StepType, StepOrder;
+
+  validation validateMandatorySteps on save { create; update; field StepName, StepType, StepOrder; }
 
   association _Offer { with draft; }
 
