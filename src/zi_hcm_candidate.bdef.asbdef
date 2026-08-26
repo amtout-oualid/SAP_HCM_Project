@@ -18,8 +18,8 @@ etag master LocalLastChangedAt
   field ( readonly )
   CreatedAt, LastChangedAt, LocalLastChangedAt;
 
-  // We use ZI_HCM_Application as the parameter so the frontend can pass ResumeUrl, CoverLetter, etc.
-  action ( features : instance ) applyToJob parameter ZA_HCM_Apply result [1] $self;
+  // No "features: instance" here!
+  action applyToJob parameter ZA_HCM_Apply result [1] $self;
 
   mapping for zhcm_candidate
   {
