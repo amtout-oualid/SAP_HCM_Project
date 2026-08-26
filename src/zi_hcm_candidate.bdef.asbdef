@@ -17,7 +17,7 @@ etag master LocalLastChangedAt
   field ( readonly )
   CreatedAt, LastChangedAt, LocalLastChangedAt;
 
-
+  action applyToJob parameter ZA_HCM_Apply result [1] $self;
   mapping for zhcm_candidate
   {
     CandidateId            = candidate_id;
