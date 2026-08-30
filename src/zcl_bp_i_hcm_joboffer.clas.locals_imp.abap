@@ -1,3 +1,34 @@
+CLASS lcl_buffer DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA: mt_pipe_prog TYPE TABLE OF zhcm_pipe_prog,
+                mt_talntpool TYPE TABLE OF zhcm_talntpool,
+                mt_hr_mail   TYPE TABLE OF zhcm_hr_mail.
+ENDCLASS.
+CLASS lcl_buffer IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lsc_ZI_HCM_JOBOFFER DEFINITION INHERITING FROM cl_abap_behavior_saver.
+  PROTECTED SECTION.
+    METHODS save_modified REDEFINITION.
+ENDCLASS.
+
+CLASS lsc_ZI_HCM_JOBOFFER IMPLEMENTATION.
+  METHOD save_modified.
+    IF lcl_buffer=>mt_pipe_prog IS NOT INITIAL.
+      INSERT zhcm_pipe_prog FROM TABLE @lcl_buffer=>mt_pipe_prog.
+      CLEAR lcl_buffer=>mt_pipe_prog.
+    ENDIF.
+    IF lcl_buffer=>mt_talntpool IS NOT INITIAL.
+      INSERT zhcm_talntpool FROM TABLE @lcl_buffer=>mt_talntpool.
+      CLEAR lcl_buffer=>mt_talntpool.
+    ENDIF.
+    IF lcl_buffer=>mt_hr_mail IS NOT INITIAL.
+      INSERT zhcm_hr_mail FROM TABLE @lcl_buffer=>mt_hr_mail.
+      CLEAR lcl_buffer=>mt_hr_mail.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
 CLASS lhc_JobOffer DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
     METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
@@ -257,14 +288,14 @@ CLASS lhc_Application IMPLEMENTATION.
   METHOD addNote.
     LOOP AT keys INTO DATA(key).
       DATA(lv_uuid) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_pipe_prog VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         progress_id = lv_uuid
         application_id = key-ApplicationId
         step_name = 'HR Note'
         status = 'N'
         notes = key-%param-NoteText
-      ) ).
+      ) TO lcl_buffer=>mt_pipe_prog.
     ENDLOOP.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
@@ -295,13 +326,13 @@ CLASS lhc_Application IMPLEMENTATION.
 
     LOOP AT keys INTO DATA(key).
        DATA(lv_prog_id) = cl_system_uuid=>create_uuid_x16_static( ).
-       INSERT INTO zhcm_pipe_prog VALUES @( VALUE #(
+       APPEND VALUE #(
          client = sy-mandt
          progress_id = lv_prog_id
          application_id = key-ApplicationId
          step_order = lt_app[ 1 ]-CurrentStepOrder
          status = 'C'
-       ) ).
+       ) TO lcl_buffer=>mt_pipe_prog.
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
@@ -328,7 +359,7 @@ CLASS lhc_Application IMPLEMENTATION.
 
     LOOP AT lt_apps INTO DATA(app).
       DATA(lv_pool_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_talntpool VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         pool_id = lv_pool_id
         candidate_id = app-CandidateId
@@ -337,7 +368,7 @@ CLASS lhc_Application IMPLEMENTATION.
         resume_url = app-ResumeUrl
         status = 'A'
         rejection_reason = keys[ 1 ]-%param-RejectionReason
-      ) ).
+      ) TO lcl_buffer=>mt_talntpool.
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
@@ -348,14 +379,14 @@ CLASS lhc_Application IMPLEMENTATION.
   METHOD sendMail.
     LOOP AT keys INTO DATA(key).
       DATA(lv_mail_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_hr_mail VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         mail_id = lv_mail_id
         application_id = key-ApplicationId
         mail_type = key-%param-MailType
         subject = key-%param-Subject
         body = key-%param-Body
-      ) ).
+      ) TO lcl_buffer=>mt_hr_mail.
     ENDLOOP.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).

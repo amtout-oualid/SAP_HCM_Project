@@ -5,6 +5,7 @@ with draft;
 define behavior for ZI_HCM_JobOffer alias JobOffer
 persistent table zhcm_joboffer
 draft table zhcm_d_joboffer
+with additional save
 lock master
 total etag LastChangedAt
 authorization master ( instance )

@@ -1,6 +1,26 @@
+CLASS lcl_buffer DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA: mt_emp_hist TYPE TABLE OF zhcm_emp_hist.
+ENDCLASS.
+CLASS lcl_buffer IMPLEMENTATION.
+ENDCLASS.
+
+CLASS lsc_ZI_HCM_EMPLOYEE DEFINITION INHERITING FROM cl_abap_behavior_saver.
+  PROTECTED SECTION.
+    METHODS save_modified REDEFINITION.
+ENDCLASS.
+
+CLASS lsc_ZI_HCM_EMPLOYEE IMPLEMENTATION.
+  METHOD save_modified.
+    IF lcl_buffer=>mt_emp_hist IS NOT INITIAL.
+      INSERT zhcm_emp_hist FROM TABLE @lcl_buffer=>mt_emp_hist.
+      CLEAR lcl_buffer=>mt_emp_hist.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
 CLASS lhc_employee DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
-    " -> ADDED MISSING AUTHORIZATION METHOD
     METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
       IMPORTING keys REQUEST requested_authorizations FOR Employee RESULT result.
 
@@ -23,7 +43,6 @@ CLASS lhc_employee DEFINITION INHERITING FROM cl_abap_behavior_handler.
 ENDCLASS.
 
 CLASS lhc_employee IMPLEMENTATION.
-  " -> ADDED MISSING AUTHORIZATION IMPLEMENTATION
   METHOD get_instance_authorizations.
     LOOP AT keys INTO DATA(key).
       APPEND VALUE #( %tky = key-%tky
@@ -64,7 +83,7 @@ CLASS lhc_employee IMPLEMENTATION.
   METHOD promoteEmployee.
     LOOP AT keys INTO DATA(ls_key).
       DATA(lv_hist_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_emp_hist VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         history_id = lv_hist_id
         employee_id = ls_key-EmployeeId
@@ -74,7 +93,7 @@ CLASS lhc_employee IMPLEMENTATION.
         new_salary = ls_key-%param-NewSalary
         currency_code = ls_key-%param-CurrencyCode
         changed_by = sy-uname
-      ) ).
+      ) TO lcl_buffer=>mt_emp_hist.
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_Employee IN LOCAL MODE
@@ -93,7 +112,7 @@ CLASS lhc_employee IMPLEMENTATION.
 
     LOOP AT keys INTO DATA(ls_key).
       DATA(lv_hist_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_emp_hist VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         history_id = lv_hist_id
         employee_id = ls_key-EmployeeId
@@ -101,7 +120,7 @@ CLASS lhc_employee IMPLEMENTATION.
         event_date = cl_abap_context_info=>get_system_date( )
         notes = ls_key-%param-TerminationReason
         changed_by = sy-uname
-      ) ).
+      ) TO lcl_buffer=>mt_emp_hist.
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_Employee IN LOCAL MODE
@@ -112,7 +131,7 @@ CLASS lhc_employee IMPLEMENTATION.
   METHOD transferEmployee.
     LOOP AT keys INTO DATA(ls_key).
       DATA(lv_hist_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_emp_hist VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         history_id = lv_hist_id
         employee_id = ls_key-EmployeeId
@@ -120,7 +139,7 @@ CLASS lhc_employee IMPLEMENTATION.
         event_date = cl_abap_context_info=>get_system_date( )
         new_department = ls_key-%param-NewDepartmentId
         changed_by = sy-uname
-      ) ).
+      ) TO lcl_buffer=>mt_emp_hist.
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_Employee IN LOCAL MODE
@@ -135,14 +154,14 @@ CLASS lhc_employee IMPLEMENTATION.
 
     LOOP AT keys INTO DATA(ls_key).
       DATA(lv_hist_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_emp_hist VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         history_id = lv_hist_id
         employee_id = ls_key-EmployeeId
         event_type = 'Suspended'
         event_date = cl_abap_context_info=>get_system_date( )
         changed_by = sy-uname
-      ) ).
+      ) TO lcl_buffer=>mt_emp_hist.
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_Employee IN LOCAL MODE
@@ -157,14 +176,14 @@ CLASS lhc_employee IMPLEMENTATION.
 
     LOOP AT keys INTO DATA(ls_key).
       DATA(lv_hist_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_emp_hist VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         history_id = lv_hist_id
         employee_id = ls_key-EmployeeId
         event_type = 'Activated'
         event_date = cl_abap_context_info=>get_system_date( )
         changed_by = sy-uname
-      ) ).
+      ) TO lcl_buffer=>mt_emp_hist.
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_Employee IN LOCAL MODE
