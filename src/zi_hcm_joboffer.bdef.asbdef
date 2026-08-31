@@ -70,13 +70,14 @@ lock dependent by _Offer
 authorization dependent by _Offer
 etag master LocalLastChangedAt
 {
-  update; delete;
+  update ( features : instance );
+  delete;
   field ( readonly, numbering : managed ) ApplicationId;
   field ( readonly ) OfferId;
 
   action evaluateWithAI result [1] $self;
-  action passToNextStep result [1] $self;
-  action acceptToPost result [1] $self;
+  action ( features : instance ) passToNextStep result [1] $self;
+  action ( features : instance ) acceptToPost parameter ZA_HCM_HireInfo result [1] $self;
 
   action putOnHold result [1] $self;
   action addNote parameter ZA_HCM_AddNote result [1] $self;
@@ -86,6 +87,7 @@ etag master LocalLastChangedAt
   validation preventDuplicateApplication on save { create; }
 
   association _Offer { with draft; }
+  association _Progress { create; with draft; }
 
   mapping for zhcm_applicatn
   {
@@ -130,6 +132,34 @@ etag master LocalLastChangedAt
     StepOrder = step_order;
     StepType = step_type;
     StepDescription = step_desc;
+    LocalLastChangedAt = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_PipeProg alias Progress
+persistent table zhcm_pipe_prog
+draft table zhcm_d_pipeprog
+lock dependent by _Offer
+authorization dependent by _Offer
+etag master LocalLastChangedAt
+{
+  update; delete;
+  field ( readonly, numbering : managed ) ProgressId;
+  field ( readonly ) ApplicationId, OfferId;
+
+  association _Application { with draft; }
+  association _Offer { with draft; }
+
+  mapping for zhcm_pipe_prog
+  {
+    ProgressId = progress_id;
+    ApplicationId = application_id;
+    StepOrder = step_order;
+    StepName = step_name;
+    Status = status;
+    Score = score;
+    Notes = notes;
+    CompletedAt = completed_at;
     LocalLastChangedAt = local_last_changed_at;
   }
 }

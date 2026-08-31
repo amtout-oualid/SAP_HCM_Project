@@ -1,79 +1,86 @@
-CLASS lcl_buffer DEFINITION.
-  PUBLIC SECTION.
-    CLASS-DATA: mt_pipe_prog TYPE TABLE OF zhcm_pipe_prog,
-                mt_talntpool TYPE TABLE OF zhcm_talntpool,
-                mt_hr_mail   TYPE TABLE OF zhcm_hr_mail.
-ENDCLASS.
-CLASS lcl_buffer IMPLEMENTATION.
-ENDCLASS.
-
-CLASS lsc_ZI_HCM_JOBOFFER DEFINITION INHERITING FROM cl_abap_behavior_saver.
-  PROTECTED SECTION.
-    METHODS save_modified REDEFINITION.
-ENDCLASS.
-
-CLASS lsc_ZI_HCM_JOBOFFER IMPLEMENTATION.
-  METHOD save_modified.
-    IF lcl_buffer=>mt_pipe_prog IS NOT INITIAL.
-      INSERT zhcm_pipe_prog FROM TABLE @lcl_buffer=>mt_pipe_prog.
-      CLEAR lcl_buffer=>mt_pipe_prog.
-    ENDIF.
-    IF lcl_buffer=>mt_talntpool IS NOT INITIAL.
-      INSERT zhcm_talntpool FROM TABLE @lcl_buffer=>mt_talntpool.
-      CLEAR lcl_buffer=>mt_talntpool.
-    ENDIF.
-    IF lcl_buffer=>mt_hr_mail IS NOT INITIAL.
-      INSERT zhcm_hr_mail FROM TABLE @lcl_buffer=>mt_hr_mail.
-      CLEAR lcl_buffer=>mt_hr_mail.
-    ENDIF.
-  ENDMETHOD.
-ENDCLASS.
-
-CLASS lhc_JobOffer DEFINITION INHERITING FROM cl_abap_behavior_handler.
+CLASS lhc_joboffer DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
     METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
       IMPORTING keys REQUEST requested_authorizations FOR JobOffer RESULT result.
 
+    METHODS get_instance_features FOR INSTANCE FEATURES
+      IMPORTING keys REQUEST requested_features FOR JobOffer RESULT result.
+
+    METHODS publishOffer FOR MODIFY
+      IMPORTING keys FOR ACTION JobOffer~publishOffer RESULT result.
+    METHODS closeOffer FOR MODIFY
+      IMPORTING keys FOR ACTION JobOffer~closeOffer RESULT result.
+    METHODS reopenOffer FOR MODIFY
+      IMPORTING keys FOR ACTION JobOffer~reopenOffer RESULT result.
+
+    METHODS validateBeforePublish FOR VALIDATE ON SAVE
+      IMPORTING keys FOR JobOffer~validateBeforePublish.
+    METHODS validateApplicationDeadline FOR VALIDATE ON SAVE
+      IMPORTING keys FOR JobOffer~validateApplicationDeadline.
     METHODS autoCloseOnDeadline FOR DETERMINE ON SAVE
       IMPORTING keys FOR JobOffer~autoCloseOnDeadline.
 
     METHODS setDefaultValues FOR DETERMINE ON MODIFY
       IMPORTING keys FOR JobOffer~setDefaultValues.
 
-    METHODS validateApplicationDeadline FOR VALIDATE ON SAVE
-      IMPORTING keys FOR JobOffer~validateApplicationDeadline.
-
-    METHODS validateBeforePublish FOR VALIDATE ON SAVE
-      IMPORTING keys FOR JobOffer~validateBeforePublish.
-
     METHODS validateMandatoryFields FOR VALIDATE ON SAVE
       IMPORTING keys FOR JobOffer~validateMandatoryFields.
-
-    METHODS closeOffer FOR MODIFY
-      IMPORTING keys FOR ACTION JobOffer~closeOffer RESULT result.
-
-    METHODS publishOffer FOR MODIFY
-      IMPORTING keys FOR ACTION JobOffer~publishOffer RESULT result.
-
-    METHODS reopenOffer FOR MODIFY
-      IMPORTING keys FOR ACTION JobOffer~reopenOffer RESULT result.
-
-    METHODS get_instance_features FOR INSTANCE FEATURES
-      IMPORTING keys REQUEST requested_features FOR JobOffer RESULT result.
-
 ENDCLASS.
 
-CLASS lhc_JobOffer IMPLEMENTATION.
-
+CLASS lhc_joboffer IMPLEMENTATION.
   METHOD get_instance_authorizations.
-    LOOP AT keys INTO DATA(ls_key).
-      APPEND VALUE #( %tky = ls_key-%tky
+    LOOP AT keys INTO DATA(key).
+      APPEND VALUE #( %tky = key-%tky
                       %update = if_abap_behv=>auth-allowed
                       %delete = if_abap_behv=>auth-allowed
                       %action-publishOffer = if_abap_behv=>auth-allowed
                       %action-closeOffer = if_abap_behv=>auth-allowed
                       %action-reopenOffer = if_abap_behv=>auth-allowed ) TO result.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD get_instance_features.
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer FIELDS ( Status ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
+
+    result = VALUE #( FOR offer IN lt_offers (
+      %tky = offer-%tky
+      %action-publishOffer = COND #( WHEN offer-Status = 'D' OR offer-Status = 'C' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
+      %action-closeOffer   = COND #( WHEN offer-Status = 'P' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
+      %action-reopenOffer  = COND #( WHEN offer-Status = 'C' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
+    ) ).
+  ENDMETHOD.
+
+  METHOD publishOffer.
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer UPDATE FIELDS ( Status PublishedAt )
+      WITH VALUE #( FOR key IN keys (
+        %tky = key-%tky
+        Status = 'P'
+        PublishedAt = cl_abap_context_info=>get_system_time( )
+      ) ).
+
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
+    result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
+  ENDMETHOD.
+
+  METHOD closeOffer.
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer UPDATE FIELDS ( Status )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'C' ) ).
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
+    result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
+  ENDMETHOD.
+
+  METHOD reopenOffer.
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer UPDATE FIELDS ( Status PositionsFilled )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'P' PositionsFilled = 0 ) ).
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
+    result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 
   METHOD autoCloseOnDeadline.
@@ -86,38 +93,6 @@ CLASS lhc_JobOffer IMPLEMENTATION.
         MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
           ENTITY JobOffer UPDATE FIELDS ( Status )
           WITH VALUE #( ( %tky = offer-%tky Status = 'C' ) ).
-      ENDIF.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD setDefaultValues.
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-      FIELDS ( Status CurrencyCode ) WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_offers).
-
-    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-      UPDATE
-      FIELDS ( Status CurrencyCode )
-      WITH VALUE #( FOR offer IN lt_offers (
-                      %tky = offer-%tky
-                      Status = COND #( WHEN offer-Status IS INITIAL THEN 'D' ELSE offer-Status )
-                      CurrencyCode = COND #( WHEN offer-CurrencyCode IS INITIAL THEN 'USD' ELSE offer-CurrencyCode )
-                  ) )
-      REPORTED DATA(lt_reported).
-
-    reported = CORRESPONDING #( DEEP lt_reported ).
-  ENDMETHOD.
-
-  METHOD validateApplicationDeadline.
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer FIELDS ( AppDeadline ValidUntil ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
-    LOOP AT lt_offers INTO DATA(offer).
-      IF offer-AppDeadline > offer-ValidUntil AND offer-ValidUntil IS NOT INITIAL.
-        APPEND VALUE #( %tky = offer-%tky ) TO failed-joboffer.
-        APPEND VALUE #( %tky = offer-%tky
-                        %msg = new_message( id = '00' number = '002' v1 = 'App Deadline must be before Valid Until' severity = if_abap_behv_message=>severity-error ) ) TO reported-joboffer.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
@@ -135,6 +110,31 @@ CLASS lhc_JobOffer IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD validateApplicationDeadline.
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer FIELDS ( AppDeadline ValidUntil ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
+    LOOP AT lt_offers INTO DATA(offer).
+      IF offer-AppDeadline > offer-ValidUntil AND offer-ValidUntil IS NOT INITIAL.
+        APPEND VALUE #( %tky = offer-%tky ) TO failed-joboffer.
+        APPEND VALUE #( %tky = offer-%tky
+                        %msg = new_message( id = '00' number = '002' v1 = 'App Deadline must be before Valid Until' severity = if_abap_behv_message=>severity-error ) ) TO reported-joboffer.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD setDefaultValues.
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer FIELDS ( Status CurrencyCode ) WITH CORRESPONDING #( keys ) RESULT DATA(offers).
+
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY JobOffer UPDATE FIELDS ( Status CurrencyCode )
+      WITH VALUE #( FOR offer IN offers (
+          %tky = offer-%tky
+          Status = 'D'
+          CurrencyCode = 'USD'
+      ) ).
+  ENDMETHOD.
+
   METHOD validateMandatoryFields.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY JobOffer FIELDS ( Title Department ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
@@ -149,137 +149,70 @@ CLASS lhc_JobOffer IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
+ENDCLASS.
 
-  METHOD closeOffer.
-    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-      UPDATE
-      FIELDS ( Status )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'C' ) )
-      FAILED failed
-      REPORTED reported.
+CLASS lhc_application DEFINITION INHERITING FROM cl_abap_behavior_handler.
+  PRIVATE SECTION.
+    METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION IMPORTING keys REQUEST requested_authorizations FOR Application RESULT result.
+    METHODS get_instance_features FOR INSTANCE FEATURES IMPORTING keys REQUEST requested_features FOR Application RESULT result.
+    METHODS putOnHold FOR MODIFY IMPORTING keys FOR ACTION Application~putOnHold RESULT result.
+    METHODS addNote FOR MODIFY IMPORTING keys FOR ACTION Application~addNote RESULT result.
+    METHODS rejectCandidate FOR MODIFY IMPORTING keys FOR ACTION Application~rejectCandidate RESULT result.
+    METHODS sendMail FOR MODIFY IMPORTING keys FOR ACTION Application~sendMail RESULT result.
+    METHODS passToNextStep FOR MODIFY IMPORTING keys FOR ACTION Application~passToNextStep RESULT result.
+    METHODS acceptToPost FOR MODIFY IMPORTING keys FOR ACTION Application~acceptToPost RESULT result.
+    METHODS evaluateWithAI FOR MODIFY IMPORTING keys FOR ACTION Application~evaluateWithAI RESULT result.
+    METHODS preventDuplicateApplication FOR VALIDATE ON SAVE IMPORTING keys FOR Application~preventDuplicateApplication.
+ENDCLASS.
 
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-      ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_offers).
-
-    result = VALUE #( FOR offer IN lt_offers ( %tky = offer-%tky %param = offer ) ).
-  ENDMETHOD.
-
-  METHOD publishOffer.
-    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-      UPDATE
-      FIELDS ( Status PublishedAt )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'P' PublishedAt = cl_abap_context_info=>get_system_time( ) ) )
-      FAILED failed
-      REPORTED reported.
-
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-      ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_offers).
-
-    result = VALUE #( FOR offer IN lt_offers ( %tky = offer-%tky %param = offer ) ).
-  ENDMETHOD.
-
-  METHOD reopenOffer.
-    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-      UPDATE
-      FIELDS ( Status )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'P' ) )
-      FAILED failed
-      REPORTED reported.
-
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-      ALL FIELDS WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_offers).
-
-    result = VALUE #( FOR offer IN lt_offers ( %tky = offer-%tky %param = offer ) ).
+CLASS lhc_application IMPLEMENTATION.
+  METHOD get_instance_authorizations.
+    LOOP AT keys INTO DATA(ls_key).
+      APPEND VALUE #( %tky = ls_key-%tky
+                      %action-acceptToPost = if_abap_behv=>auth-allowed
+                      %action-addNote = if_abap_behv=>auth-allowed
+                      %action-evaluateWithAI = if_abap_behv=>auth-allowed
+                      %action-passToNextStep = if_abap_behv=>auth-allowed
+                      %action-putOnHold = if_abap_behv=>auth-allowed
+                      %action-rejectCandidate = if_abap_behv=>auth-allowed
+                      %action-sendMail = if_abap_behv=>auth-allowed
+                    ) TO result.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD get_instance_features.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY JobOffer
-      FIELDS ( Status ) WITH CORRESPONDING #( keys )
-      RESULT DATA(lt_offers).
+      ENTITY Application BY \_Offer
+      FIELDS ( OfferId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
 
-    result = VALUE #( FOR offer IN lt_offers (
-      %tky = offer-%tky
-      %action-publishOffer = COND #( WHEN offer-Status = 'D' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
-      %action-closeOffer = COND #( WHEN offer-Status = 'P' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
-      %action-reopenOffer = COND #( WHEN offer-Status = 'C' THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled )
-    ) ).
-  ENDMETHOD.
-
-ENDCLASS.
-
-CLASS lhc_Application DEFINITION INHERITING FROM cl_abap_behavior_handler.
-  PRIVATE SECTION.
-    METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
-      IMPORTING keys REQUEST requested_authorizations FOR Application RESULT result.
-
-    METHODS preventDuplicateApplication FOR VALIDATE ON SAVE
-      IMPORTING keys FOR Application~preventDuplicateApplication.
-
-    METHODS acceptToPost FOR MODIFY
-      IMPORTING keys FOR ACTION Application~acceptToPost RESULT result.
-
-    METHODS addNote FOR MODIFY
-      IMPORTING keys FOR ACTION Application~addNote RESULT result.
-
-    METHODS evaluateWithAI FOR MODIFY
-      IMPORTING keys FOR ACTION Application~evaluateWithAI RESULT result.
-
-    METHODS passToNextStep FOR MODIFY
-      IMPORTING keys FOR ACTION Application~passToNextStep RESULT result.
-
-    METHODS putOnHold FOR MODIFY
-      IMPORTING keys FOR ACTION Application~putOnHold RESULT result.
-
-    METHODS rejectCandidate FOR MODIFY
-      IMPORTING keys FOR ACTION Application~rejectCandidate RESULT result.
-
-    METHODS sendMail FOR MODIFY
-      IMPORTING keys FOR ACTION Application~sendMail RESULT result.
-ENDCLASS.
-
-CLASS lhc_Application IMPLEMENTATION.
-
-  METHOD get_instance_authorizations.
-    LOOP AT keys INTO DATA(ls_key).
-      APPEND VALUE #( %tky = ls_key-%tky
-                      %action-evaluateWithAI = if_abap_behv=>auth-allowed
-                      %action-passToNextStep = if_abap_behv=>auth-allowed
-                      %action-acceptToPost = if_abap_behv=>auth-allowed
-                      %action-putOnHold = if_abap_behv=>auth-allowed
-                      %action-addNote = if_abap_behv=>auth-allowed
-                      %action-rejectCandidate = if_abap_behv=>auth-allowed
-                      %action-sendMail = if_abap_behv=>auth-allowed ) TO result.
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD preventDuplicateApplication.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application FIELDS ( CandidateId OfferId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
+      ENTITY Application FIELDS ( CurrentStepOrder ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
 
-    LOOP AT lt_apps INTO DATA(app).
-      SELECT COUNT(*) FROM zhcm_applicatn WHERE candidate_id = @app-CandidateId AND offer_id = @app-OfferId AND application_id <> @app-ApplicationId.
-      IF sy-subrc = 0.
-        APPEND VALUE #( %tky = app-%tky ) TO failed-application.
-        APPEND VALUE #( %tky = app-%tky
-                        %msg = new_message( id = '00' number = '003' v1 = 'Candidate already applied!' severity = if_abap_behv_message=>severity-error ) ) TO reported-application.
-      ENDIF.
+    LOOP AT lt_apps INTO DATA(ls_app).
+      READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+        ENTITY JobOffer BY \_Steps FIELDS ( StepOrder ) WITH VALUE #( ( %tky-OfferId = ls_app-OfferId ) ) RESULT DATA(lt_tmpl).
+
+      DATA(lv_max_step) = 0.
+      LOOP AT lt_tmpl INTO DATA(ls_tmpl).
+        IF ls_tmpl-StepOrder > lv_max_step.
+          lv_max_step = ls_tmpl-StepOrder.
+        ENDIF.
+      ENDLOOP.
+
+      DATA(lv_can_pass) = COND #( WHEN ls_app-CurrentStepOrder < lv_max_step THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled ).
+      DATA(lv_can_accept) = COND #( WHEN ls_app-CurrentStepOrder = lv_max_step THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled ).
+
+      APPEND VALUE #( %tky = ls_app-%tky
+                      %action-passToNextStep = lv_can_pass
+                      %action-acceptToPost = lv_can_accept
+                    ) TO result.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD acceptToPost.
+  METHOD putOnHold.
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application UPDATE FIELDS ( OverallStatus )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'A' ) ).
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'H' ) ).
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
@@ -288,24 +221,59 @@ CLASS lhc_Application IMPLEMENTATION.
   METHOD addNote.
     LOOP AT keys INTO DATA(key).
       DATA(lv_uuid) = cl_system_uuid=>create_uuid_x16_static( ).
-      APPEND VALUE #(
+      INSERT INTO zhcm_pipe_prog VALUES @( VALUE #(
         client = sy-mandt
         progress_id = lv_uuid
         application_id = key-ApplicationId
         step_name = 'HR Note'
         status = 'N'
         notes = key-%param-NoteText
-      ) TO lcl_buffer=>mt_pipe_prog.
+      ) ).
     ENDLOOP.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 
-  METHOD evaluateWithAI.
+  METHOD rejectCandidate.
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application UPDATE FIELDS ( AiMatchScore )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky AiMatchScore = 75 ) ).
+      ENTITY Application UPDATE FIELDS ( OverallStatus RejectionReason )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'R' RejectionReason = key-%param-RejectionReason ) ).
+
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application FIELDS ( CandidateId OfferId AiMatchScore ResumeUrl ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
+
+    LOOP AT lt_apps INTO DATA(app).
+      DATA(lv_pool_id) = cl_system_uuid=>create_uuid_x16_static( ).
+      INSERT INTO zhcm_talntpool VALUES @( VALUE #(
+        client = sy-mandt
+        pool_id = lv_pool_id
+        candidate_id = app-CandidateId
+        original_offer_id = app-OfferId
+        ai_score = app-AiMatchScore
+        resume_url = app-ResumeUrl
+        status = 'A'
+        rejection_reason = keys[ 1 ]-%param-RejectionReason
+      ) ).
+    ENDLOOP.
+
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
+    result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
+  ENDMETHOD.
+
+  METHOD sendMail.
+    LOOP AT keys INTO DATA(key).
+      DATA(lv_mail_id) = cl_system_uuid=>create_uuid_x16_static( ).
+      INSERT INTO zhcm_hr_mail VALUES @( VALUE #(
+        client = sy-mandt
+        mail_id = lv_mail_id
+        application_id = key-ApplicationId
+        mail_type = key-%param-MailType
+        subject = key-%param-Subject
+        body = key-%param-Body
+      ) ).
+    ENDLOOP.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
@@ -326,13 +294,13 @@ CLASS lhc_Application IMPLEMENTATION.
 
     LOOP AT keys INTO DATA(key).
        DATA(lv_prog_id) = cl_system_uuid=>create_uuid_x16_static( ).
-       APPEND VALUE #(
+       INSERT INTO zhcm_pipe_prog VALUES @( VALUE #(
          client = sy-mandt
          progress_id = lv_prog_id
          application_id = key-ApplicationId
          step_order = lt_app[ 1 ]-CurrentStepOrder
          status = 'C'
-       ) TO lcl_buffer=>mt_pipe_prog.
+       ) ).
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
@@ -340,68 +308,59 @@ CLASS lhc_Application IMPLEMENTATION.
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 
-  METHOD putOnHold.
+  METHOD acceptToPost.
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application UPDATE FIELDS ( OverallStatus )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'H' ) ).
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'A' ) ).
+
+    " 2. Close Job Offer if PositionsFilled reaches PositionsNeeded
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application BY \_Offer ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
+
+    LOOP AT lt_offers INTO DATA(ls_offer).
+      ls_offer-PositionsFilled += 1.
+      IF ls_offer-PositionsFilled >= ls_offer-PositionsNeeded.
+        ls_offer-Status = 'Closed'.
+      ENDIF.
+      MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+        ENTITY JobOffer UPDATE FIELDS ( PositionsFilled Status )
+        WITH VALUE #( ( %tky = ls_offer-%tky PositionsFilled = ls_offer-PositionsFilled Status = ls_offer-Status ) ).
+    ENDLOOP.
+
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
 
-  METHOD rejectCandidate.
+  METHOD evaluateWithAI.
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application UPDATE FIELDS ( OverallStatus RejectionReason )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'R' RejectionReason = key-%param-RejectionReason ) ).
-
+      ENTITY Application UPDATE FIELDS ( AiMatchScore )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky AiMatchScore = 75 ) ).
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application FIELDS ( CandidateId OfferId AiMatchScore ResumeUrl ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
+      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
+    result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
+  ENDMETHOD.
 
+  METHOD preventDuplicateApplication.
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application FIELDS ( CandidateId OfferId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
     LOOP AT lt_apps INTO DATA(app).
-      DATA(lv_pool_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      APPEND VALUE #(
-        client = sy-mandt
-        pool_id = lv_pool_id
-        candidate_id = app-CandidateId
-        original_offer_id = app-OfferId
-        ai_score = app-AiMatchScore
-        resume_url = app-ResumeUrl
-        status = 'A'
-        rejection_reason = keys[ 1 ]-%param-RejectionReason
-      ) TO lcl_buffer=>mt_talntpool.
+      SELECT COUNT(*) FROM zhcm_applicatn WHERE candidate_id = @app-CandidateId AND offer_id = @app-OfferId AND application_id <> @app-ApplicationId.
+      IF sy-subrc = 0.
+        APPEND VALUE #( %tky = app-%tky ) TO failed-application.
+        APPEND VALUE #( %tky = app-%tky
+                        %msg = new_message( id = '00' number = '003' v1 = 'Candidate already applied!' severity = if_abap_behv_message=>severity-error ) ) TO reported-application.
+      ENDIF.
     ENDLOOP.
-
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
-    result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
   ENDMETHOD.
-
-  METHOD sendMail.
-    LOOP AT keys INTO DATA(key).
-      DATA(lv_mail_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      APPEND VALUE #(
-        client = sy-mandt
-        mail_id = lv_mail_id
-        application_id = key-ApplicationId
-        mail_type = key-%param-MailType
-        subject = key-%param-Subject
-        body = key-%param-Body
-      ) TO lcl_buffer=>mt_hr_mail.
-    ENDLOOP.
-    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
-    result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
-  ENDMETHOD.
-
 ENDCLASS.
 
-CLASS lhc_PipeTmpl DEFINITION INHERITING FROM cl_abap_behavior_handler.
+CLASS lhc_pipetmpl DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
-    METHODS validateMandatorySteps FOR VALIDATE ON SAVE
-      IMPORTING keys FOR PipeTmpl~validateMandatorySteps.
+    METHODS validateMandatorySteps FOR VALIDATE ON SAVE IMPORTING keys FOR PipeTmpl~validateMandatorySteps.
 ENDCLASS.
 
-CLASS lhc_PipeTmpl IMPLEMENTATION.
+CLASS lhc_pipetmpl IMPLEMENTATION.
 
   METHOD validateMandatorySteps.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
@@ -417,6 +376,5 @@ CLASS lhc_PipeTmpl IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
-
 ENDCLASS.
 

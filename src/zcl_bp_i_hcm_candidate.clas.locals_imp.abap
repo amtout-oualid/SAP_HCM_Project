@@ -47,6 +47,7 @@ CLASS lhc_candidate IMPLEMENTATION.
         currency_code      = <ls_key>-%param-CurrencyCode
         applied_at         = lv_ts
         overall_status     = 'NW' " Default Status: New
+        current_step_order = 1
       ) TO lcl_buffer=>mt_new_applications.
 
       " 4. Return success

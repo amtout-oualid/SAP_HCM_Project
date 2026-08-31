@@ -39,6 +39,7 @@ use etag
   use action sendMail;
 
   use association _Offer { with draft; }
+  use association _Progress { create; with draft; }
 }
 
 define behavior for ZC_HCM_PipeTmpl alias PipeTmpl
@@ -46,5 +47,14 @@ use etag
 {
   use update;
   use delete;
+  use association _Offer { with draft; }
+}
+
+define behavior for ZC_HCM_PipeProg alias Progress
+use etag
+{
+  use update;
+  use delete;
+  use association _Application { with draft; }
   use association _Offer { with draft; }
 }
