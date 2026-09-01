@@ -73,7 +73,7 @@ etag master LocalLastChangedAt
   update ( features : instance );
   delete;
   field ( readonly, numbering : managed ) ApplicationId;
-  field ( readonly ) OfferId;
+  field ( readonly ) OfferId, CandidateFirstName, CandidateLastName, CandidateEmail;
 
   action evaluateWithAI result [1] $self;
   action ( features : instance ) passToNextStep result [1] $self;

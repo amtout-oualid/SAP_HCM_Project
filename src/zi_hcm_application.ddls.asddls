@@ -26,6 +26,10 @@ define view entity ZI_HCM_Application
       rejection_reason         as RejectionReason,
       internal_notes           as InternalNotes,
       
+      _Candidate.FirstName     as CandidateFirstName,
+      _Candidate.LastName      as CandidateLastName,
+      _Candidate.Email         as CandidateEmail,
+      
       @Semantics.systemDateTime.localInstanceLastChangedAt: true
       local_last_changed_at    as LocalLastChangedAt,
 

@@ -1,3 +1,12 @@
+CLASS lcl_buffer DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA: mt_talentpool TYPE TABLE OF zhcm_talntpool,
+                mt_hrmail     TYPE TABLE OF zhcm_hr_mail.
+ENDCLASS.
+
+CLASS lcl_buffer IMPLEMENTATION.
+ENDCLASS.
+
 CLASS lhc_joboffer DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
     METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
@@ -186,18 +195,14 @@ CLASS lhc_application IMPLEMENTATION.
       FIELDS ( OfferId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application FIELDS ( CurrentStepOrder ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
+      ENTITY Application FIELDS ( CurrentStepOrder OfferId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
 
     LOOP AT lt_apps INTO DATA(ls_app).
-      READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-        ENTITY JobOffer BY \_Steps FIELDS ( StepOrder ) WITH VALUE #( ( %tky-OfferId = ls_app-OfferId ) ) RESULT DATA(lt_tmpl).
-
       DATA(lv_max_step) = 0.
-      LOOP AT lt_tmpl INTO DATA(ls_tmpl).
-        IF ls_tmpl-StepOrder > lv_max_step.
-          lv_max_step = ls_tmpl-StepOrder.
-        ENDIF.
-      ENDLOOP.
+
+      SELECT SINGLE MAX( step_order ) FROM zhcm_pipe_tmpl
+        WHERE offer_id = @ls_app-OfferId
+        INTO @lv_max_step.
 
       DATA(lv_can_pass) = COND #( WHEN ls_app-CurrentStepOrder < lv_max_step THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled ).
       DATA(lv_can_accept) = COND #( WHEN ls_app-CurrentStepOrder = lv_max_step THEN if_abap_behv=>fc-o-enabled ELSE if_abap_behv=>fc-o-disabled ).
@@ -219,17 +224,19 @@ CLASS lhc_application IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD addNote.
-    LOOP AT keys INTO DATA(key).
-      DATA(lv_uuid) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_pipe_prog VALUES @( VALUE #(
-        client = sy-mandt
-        progress_id = lv_uuid
-        application_id = key-ApplicationId
-        step_name = 'HR Note'
-        status = 'N'
-        notes = key-%param-NoteText
-      ) ).
-    ENDLOOP.
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application CREATE BY \_Progress
+      FIELDS ( StepName Status Notes )
+      WITH VALUE #( FOR key IN keys (
+                      %tky = key-%tky
+                      %target = VALUE #( (
+                         %cid = 'NOTE_' && key-ApplicationId
+                         StepName = 'HR Note'
+                         Status = 'N'
+                         Notes = key-%param-NoteText
+                      ) )
+                  ) ).
+
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
@@ -245,7 +252,7 @@ CLASS lhc_application IMPLEMENTATION.
 
     LOOP AT lt_apps INTO DATA(app).
       DATA(lv_pool_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_talntpool VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         pool_id = lv_pool_id
         candidate_id = app-CandidateId
@@ -254,7 +261,7 @@ CLASS lhc_application IMPLEMENTATION.
         resume_url = app-ResumeUrl
         status = 'A'
         rejection_reason = keys[ 1 ]-%param-RejectionReason
-      ) ).
+      ) TO lcl_buffer=>mt_talentpool.
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
@@ -265,14 +272,14 @@ CLASS lhc_application IMPLEMENTATION.
   METHOD sendMail.
     LOOP AT keys INTO DATA(key).
       DATA(lv_mail_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      INSERT INTO zhcm_hr_mail VALUES @( VALUE #(
+      APPEND VALUE #(
         client = sy-mandt
         mail_id = lv_mail_id
         application_id = key-ApplicationId
         mail_type = key-%param-MailType
         subject = key-%param-Subject
         body = key-%param-Body
-      ) ).
+      ) TO lcl_buffer=>mt_hrmail.
     ENDLOOP.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
@@ -292,16 +299,17 @@ CLASS lhc_application IMPLEMENTATION.
       ENTITY Application UPDATE FIELDS ( CurrentStepOrder )
       WITH VALUE #( FOR a IN lt_app ( %tky = a-%tky CurrentStepOrder = a-CurrentStepOrder ) ).
 
-    LOOP AT keys INTO DATA(key).
-       DATA(lv_prog_id) = cl_system_uuid=>create_uuid_x16_static( ).
-       INSERT INTO zhcm_pipe_prog VALUES @( VALUE #(
-         client = sy-mandt
-         progress_id = lv_prog_id
-         application_id = key-ApplicationId
-         step_order = lt_app[ 1 ]-CurrentStepOrder
-         status = 'C'
-       ) ).
-    ENDLOOP.
+    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application CREATE BY \_Progress
+      FIELDS ( StepOrder Status )
+      WITH VALUE #( FOR key IN keys (
+                      %tky = key-%tky
+                      %target = VALUE #( (
+                         %cid = 'PROG_' && key-ApplicationId
+                         StepOrder = lt_app[ 1 ]-CurrentStepOrder
+                         Status = 'C'
+                      ) )
+                  ) ).
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
@@ -375,6 +383,28 @@ CLASS lhc_pipetmpl IMPLEMENTATION.
                         %element-StepType = if_abap_behv=>mk-on ) TO reported-pipetmpl.
       ENDIF.
     ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lsc_joboffer DEFINITION INHERITING FROM cl_abap_behavior_saver.
+  PROTECTED SECTION.
+    METHODS save_modified REDEFINITION.
+    METHODS cleanup_finalize REDEFINITION.
+ENDCLASS.
+
+CLASS lsc_joboffer IMPLEMENTATION.
+  METHOD save_modified.
+    IF lcl_buffer=>mt_talentpool IS NOT INITIAL.
+      INSERT zhcm_talntpool FROM TABLE @lcl_buffer=>mt_talentpool.
+    ENDIF.
+    IF lcl_buffer=>mt_hrmail IS NOT INITIAL.
+      INSERT zhcm_hr_mail FROM TABLE @lcl_buffer=>mt_hrmail.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD cleanup_finalize.
+    CLEAR lcl_buffer=>mt_talentpool.
+    CLEAR lcl_buffer=>mt_hrmail.
   ENDMETHOD.
 ENDCLASS.
 

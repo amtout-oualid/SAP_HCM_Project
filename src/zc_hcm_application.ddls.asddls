@@ -21,6 +21,9 @@ define view entity ZC_HCM_Application
       CurrencyCode,
       RejectionReason,
       InternalNotes,
+      CandidateFirstName,
+      CandidateLastName,
+      CandidateEmail,
       LocalLastChangedAt,
       
   /* Associations */

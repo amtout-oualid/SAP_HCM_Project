@@ -19,17 +19,17 @@ annotate view ZC_HCM_Application with
   @UI.hidden: true
   CandidateId;
 
-  @UI.lineItem: [{ position: 10, label: 'First Name' }]
+  @UI.lineItem: [{ position: 10, label: 'First Name', importance: #HIGH }]
   @UI.identification: [{ position: 5, label: 'First Name' }]
-  candidatefirstname;
+  CandidateFirstName;
 
-  @UI.lineItem: [{ position: 20, label: 'Last Name' }]
+  @UI.lineItem: [{ position: 20, label: 'Last Name', importance: #HIGH }]
   @UI.identification: [{ position: 6, label: 'Last Name' }]
-  candidatelastname;
+  CandidateLastName;
 
-  @UI.lineItem: [{ position: 30, label: 'Email' }]
+  @UI.lineItem: [{ position: 30, label: 'Email', importance: #HIGH }]
   @UI.identification: [{ position: 7, label: 'Email' }]
-  candidateemail;
+  CandidateEmail;
 
   @UI.lineItem: [{ position: 40, label: 'Resume', type: #WITH_URL, url: 'ResumeUrl' }]
   @UI.identification: [{ position: 20, label: 'Resume URL' }]
@@ -42,15 +42,15 @@ annotate view ZC_HCM_Application with
   @UI.identification: [{ position: 40, label: 'Applied On' }]
   AppliedAt;
 
-  @UI.lineItem: [{ position: 60, label: 'Step' }]
+  @UI.lineItem: [{ position: 60, label: 'Step', importance: #HIGH }]
   @UI.identification: [{ position: 50, label: 'Current Step' }]
   CurrentStepOrder;
 
-  @UI.lineItem: [{ position: 80, label: 'AI Score' }]
+  @UI.lineItem: [{ position: 80, label: 'AI Score', importance: #HIGH }]
   @UI.identification: [{ position: 70, label: 'AI Match Score' }]
   AiMatchScore;
 
-  @UI.lineItem: [{ position: 70, label: 'Status' },
+  @UI.lineItem: [{ position: 70, label: 'Status', importance: #HIGH },
                  { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate with AI' },
                  { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Pass to Next Step' },
                  { type: #FOR_ACTION, dataAction: 'rejectCandidate', label: 'Reject' },

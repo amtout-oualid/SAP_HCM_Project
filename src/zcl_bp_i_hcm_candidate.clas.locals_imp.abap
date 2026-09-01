@@ -50,6 +50,12 @@ CLASS lhc_candidate IMPLEMENTATION.
         current_step_order = 1
       ) TO lcl_buffer=>mt_new_applications.
 
+      " Trigger save sequence by marking the Candidate as updated
+      MODIFY ENTITIES OF ZI_HCM_Candidate IN LOCAL MODE
+        ENTITY Candidate
+        UPDATE FIELDS ( LocalLastChangedAt )
+        WITH VALUE #( ( %tky = <ls_key>-%tky LocalLastChangedAt = lv_ts ) ).
+
       " 4. Return success
       APPEND VALUE #( %tky = <ls_key>-%tky ) TO result.
     ENDLOOP.
