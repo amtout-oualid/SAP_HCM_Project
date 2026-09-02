@@ -1,6 +1,7 @@
 CLASS lcl_buffer DEFINITION.
   PUBLIC SECTION.
-    CLASS-DATA: mt_emp_hist TYPE TABLE OF zhcm_emp_hist.
+    CLASS-DATA: mt_emp_hist TYPE TABLE OF zhcm_emp_hist,
+                mt_orgassign_update TYPE TABLE OF zhcm_orgassign.
 ENDCLASS.
 CLASS lcl_buffer IMPLEMENTATION.
 ENDCLASS.
@@ -16,6 +17,15 @@ CLASS lsc_ZI_HCM_EMPLOYEE IMPLEMENTATION.
       INSERT zhcm_emp_hist FROM TABLE @lcl_buffer=>mt_emp_hist.
       CLEAR lcl_buffer=>mt_emp_hist.
     ENDIF.
+    LOOP AT lcl_buffer=>mt_orgassign_update INTO DATA(ls_org).
+      IF ls_org-position_id IS NOT INITIAL.
+        UPDATE zhcm_orgassign SET position_id = @ls_org-position_id WHERE employee_id = @ls_org-employee_id.
+      ENDIF.
+      IF ls_org-department IS NOT INITIAL.
+        UPDATE zhcm_orgassign SET department = @ls_org-department WHERE employee_id = @ls_org-employee_id.
+      ENDIF.
+    ENDLOOP.
+    CLEAR lcl_buffer=>mt_orgassign_update.
   ENDMETHOD.
 ENDCLASS.
 
@@ -81,6 +91,15 @@ CLASS lhc_employee IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD promoteEmployee.
+    " PositionId, Salary, CurrencyCode do not exist on ZI_HCM_Employee BDEF directly.
+    " Buffer the OrgAssign update for save_modified.
+    LOOP AT keys INTO DATA(key).
+      APPEND VALUE #(
+        employee_id = key-EmployeeId
+        position_id = key-%param-NewPositionId
+      ) TO lcl_buffer=>mt_orgassign_update.
+    ENDLOOP.
+
     LOOP AT keys INTO DATA(ls_key).
       DATA(lv_hist_id) = cl_system_uuid=>create_uuid_x16_static( ).
       APPEND VALUE #(
@@ -129,6 +148,15 @@ CLASS lhc_employee IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD transferEmployee.
+    " DepartmentId does not exist on ZI_HCM_Employee BDEF directly.
+    " Buffer the OrgAssign update for save_modified.
+    LOOP AT keys INTO DATA(key).
+      APPEND VALUE #(
+        employee_id = key-EmployeeId
+        department = CONV #( key-%param-NewDepartmentId )
+      ) TO lcl_buffer=>mt_orgassign_update.
+    ENDLOOP.
+
     LOOP AT keys INTO DATA(ls_key).
       DATA(lv_hist_id) = cl_system_uuid=>create_uuid_x16_static( ).
       APPEND VALUE #(

@@ -5,6 +5,7 @@ with draft;
 define behavior for ZI_HCM_Onboarding alias Onboarding
 persistent table zhcm_onboardng
 draft table zhcm_d_onboardn
+with additional save
 lock master
 total etag LastChangedAt
 authorization master ( instance )

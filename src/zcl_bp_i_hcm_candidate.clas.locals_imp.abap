@@ -56,8 +56,10 @@ CLASS lhc_candidate IMPLEMENTATION.
         UPDATE FIELDS ( LocalLastChangedAt )
         WITH VALUE #( ( %tky = <ls_key>-%tky LocalLastChangedAt = lv_ts ) ).
 
-      " 4. Return success
-      APPEND VALUE #( %tky = <ls_key>-%tky ) TO result.
+      " 4. Return success with param containing the Candidate entity data
+      DATA(ls_candidate) = lt_candidates[ %tky = <ls_key>-%tky ].
+      APPEND VALUE #( %tky = <ls_key>-%tky
+                      %param = ls_candidate ) TO result.
     ENDLOOP.
   ENDMETHOD.
 ENDCLASS.
