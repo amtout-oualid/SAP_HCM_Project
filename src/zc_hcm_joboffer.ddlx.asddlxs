@@ -19,7 +19,10 @@ annotate view ZC_HCM_JobOffer with
   @UI.lineItem: [{ position: 10, importance: #HIGH, label: 'Title' }, 
                  { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' }, 
                  { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' }]
-  @UI.identification: [{ position: 10, label: 'Job Title' }]
+  @UI.identification: [{ position: 10, label: 'Job Title' },
+                       { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' }, 
+                       { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' }]
+  @UI.selectionField: [{ position: 30 }]
   @Search.defaultSearchElement: true
   Title;
 

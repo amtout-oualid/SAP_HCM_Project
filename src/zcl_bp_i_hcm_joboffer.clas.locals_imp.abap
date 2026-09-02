@@ -360,9 +360,14 @@ CLASS lhc_application IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD acceptToPost.
+    " Update the overall status to Accepted (A) AND save the HR Notes from the popup
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application UPDATE FIELDS ( OverallStatus )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky OverallStatus = 'A' ) ).
+      ENTITY Application UPDATE FIELDS ( OverallStatus InternalNotes )
+      WITH VALUE #( FOR key IN keys (
+          %tky = key-%tky
+          OverallStatus = 'A'
+          InternalNotes = key-%param-Notes
+      ) ).
 
     " Close Job Offer if PositionsFilled reaches PositionsNeeded
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
