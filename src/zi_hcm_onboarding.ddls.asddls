@@ -27,6 +27,18 @@ define root view entity ZI_HCM_Onboarding
       emergency_phone            as EmergencyPhone,
       emergency_relation          as EmergencyRelation,
       status                 as Status,
+      
+      /* Bring in the Job Title from the Application's Offer */
+      _Application._Offer.Title as JobTitle,
+      
+      /* Criticality for Status Colors: 3=Green(Approved), 2=Orange(Submitted), 1=Red(Rejected), 0=Grey(Draft) */
+      case status
+        when 'A' then 3
+        when 'S' then 2
+        when 'P' then 1
+        else 0
+      end as StatusCriticality,
+      
       submitted_at             as SubmittedAt,
       approved_by              as ApprovedBy,
       approved_at              as ApprovedAt,

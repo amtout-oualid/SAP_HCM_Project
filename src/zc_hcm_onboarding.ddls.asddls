@@ -10,6 +10,7 @@ define root view entity ZC_HCM_Onboarding
   EmployeeId,
   FirstName,
   LastName,
+  JobTitle, /* Exposed Job Title */
   DateOfBirth,
   PlaceOfBirth,
   Nationality,
@@ -27,6 +28,7 @@ define root view entity ZC_HCM_Onboarding
   EmergencyPhone,
   EmergencyRelation,
   Status,
+  StatusCriticality, /* Expose the criticality field */
   SubmittedAt,
   ApprovedBy,
   ApprovedAt,

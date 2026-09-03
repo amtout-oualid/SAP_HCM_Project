@@ -1,30 +1,122 @@
 @Metadata.layer: #CUSTOMER
 @UI.headerInfo: {
   typeName: 'Onboarding Form',
-  typeNamePlural: 'Onboarding Forms'
+  typeNamePlural: 'Onboarding Forms',
+  title: { type: #STANDARD, value: 'FirstName' },
+  description: { type: #STANDARD, value: 'LastName' }
 }
 annotate view ZC_HCM_Onboarding with
 {
   @UI.facet: [
-    { id: 'PersonalInfo', type: #IDENTIFICATION_REFERENCE, label: 'Personal Information', position: 10 },
-    { id: 'BankInfo', type: #IDENTIFICATION_REFERENCE, label: 'Bank & Legal', position: 20 }
+    { id: 'PersonalInfo', type: #FIELDGROUP_REFERENCE, label: 'Personal Information', position: 10, targetQualifier: 'FG_PERSONAL' },
+    { id: 'LegalInfo',    type: #FIELDGROUP_REFERENCE, label: 'Legal & Contact',      position: 20, targetQualifier: 'FG_LEGAL' },
+    { id: 'BankInfo',     type: #FIELDGROUP_REFERENCE, label: 'Banking Information',  position: 30, targetQualifier: 'FG_BANK' },
+    { id: 'Emergency',    type: #FIELDGROUP_REFERENCE, label: 'Emergency Contact',    position: 40, targetQualifier: 'FG_EMERGENCY' }
   ]
 
   @UI.hidden: true
   FormId;
+  
+  @UI.hidden: true
+  ApplicationId;
+  
+  @UI.hidden: true
+  EmployeeId;
+  
+  @UI.hidden: true
+  statuscriticality;
 
-  @UI.lineItem: [{ position: 10 }]
-  @UI.identification: [{ position: 10 }]
+  /* =========================================================
+     LIST REPORT COLUMNS & SEARCH FILTERS
+     ========================================================= */
+  
+  @UI.lineItem: [{ position: 10, label: 'First Name', importance: #HIGH }]
+  @UI.selectionField: [{ position: 20 }]
+  @Search.defaultSearchElement: true
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 10, label: 'First Name' }]
   FirstName;
 
-  @UI.lineItem: [{ position: 20 }]
-  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20, label: 'Last Name', importance: #HIGH }]
+  @UI.selectionField: [{ position: 30 }]
+  @Search.defaultSearchElement: true
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 20, label: 'Last Name' }]
   LastName;
 
-  @UI.lineItem: [{ position: 30 },
-                 { type: #FOR_ACTION, dataAction: 'submitForm', label: 'Submit' },
+  @UI.lineItem: [{ position: 25, label: 'Job Role (Offer)' }]
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 25, label: 'Applied Role' }]
+  jobtitle;
+
+  @UI.lineItem: [{ position: 30, label: 'Personal Email' }]
+  @UI.fieldGroup: [{ qualifier: 'FG_LEGAL', position: 50, label: 'Personal Email' }]
+  PersonalEmail;
+
+  @UI.lineItem: [{ position: 40, label: 'Nationality' }]
+  @UI.selectionField: [{ position: 40 }]
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 60, label: 'Nationality' }]
+  Nationality;
+
+  @UI.lineItem: [{ position: 50, label: 'Submitted On' }]
+  @UI.selectionField: [{ position: 50 }]
+  @UI.fieldGroup: [{ qualifier: 'FG_LEGAL', position: 60, label: 'Submitted On' }]
+  SubmittedAt;
+
+  @UI.lineItem: [{ position: 60, label: 'Status', importance: #HIGH, criticality: 'StatusCriticality' },
                  { type: #FOR_ACTION, dataAction: 'approveAndCreateEmployee', label: 'Approve & Hire' },
                  { type: #FOR_ACTION, dataAction: 'rejectForm', label: 'Reject' }]
-  @UI.identification: [{ position: 60 }]
+  @UI.selectionField: [{ position: 10 }]
+  /* Also place the action buttons inside the Object Page header by assigning them to identification */
+  @UI.identification: [{ position: 10, label: 'Status', criticality: 'StatusCriticality' },
+                       { type: #FOR_ACTION, dataAction: 'approveAndCreateEmployee', label: 'Approve & Hire' },
+                       { type: #FOR_ACTION, dataAction: 'rejectForm', label: 'Reject Candidate' }]
   Status;
+
+  /* =========================================================
+     OBJECT PAGE FIELD GROUPS (FACETS)
+     ========================================================= */
+
+  /* --- Personal Information --- */
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 30, label: 'Date of Birth' }]
+  DateOfBirth;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 40, label: 'Place of Birth' }]
+  PlaceOfBirth;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 50, label: 'Gender' }]
+  Gender;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 70, label: 'Marital Status' }]
+  MaritalStatus;
+
+  /* --- Legal & Contact --- */
+  @UI.fieldGroup: [{ qualifier: 'FG_LEGAL', position: 10, label: 'National ID (CIN)' }]
+  NationalId;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_LEGAL', position: 20, label: 'Social Security Number' }]
+  Ssn;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_LEGAL', position: 30, label: 'Home Address' }]
+  Address;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_LEGAL', position: 40, label: 'Phone Number' }]
+  Phone;
+
+  /* --- Banking Information --- */
+  @UI.fieldGroup: [{ qualifier: 'FG_BANK', position: 10, label: 'Bank Name' }]
+  BankName;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_BANK', position: 20, label: 'Account Number' }]
+  BankAccount;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_BANK', position: 30, label: 'IBAN' }]
+  Iban;
+
+  /* --- Emergency Contact --- */
+  @UI.fieldGroup: [{ qualifier: 'FG_EMERGENCY', position: 10, label: 'Contact Name' }]
+  EmergencyName;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_EMERGENCY', position: 20, label: 'Contact Phone' }]
+  EmergencyPhone;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_EMERGENCY', position: 30, label: 'Relationship' }]
+  EmergencyRelation;
 }
