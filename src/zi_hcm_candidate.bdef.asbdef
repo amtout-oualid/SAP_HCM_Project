@@ -18,7 +18,6 @@ etag master LocalLastChangedAt
   field ( readonly )
   CreatedAt, LastChangedAt, LocalLastChangedAt;
 
-  // Action definition updated for strict(2) compliance
   action ( features : instance, authorization : update ) applyToJob parameter ZA_HCM_Apply result [1] $self;
 
   mapping for zhcm_candidate
