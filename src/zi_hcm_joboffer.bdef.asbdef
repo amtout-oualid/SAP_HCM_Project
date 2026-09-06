@@ -75,14 +75,14 @@ etag master LocalLastChangedAt
   field ( readonly, numbering : managed ) ApplicationId;
   field ( readonly ) OfferId, CandidateFirstName, CandidateLastName, CandidateEmail;
 
-  action ( features : instance, authorization : custom ) evaluateWithAI result [1] $self;
-  action ( features : instance, authorization : custom ) passToNextStep result [1] $self;
-  action ( features : instance, authorization : custom ) acceptToPost parameter ZA_HCM_HireInfo result [1] $self;
+  action ( features : instance, authorization : update ) evaluateWithAI result [1] $self;
+  action ( features : instance, authorization : update ) passToNextStep result [1] $self;
+  action ( features : instance, authorization : update ) acceptToPost parameter ZA_HCM_HireInfo result [1] $self;
 
-  action ( features : instance, authorization : custom ) putOnHold result [1] $self;
-  action ( features : instance, authorization : custom ) addNote parameter ZA_HCM_AddNote result [1] $self;
-  action ( features : instance, authorization : custom ) rejectCandidate parameter ZA_HCM_Reject result [1] $self;
-  action ( features : instance, authorization : custom ) sendMail parameter ZA_HCM_SendMail result [1] $self;
+  action ( features : instance, authorization : update ) putOnHold result [1] $self;
+  action ( features : instance, authorization : update ) addNote parameter ZA_HCM_AddNote result [1] $self;
+  action ( features : instance, authorization : update ) rejectCandidate parameter ZA_HCM_Reject result [1] $self;
+  action ( features : instance, authorization : update ) sendMail parameter ZA_HCM_SendMail result [1] $self;
 
   validation preventDuplicateApplication on save { create; }
 
