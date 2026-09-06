@@ -4,7 +4,7 @@ strict ( 2 );
 define behavior for ZI_HCM_OrgUnit alias OrgUnit
 persistent table zhcm_orgunit
 lock master
-authorization master ( instance )
+authorization master ( global, instance )
 etag master LocalLastChangedAt
 early numbering
 {
