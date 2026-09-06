@@ -41,7 +41,7 @@ CLASS lhc_orgunit IMPLEMENTATION.
   METHOD earlynumbering_create.
     LOOP AT entities INTO DATA(entity).
       APPEND VALUE #( %cid      = entity-%cid
-                      %key      = entity-%key
+                      %is_draft = entity-%is_draft
                       OrgUnitId = cl_system_uuid=>create_uuid_x16_static( ) ) TO mapped-orgunit.
     ENDLOOP.
   ENDMETHOD.
@@ -50,7 +50,7 @@ CLASS lhc_orgunit IMPLEMENTATION.
     LOOP AT entities INTO DATA(entity).
       LOOP AT entity-%target INTO DATA(target).
         APPEND VALUE #( %cid       = target-%cid
-                        %key       = target-%key
+                        %is_draft  = target-%is_draft
                         PositionId = cl_system_uuid=>create_uuid_x16_static( ) ) TO mapped-position.
       ENDLOOP.
     ENDLOOP.
