@@ -1,31 +1,41 @@
-@EndUserText.label: 'Job Application - Projection'
 @AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Application - Projection'
 @Metadata.allowExtensions: true
-@Search.searchable: true
 define view entity ZC_HCM_Application
   as projection on ZI_HCM_Application
 {
   key ApplicationId,
-      @Search.defaultSearchElement: true
-      OfferId,
-      @Search.defaultSearchElement: true
-      CandidateId,
-      ResumeUrl,
-      CoverLetter,
-      AppliedAt,
-      CurrentStepOrder,
-      OverallStatus,
-      AiMatchScore,
-      NoticePeriod,
-      SalaryExpectation,
-      CurrencyCode,
-      RejectionReason,
-      InternalNotes,
-      CandidateFirstName,
-      CandidateLastName,
-      CandidateEmail,
-      LocalLastChangedAt,
-      
+  OfferId,
+  CandidateId,
+  
+  @Search.defaultSearchElement: true
+  _Candidate.FirstName as CandidateFirstName,
+  
+  @Search.defaultSearchElement: true
+  _Candidate.LastName  as CandidateLastName,
+  
+  @Search.defaultSearchElement: true
+  _Candidate.Email     as CandidateEmail,
+  
+  ResumeUrl,
+  CoverLetter,
+  AppliedAt,
+  CurrentStepOrder,
+  
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_AppStatus', element: 'Status' } }]
+  @Search.defaultSearchElement: true
+  OverallStatus,
+  
+  StatusCriticality, /* EXPOSED FOR UI COLORING */
+  
+  AiMatchScore,
+  NoticePeriod,
+  @Semantics.amount.currencyCode: 'CurrencyCode'
+  SalaryExpectation,
+  CurrencyCode,
+  @Semantics.systemDateTime.localInstanceLastChangedAt: true
+  LocalLastChangedAt,
+  
   /* Associations */
   _Offer : redirected to parent ZC_HCM_JobOffer,
   _Progress : redirected to composition child ZC_HCM_PipeProg,

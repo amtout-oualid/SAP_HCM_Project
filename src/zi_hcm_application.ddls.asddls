@@ -26,9 +26,12 @@ define view entity ZI_HCM_Application
       rejection_reason         as RejectionReason,
       internal_notes           as InternalNotes,
       
-      _Candidate.FirstName     as CandidateFirstName,
-      _Candidate.LastName      as CandidateLastName,
-      _Candidate.Email         as CandidateEmail,
+      /* ADDED FOR UI COLORING */
+      case overall_status
+        when 'A' then 3 /* Accepted = Green */
+        when 'R' then 1 /* Rejected = Red */
+        else 2          /* In Progress = Yellow */
+      end as StatusCriticality,
       
       @Semantics.systemDateTime.localInstanceLastChangedAt: true
       local_last_changed_at    as LocalLastChangedAt,

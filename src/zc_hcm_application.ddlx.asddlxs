@@ -1,7 +1,9 @@
 @Metadata.layer: #CUSTOMER
 @UI.headerInfo: {
   typeName: 'Application',
-  typeNamePlural: 'Applications'
+  typeNamePlural: 'Applications',
+  title: { type: #STANDARD, value: 'CandidateLastName' },
+  description: { type: #STANDARD, value: 'CandidateFirstName' }
 }
 annotate view ZC_HCM_Application with
 {
@@ -12,27 +14,30 @@ annotate view ZC_HCM_Application with
 
   @UI.hidden: true
   ApplicationId;
-
   @UI.hidden: true
   OfferId;
-
   @UI.hidden: true
   CandidateId;
+  @UI.hidden: true
+  statuscriticality;
 
   @UI.lineItem: [{ position: 10, label: 'First Name', importance: #HIGH }]
   @UI.identification: [{ position: 5, label: 'First Name' }]
+  @UI.selectionField: [{ position: 10 }]
   CandidateFirstName;
 
   @UI.lineItem: [{ position: 20, label: 'Last Name', importance: #HIGH }]
   @UI.identification: [{ position: 6, label: 'Last Name' }]
+  @UI.selectionField: [{ position: 20 }]
   CandidateLastName;
 
   @UI.lineItem: [{ position: 30, label: 'Email', importance: #HIGH }]
   @UI.identification: [{ position: 7, label: 'Email' }]
+  @UI.selectionField: [{ position: 30 }]
   CandidateEmail;
 
   @UI.lineItem: [{ position: 40, label: 'Resume', type: #WITH_URL, url: 'ResumeUrl' }]
-  @UI.identification: [{ position: 20, label: 'Resume URL' }]
+  @UI.identification: [{ position: 20, label: 'Resume URL', type: #WITH_URL, url: 'ResumeUrl' }]
   ResumeUrl;
 
   @UI.identification: [{ position: 30, label: 'Cover Letter' }]
@@ -46,16 +51,23 @@ annotate view ZC_HCM_Application with
   @UI.identification: [{ position: 50, label: 'Current Step' }]
   CurrentStepOrder;
 
-  @UI.lineItem: [{ position: 80, label: 'AI Score', importance: #HIGH }]
+  @UI.lineItem: [{ position: 70, label: 'AI Score', importance: #HIGH }]
   @UI.identification: [{ position: 70, label: 'AI Match Score' }]
   AiMatchScore;
 
-  @UI.lineItem: [{ position: 70, label: 'Status', importance: #HIGH },
-                 { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate with AI' },
-                 { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Pass to Next Step' },
+  /* Line Item Actions */
+  @UI.lineItem: [{ position: 80, label: 'Status', importance: #HIGH, criticality: 'StatusCriticality' },
+                 { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate AI' },
+                 { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Next Step' },
                  { type: #FOR_ACTION, dataAction: 'rejectCandidate', label: 'Reject' },
-                 { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept to Post' }]
-  @UI.identification: [{ position: 60, label: 'Overall Status' }]
+                 { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept Candidate' }]
+  @UI.selectionField: [{ position: 40 }]
+  /* Header Page Actions */
+  @UI.identification: [{ position: 60, label: 'Overall Status', criticality: 'StatusCriticality' },
+                 { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate AI' },
+                 { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Next Step' },
+                 { type: #FOR_ACTION, dataAction: 'rejectCandidate', label: 'Reject' },
+                 { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept Candidate' }]
   OverallStatus;
 
   @UI.identification: [{ position: 80, label: 'Notice Period' }]

@@ -24,9 +24,9 @@ etag master LocalLastChangedAt
   field ( readonly, numbering : managed ) FormId;
   field ( readonly ) CreatedAt, LastChangedAt, LocalLastChangedAt;
 
-  action submitForm result [1] $self;
-  action approveAndCreateEmployee result [1] $self;
-  action rejectForm result [1] $self;
+  action ( features : instance, authorization : instance ) submitForm result [1] $self;
+  action ( features : instance, authorization : instance ) approveAndCreateEmployee result [1] $self;
+  action ( features : instance, authorization : instance ) rejectForm result [1] $self;
 
   mapping for zhcm_onboardng {
     FormId = form_id; ApplicationId = application_id; EmployeeId = employee_id;

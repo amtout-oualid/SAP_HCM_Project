@@ -10,34 +10,43 @@ annotate view ZC_HCM_Employee with
   @UI.facet: [
     { id: 'Core', type: #IDENTIFICATION_REFERENCE, label: 'Core Data', position: 10 },
     { id: 'Contact', type: #LINEITEM_REFERENCE, label: 'Contact', position: 20, targetElement: '_Contact' },
-    { id: 'Bank', type: #LINEITEM_REFERENCE, label: 'Bank Details', position: 50, targetElement: '_BankDetails' }
-    
-    // { id: 'OrgAssign', type: #LINEITEM_REFERENCE, label: 'Org Assignment', position: 30, targetElement: '_OrgAssign' },
-    // { id: 'Legal', type: #LINEITEM_REFERENCE, label: 'Legal Contract', position: 40, targetElement: '_LegalContract' },
-    // { id: 'Education', type: #LINEITEM_REFERENCE, label: 'Education', position: 60, targetElement: '_Education' },
-    // { id: 'Skills', type: #LINEITEM_REFERENCE, label: 'Skills', position: 70, targetElement: '_Skills' },
-    // { id: 'Emergency', type: #LINEITEM_REFERENCE, label: 'Emergency Contacts', position: 80, targetElement: '_Emergency' },
-    // { id: 'Dependents', type: #LINEITEM_REFERENCE, label: 'Dependents', position: 90, targetElement: '_Dependents' },
-    // { id: 'Documents', type: #LINEITEM_REFERENCE, label: 'Documents', position: 100, targetElement: '_Documents' }
+    { id: 'Bank', type: #LINEITEM_REFERENCE, label: 'Bank Details', position: 30, targetElement: '_BankDetails' }
   ]
 
   @UI.hidden: true
   EmployeeId;
+  
+  @UI.hidden: true
+  statuscriticality;
 
-  @UI.lineItem: [{ position: 10 }]
-  @UI.identification: [{ position: 10 }]
+  @UI.lineItem: [{ position: 10, label: 'First Name' }]
+  @UI.identification: [{ position: 10, label: 'First Name' }]
+  @UI.selectionField: [{ position: 10 }]
   FirstName;
 
-  @UI.lineItem: [{ position: 20 }]
-  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20, label: 'Last Name' }]
+  @UI.identification: [{ position: 20, label: 'Last Name' }]
+  @UI.selectionField: [{ position: 20 }]
   LastName;
 
-  @UI.lineItem: [{ position: 30 }]
-  @UI.identification: [{ position: 80 }]
-  @UI.selectionField: [{ position: 10 }]
+  /* Line Item Actions */
+  @UI.lineItem: [{ position: 30, label: 'Status', criticality: 'StatusCriticality' },
+                 { type: #FOR_ACTION, dataAction: 'promoteEmployee', label: 'Promote' },
+                 { type: #FOR_ACTION, dataAction: 'transferEmployee', label: 'Transfer' },
+                 { type: #FOR_ACTION, dataAction: 'suspendEmployee', label: 'Suspend' },
+                 { type: #FOR_ACTION, dataAction: 'activateEmployee', label: 'Activate' },
+                 { type: #FOR_ACTION, dataAction: 'terminateEmployee', label: 'Terminate' }]
+  @UI.selectionField: [{ position: 30 }]
+  /* Header Actions */
+  @UI.identification: [{ position: 30, label: 'Status', criticality: 'StatusCriticality' },
+                 { type: #FOR_ACTION, dataAction: 'promoteEmployee', label: 'Promote' },
+                 { type: #FOR_ACTION, dataAction: 'transferEmployee', label: 'Transfer' },
+                 { type: #FOR_ACTION, dataAction: 'suspendEmployee', label: 'Suspend' },
+                 { type: #FOR_ACTION, dataAction: 'activateEmployee', label: 'Activate' },
+                 { type: #FOR_ACTION, dataAction: 'terminateEmployee', label: 'Terminate' }]
   EmployeeStatus;
 
-  @UI.lineItem: [{ position: 40 }]
-  @UI.identification: [{ position: 90 }]
+  @UI.lineItem: [{ position: 40, label: 'Hire Date' }]
+  @UI.identification: [{ position: 40, label: 'Hire Date' }]
   HireDate;
 }

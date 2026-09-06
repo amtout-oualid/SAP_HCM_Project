@@ -14,6 +14,15 @@ define root view entity ZI_HCM_Employee
       nationality            as Nationality,
       gender                 as Gender,
       employee_status        as EmployeeStatus,
+      
+      /* ADDED FOR UI COLORING */
+      case employee_status
+        when 'A' then 3 /* Active = Green */
+        when 'S' then 2 /* Suspended = Yellow */
+        when 'T' then 1 /* Terminated = Red */
+        else 0
+      end as StatusCriticality,
+      
       photo_url              as PhotoUrl,
       hire_date              as HireDate,
       termination_date       as TerminationDate,
