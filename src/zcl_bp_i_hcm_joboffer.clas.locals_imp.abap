@@ -172,7 +172,6 @@ ENDCLASS.
 
 CLASS lhc_application DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
-    METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION IMPORTING keys REQUEST requested_authorizations FOR Application RESULT result.
     METHODS get_instance_features FOR INSTANCE FEATURES IMPORTING keys REQUEST requested_features FOR Application RESULT result.
     METHODS putOnHold FOR MODIFY IMPORTING keys FOR ACTION Application~putOnHold RESULT result.
     METHODS addNote FOR MODIFY IMPORTING keys FOR ACTION Application~addNote RESULT result.
@@ -185,19 +184,7 @@ CLASS lhc_application DEFINITION INHERITING FROM cl_abap_behavior_handler.
 ENDCLASS.
 
 CLASS lhc_application IMPLEMENTATION.
-  METHOD get_instance_authorizations.
-    LOOP AT keys INTO DATA(ls_key).
-      APPEND VALUE #( %tky = ls_key-%tky
-                      %action-acceptToPost = if_abap_behv=>auth-allowed
-                      %action-addNote = if_abap_behv=>auth-allowed
-                      %action-evaluateWithAI = if_abap_behv=>auth-allowed
-                      %action-passToNextStep = if_abap_behv=>auth-allowed
-                      %action-putOnHold = if_abap_behv=>auth-allowed
-                      %action-rejectCandidate = if_abap_behv=>auth-allowed
-                      %action-sendMail = if_abap_behv=>auth-allowed
-                    ) TO result.
-    ENDLOOP.
-  ENDMETHOD.
+
 
   METHOD get_instance_features.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
