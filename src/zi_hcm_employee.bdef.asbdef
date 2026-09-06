@@ -24,11 +24,11 @@ etag master LocalLastChangedAt
 
   determination setDefaultStatus on modify { create; }
 
-  action ( features : instance ) promoteEmployee parameter ZA_HCM_Promote result [1] $self;
-  action ( features : instance ) terminateEmployee parameter ZA_HCM_Terminate result [1] $self;
-  action ( features : instance ) transferEmployee parameter ZA_HCM_Transfer result [1] $self;
-  action ( features : instance ) suspendEmployee result [1] $self;
-  action ( features : instance ) activateEmployee result [1] $self;
+  action ( features : instance, authorization : instance ) promoteEmployee parameter ZA_HCM_Promote result [1] $self;
+  action ( features : instance, authorization : instance ) terminateEmployee parameter ZA_HCM_Terminate result [1] $self;
+  action ( features : instance, authorization : instance ) transferEmployee parameter ZA_HCM_Transfer result [1] $self;
+  action ( features : instance, authorization : instance ) suspendEmployee result [1] $self;
+  action ( features : instance, authorization : instance ) activateEmployee result [1] $self;
 
   association _Contact { create; with draft; }
   association _BankDetails { create; with draft; }

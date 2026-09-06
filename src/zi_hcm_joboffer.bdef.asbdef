@@ -22,9 +22,9 @@ etag master LocalLastChangedAt
   field ( readonly, numbering : managed ) OfferId;
   field ( mandatory ) Title, Department;
 
-  action ( features : instance ) publishOffer result [1] $self;
-  action ( features : instance ) closeOffer result [1] $self;
-  action ( features : instance ) reopenOffer result [1] $self;
+  action ( features : instance, authorization : instance ) publishOffer result [1] $self;
+  action ( features : instance, authorization : instance ) closeOffer result [1] $self;
+  action ( features : instance, authorization : instance ) reopenOffer result [1] $self;
 
   validation validateBeforePublish on save { create; update; }
   validation validateApplicationDeadline on save { create; update; }
@@ -75,14 +75,14 @@ etag master LocalLastChangedAt
   field ( readonly, numbering : managed ) ApplicationId;
   field ( readonly ) OfferId, CandidateFirstName, CandidateLastName, CandidateEmail;
 
-  action evaluateWithAI result [1] $self;
-  action ( features : instance ) passToNextStep result [1] $self;
-  action ( features : instance ) acceptToPost parameter ZA_HCM_HireInfo result [1] $self;
+  action ( features : instance, authorization : custom ) evaluateWithAI result [1] $self;
+  action ( features : instance, authorization : custom ) passToNextStep result [1] $self;
+  action ( features : instance, authorization : custom ) acceptToPost parameter ZA_HCM_HireInfo result [1] $self;
 
-  action putOnHold result [1] $self;
-  action addNote parameter ZA_HCM_AddNote result [1] $self;
-  action rejectCandidate parameter ZA_HCM_Reject result [1] $self;
-  action sendMail parameter ZA_HCM_SendMail result [1] $self;
+  action ( features : instance, authorization : custom ) putOnHold result [1] $self;
+  action ( features : instance, authorization : custom ) addNote parameter ZA_HCM_AddNote result [1] $self;
+  action ( features : instance, authorization : custom ) rejectCandidate parameter ZA_HCM_Reject result [1] $self;
+  action ( features : instance, authorization : custom ) sendMail parameter ZA_HCM_SendMail result [1] $self;
 
   validation preventDuplicateApplication on save { create; }
 
