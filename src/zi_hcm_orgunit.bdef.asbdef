@@ -1,9 +1,12 @@
 managed implementation in class zcl_bp_i_hcm_orgunit unique;
 strict ( 2 );
+with draft;
 
 define behavior for ZI_HCM_OrgUnit alias OrgUnit
 persistent table zhcm_orgunit
+draft table zhcm_d_orgunit
 lock master
+total etag LastChangedAt
 authorization master ( global, instance )
 etag master LocalLastChangedAt
 early numbering
@@ -12,19 +15,31 @@ early numbering
   update;
   delete;
 
-  field ( readonly )
-    OrgUnitId;
+  draft action Edit;
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare;
 
+  field ( readonly )
+    OrgUnitId, OrgUnitNum;
+
+  determination CalculateOrgUnitNum on modify { create; }
+  determination DefaultStatus on modify { create; }
   validation validateDelete on save { delete; }
 
-  association _Positions { create; }
+  association _Positions { create; with draft; }
 
   mapping for zhcm_orgunit
   {
     OrgUnitId             = org_unit_id;
+    OrgUnitNum            = org_unit_num;
     UnitName             = unit_name;
+    Description          = description;
     ParentOrgUnitId         = parent_org_unit_id;
     CostCenter            = cost_center;
+    Budget               = budget;
+    CurrencyCode         = currency_code;
     Status               = status;
     CreatedBy             = created_by;
     CreatedAt             = created_at;
@@ -36,6 +51,7 @@ early numbering
 
 define behavior for ZI_HCM_Position alias Position
 persistent table zhcm_position
+draft table zhcm_d_position
 lock dependent by _OrgUnit
 authorization dependent by _OrgUnit
 etag master LocalLastChangedAt
@@ -47,7 +63,9 @@ early numbering
   field ( readonly )
     PositionId, OrgUnitId;
 
-  association _OrgUnit;
+  determination DefaultPosStatus on modify { create; }
+
+  association _OrgUnit { with draft; }
 
   mapping for zhcm_position
   {
@@ -56,6 +74,8 @@ early numbering
     JobTitle             = job_title;
     IsManager             = is_manager;
     FteValue             = fte_value;
+    Budget               = budget;
+    CurrencyCode         = currency_code;
     Status               = status;
     LocalLastChangedAt        = local_last_changed_at;
   }

@@ -1,5 +1,6 @@
 projection;
 strict ( 2 );
+use draft;
 
 define behavior for ZC_HCM_OrgUnit alias OrgUnit
 use etag
@@ -8,7 +9,13 @@ use etag
   use update;
   use delete;
 
-  use association _Positions { create; }
+  use action Edit;
+  use action Activate;
+  use action Discard;
+  use action Resume;
+  use action Prepare;
+
+  use association _Positions { create; with draft; }
 }
 
 define behavior for ZC_HCM_Position alias Position
@@ -16,5 +23,6 @@ use etag
 {
   use update;
   use delete;
-  use association _OrgUnit;
+
+  use association _OrgUnit { with draft; }
 }

@@ -15,6 +15,11 @@ define view entity ZI_HCM_Position
       is_manager               as IsManager,
       @EndUserText.label: 'FTE Value'
       fte_value               as FteValue,
+      @Semantics.amount.currencyCode: 'CurrencyCode'
+      @EndUserText.label: 'Position Budget'
+      budget                 as Budget,
+      @EndUserText.label: 'Currency'
+      currency_code            as CurrencyCode,
       @EndUserText.label: 'Status'
       status                 as Status,
       @Semantics.systemDateTime.localInstanceLastChangedAt: true

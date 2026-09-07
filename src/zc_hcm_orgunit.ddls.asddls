@@ -6,9 +6,18 @@ define root view entity ZC_HCM_OrgUnit
   as projection on ZI_HCM_OrgUnit
 {
   key OrgUnitId,
+  OrgUnitNum,
   UnitName,
+  Description,
+  
+  @ObjectModel.text.element: ['ParentUnitName']
   ParentOrgUnitId,
+  
+  ParentUnitName,
+  
   CostCenter,
+  Budget,
+  CurrencyCode,
   Status,
   CreatedBy,
   CreatedAt,

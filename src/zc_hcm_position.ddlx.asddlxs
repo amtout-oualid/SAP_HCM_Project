@@ -6,7 +6,9 @@
 }
 annotate view ZC_HCM_Position with
 {
-  @UI.facet: [{ id: 'PosDetails', type: #IDENTIFICATION_REFERENCE, label: 'Details', position: 10 }]
+  @UI.facet: [
+    { id: 'PosDetails', type: #IDENTIFICATION_REFERENCE, label: 'Details', position: 10 }
+  ]
 
   @UI.hidden: true
   PositionId;
@@ -16,20 +18,25 @@ annotate view ZC_HCM_Position with
 
   @UI.lineItem: [{ position: 10 }]
   @UI.identification: [{ position: 10 }]
-  @UI.selectionField: [{ position: 10 }]
-  @Search.defaultSearchElement: true
   JobTitle;
 
-  @UI.lineItem: [{ position: 20, label: 'Is Manager' }]
-  @UI.identification: [{ position: 20, label: 'Is Manager' }]
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 20 }]
   IsManager;
 
-  @UI.lineItem: [{ position: 30, label: 'FTE' }]
-  @UI.identification: [{ position: 30, label: 'Full Time Equivalent (FTE)' }]
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 30 }]
   FteValue;
+  
+  @UI.lineItem: [{ position: 40 }]
+  @UI.identification: [{ position: 40 }]
+  budget;
+  
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
+  currencycode;
 
-  @UI.lineItem: [{ position: 40, label: 'Status' }]
-  @UI.identification: [{ position: 40, label: 'Status' }]
+  @UI.lineItem: [{ position: 50, label: 'Status' }]
+  @UI.identification: [{ position: 50, label: 'Status' }]
   @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_GenericStatus', element: 'Status' } }]
   Status;
 }

@@ -9,6 +9,8 @@ define view entity ZC_HCM_Position
   JobTitle,
   IsManager,
   FteValue,
+  Budget,
+  CurrencyCode,
   Status,
   LocalLastChangedAt,
   

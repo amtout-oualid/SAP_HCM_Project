@@ -185,7 +185,6 @@ ENDCLASS.
 
 CLASS lhc_application IMPLEMENTATION.
 
-
   METHOD get_instance_features.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application BY \_Offer

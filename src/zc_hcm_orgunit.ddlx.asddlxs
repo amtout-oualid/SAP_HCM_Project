@@ -2,35 +2,55 @@
 @UI.headerInfo: {
   typeName: 'Organizational Unit',
   typeNamePlural: 'Organizational Units',
-  title: { type: #STANDARD, value: 'UnitName' }
+  title: { type: #STANDARD, value: 'UnitName' },
+  description: { type: #STANDARD, value: 'OrgUnitNum' }
 }
 annotate view ZC_HCM_OrgUnit with
 {
   @UI.facet: [
-    { id: 'OrgDetails', type: #IDENTIFICATION_REFERENCE, label: 'Details', position: 10 },
-    { id: 'Positions', type: #LINEITEM_REFERENCE, label: 'Positions', position: 20, targetElement: '_Positions' }
+    { id: 'BasicData', type: #FIELDGROUP_REFERENCE, label: 'Basic Data', position: 10, targetQualifier: 'BasicInfo' },
+    { id: 'FinanceData', type: #FIELDGROUP_REFERENCE, label: 'Financials & Status', position: 20, targetQualifier: 'FinanceInfo' },
+    { id: 'Positions', type: #LINEITEM_REFERENCE, label: 'Positions', position: 30, targetElement: '_Positions' }
   ]
 
   @UI.hidden: true
   OrgUnitId;
 
+  @UI.lineItem: [{ position: 5 }]
+  @UI.fieldGroup: [{ qualifier: 'BasicInfo', position: 10 }]
+  @UI.selectionField: [{ position: 5 }]
+  OrgUnitNum;
+
   @UI.lineItem: [{ position: 10 }]
-  @UI.identification: [{ position: 10 }]
+  @UI.fieldGroup: [{ qualifier: 'BasicInfo', position: 20 }]
   @UI.selectionField: [{ position: 10 }]
   @Search.defaultSearchElement: true
   UnitName;
 
-  @UI.identification: [{ position: 20 }]
+  @UI.fieldGroup: [{ qualifier: 'BasicInfo', position: 30 }]
+  @UI.multiLineText: true
+  Description;
+
+  @UI.fieldGroup: [{ qualifier: 'BasicInfo', position: 40 }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_OrgUnit', element: 'OrgUnitId' } }]
   ParentOrgUnitId;
+  
+  @UI.hidden: true
+  parentunitname;
 
   @UI.lineItem: [{ position: 20 }]
-  @UI.identification: [{ position: 30 }]
+  @UI.fieldGroup: [{ qualifier: 'FinanceInfo', position: 10 }]
   @UI.selectionField: [{ position: 20 }]
-  @Search.defaultSearchElement: true
   CostCenter;
 
+  @UI.fieldGroup: [{ qualifier: 'FinanceInfo', position: 20 }]
+  Budget;
+  
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
+  CurrencyCode;
+
   @UI.lineItem: [{ position: 30, label: 'Status' }]
-  @UI.identification: [{ position: 40, label: 'Status' }]
+  @UI.fieldGroup: [{ qualifier: 'FinanceInfo', position: 30 }]
   @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_GenericStatus', element: 'Status' } }]
   Status;
 }

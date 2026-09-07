@@ -14,6 +14,13 @@ CLASS lhc_orgunit DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS validateDelete FOR VALIDATE ON SAVE
       IMPORTING keys FOR OrgUnit~validateDelete.
+
+    METHODS CalculateOrgUnitNum FOR DETERMINE ON MODIFY
+      IMPORTING keys FOR OrgUnit~CalculateOrgUnitNum.
+
+    METHODS DefaultStatus FOR DETERMINE ON MODIFY
+      IMPORTING keys FOR OrgUnit~DefaultStatus.
+
 ENDCLASS.
 
 CLASS lhc_orgunit IMPLEMENTATION.
@@ -74,4 +81,56 @@ CLASS lhc_orgunit IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
+
+  METHOD CalculateOrgUnitNum.
+    READ ENTITIES OF ZI_HCM_OrgUnit IN LOCAL MODE
+      ENTITY OrgUnit FIELDS ( OrgUnitNum ) WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_orgunits).
+
+    SELECT MAX( org_unit_num ) FROM zhcm_orgunit INTO @DATA(lv_max_num).
+    DATA(lv_next_num) = CONV i( lv_max_num ).
+
+    LOOP AT lt_orgunits ASSIGNING FIELD-SYMBOL(<ls_orgunit>) WHERE OrgUnitNum IS INITIAL.
+      lv_next_num += 1.
+      <ls_orgunit>-OrgUnitNum = |{ lv_next_num WIDTH = 6 ALIGN = RIGHT PAD = '0' }|.
+
+      MODIFY ENTITIES OF ZI_HCM_OrgUnit IN LOCAL MODE
+        ENTITY OrgUnit
+        UPDATE FIELDS ( OrgUnitNum ) WITH VALUE #( ( %tky = <ls_orgunit>-%tky OrgUnitNum = <ls_orgunit>-OrgUnitNum ) ).
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD DefaultStatus.
+    READ ENTITIES OF ZI_HCM_OrgUnit IN LOCAL MODE
+      ENTITY OrgUnit FIELDS ( Status ) WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_orgunits).
+
+    LOOP AT lt_orgunits ASSIGNING FIELD-SYMBOL(<ls_orgunit>) WHERE Status IS INITIAL.
+      MODIFY ENTITIES OF ZI_HCM_OrgUnit IN LOCAL MODE
+        ENTITY OrgUnit
+        UPDATE FIELDS ( Status ) WITH VALUE #( ( %tky = <ls_orgunit>-%tky Status = 'A' ) ).
+    ENDLOOP.
+  ENDMETHOD.
+
 ENDCLASS.
+
+CLASS lhc_position DEFINITION INHERITING FROM cl_abap_behavior_handler.
+  PRIVATE SECTION.
+    METHODS DefaultPosStatus FOR DETERMINE ON MODIFY
+      IMPORTING keys FOR Position~DefaultPosStatus.
+ENDCLASS.
+
+CLASS lhc_position IMPLEMENTATION.
+  METHOD DefaultPosStatus.
+    READ ENTITIES OF ZI_HCM_OrgUnit IN LOCAL MODE
+      ENTITY Position FIELDS ( Status ) WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_positions).
+
+    LOOP AT lt_positions ASSIGNING FIELD-SYMBOL(<ls_position>) WHERE Status IS INITIAL.
+      MODIFY ENTITIES OF ZI_HCM_OrgUnit IN LOCAL MODE
+        ENTITY Position
+        UPDATE FIELDS ( Status ) WITH VALUE #( ( %tky = <ls_position>-%tky Status = 'A' ) ).
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
