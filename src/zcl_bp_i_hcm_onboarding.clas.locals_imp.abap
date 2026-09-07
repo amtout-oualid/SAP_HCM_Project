@@ -12,6 +12,7 @@ CLASS lcl_buffer DEFINITION.
              marital_status  TYPE string,
              personal_email  TYPE string,
              phone           TYPE string,
+             address         TYPE string,
              bank_name       TYPE string,
              bank_account    TYPE string,
              iban            TYPE string,
@@ -87,6 +88,7 @@ CLASS lhc_onboarding IMPLEMENTATION.
         marital_status = ls_form-MaritalStatus
         personal_email = ls_form-PersonalEmail
         phone          = ls_form-Phone
+        address        = ls_form-Address
         bank_name      = ls_form-BankName
         bank_account   = ls_form-BankAccount
         iban           = ls_form-Iban
@@ -129,7 +131,7 @@ CLASS lsc_ZI_HCM_ONBOARDING IMPLEMENTATION.
       DATA(lv_con_cid) = |CON_{ lv_counter }|.
       DATA(lv_bnk_cid) = |BNK_{ lv_counter }|.
 
-      " 1. Create Employee master, Contact, and Bank Details in ZI_HCM_Employee
+      " 1. Create Employee master, Contact (with Address), and Bank Details in ZI_HCM_Employee
       MODIFY ENTITIES OF ZI_HCM_Employee ENTITY Employee
         CREATE SET FIELDS WITH VALUE #( (
              %cid           = lv_emp_cid
@@ -145,9 +147,10 @@ CLASS lsc_ZI_HCM_ONBOARDING IMPLEMENTATION.
         CREATE BY \_Contact SET FIELDS WITH VALUE #( (
              %cid_ref = lv_emp_cid
              %target  = VALUE #( (
-                  %cid          = lv_con_cid
-                  PersonalEmail = ls_emp-personal_email
-                  PhoneNumber   = ls_emp-phone ) ) ) )
+                  %cid            = lv_con_cid
+                  PersonalEmail   = ls_emp-personal_email
+                  PhoneNumber     = ls_emp-phone
+                  PersonalAddress = ls_emp-address ) ) ) )
         CREATE BY \_BankDetails SET FIELDS WITH VALUE #( (
              %cid_ref = lv_emp_cid
              %target  = VALUE #( (
@@ -183,10 +186,26 @@ CLASS lsc_ZI_HCM_ONBOARDING IMPLEMENTATION.
             INTO (@DATA(lv_job_title), @DATA(lv_dept)).
 
           IF sy-subrc = 0.
+            " Attempt to find an active vacant position matching the job title
             SELECT SINGLE position_id, org_unit_id FROM zhcm_position
-              WHERE job_title = @lv_job_title
+              WHERE job_title = @lv_job_title AND status <> 'F'
               INTO (@DATA(lv_pos_id), @DATA(lv_org_id)).
 
+            " Fallback: If no vacant position found, check if any position has that title
+            IF sy-subrc <> 0.
+              SELECT SINGLE position_id, org_unit_id FROM zhcm_position
+                WHERE job_title = @lv_job_title
+                INTO (@lv_pos_id, @lv_org_id).
+            ENDIF.
+
+            " Fallback: If still no org unit found, look up org unit ID from department name
+            IF lv_org_id IS INITIAL AND lv_dept IS NOT INITIAL.
+              SELECT SINGLE org_unit_id FROM zhcm_orgunit
+                WHERE unit_name = @lv_dept
+                INTO @lv_org_id.
+            ENDIF.
+
+            " Always create Organizational Assignment
             DATA(lv_asg_id) = cl_system_uuid=>create_uuid_x16_static( ).
             INSERT zhcm_orgassign FROM @( VALUE #(
               client            = sy-mandt

@@ -27,6 +27,7 @@ early numbering
   determination CalculateOrgUnitNum on modify { create; }
   determination DefaultStatus on modify { create; }
   validation validateDelete on save { delete; }
+  validation validateParent on save { create; update; field ParentOrgUnitId; }
 
   association _Positions { create; with draft; }
 
@@ -34,18 +35,18 @@ early numbering
   {
     OrgUnitId             = org_unit_id;
     OrgUnitNum            = org_unit_num;
-    UnitName             = unit_name;
-    Description          = description;
-    ParentOrgUnitId         = parent_org_unit_id;
+    UnitName              = unit_name;
+    Description           = description;
+    ParentOrgUnitId       = parent_org_unit_id;
     CostCenter            = cost_center;
-    Budget               = budget;
-    CurrencyCode         = currency_code;
-    Status               = status;
+    Budget                = budget;
+    CurrencyCode          = currency_code;
+    Status                = status;
     CreatedBy             = created_by;
     CreatedAt             = created_at;
-    LastChangedBy          = last_changed_by;
-    LastChangedAt          = last_changed_at;
-    LocalLastChangedAt        = local_last_changed_at;
+    LastChangedBy         = last_changed_by;
+    LastChangedAt         = last_changed_at;
+    LocalLastChangedAt    = local_last_changed_at;
   }
 }
 
@@ -71,12 +72,12 @@ early numbering
   {
     PositionId            = position_id;
     OrgUnitId             = org_unit_id;
-    JobTitle             = job_title;
+    JobTitle              = job_title;
     IsManager             = is_manager;
-    FteValue             = fte_value;
-    Budget               = budget;
-    CurrencyCode         = currency_code;
-    Status               = status;
-    LocalLastChangedAt        = local_last_changed_at;
+    FteValue              = fte_value;
+    Budget                = budget;
+    CurrencyCode          = currency_code;
+    Status                = status;
+    LocalLastChangedAt    = local_last_changed_at;
   }
 }

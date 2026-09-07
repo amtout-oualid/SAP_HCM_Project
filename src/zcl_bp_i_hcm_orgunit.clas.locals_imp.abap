@@ -15,6 +15,9 @@ CLASS lhc_orgunit DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS validateDelete FOR VALIDATE ON SAVE
       IMPORTING keys FOR OrgUnit~validateDelete.
 
+    METHODS validateParent FOR VALIDATE ON SAVE
+      IMPORTING keys FOR OrgUnit~validateParent.
+
     METHODS CalculateOrgUnitNum FOR DETERMINE ON MODIFY
       IMPORTING keys FOR OrgUnit~CalculateOrgUnitNum.
 
@@ -78,6 +81,25 @@ CLASS lhc_orgunit IMPLEMENTATION.
                                  v1       = 'Cannot delete org unit with positions'
                                  severity = if_abap_behv_message=>severity-error ) )
                TO reported-orgunit.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD validateParent.
+    READ ENTITIES OF ZI_HCM_OrgUnit IN LOCAL MODE
+      ENTITY OrgUnit FIELDS ( OrgUnitId ParentOrgUnitId )
+      WITH CORRESPONDING #( keys ) RESULT DATA(lt_orgs).
+
+    LOOP AT lt_orgs INTO DATA(ls_org).
+      IF ls_org-ParentOrgUnitId IS NOT INITIAL AND ls_org-ParentOrgUnitId = ls_org-OrgUnitId.
+        APPEND VALUE #( %tky = ls_org-%tky ) TO failed-orgunit.
+        APPEND VALUE #( %tky = ls_org-%tky
+                        %msg = new_message(
+                                 id       = '00'
+                                 number   = '007'
+                                 v1       = 'An Org Unit cannot be its own parent!'
+                                 severity = if_abap_behv_message=>severity-error )
+                        %element-ParentOrgUnitId = if_abap_behv=>mk-on ) TO reported-orgunit.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.

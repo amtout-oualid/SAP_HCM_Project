@@ -8,11 +8,11 @@
 annotate view ZC_HCM_Employee with
 {
   @UI.facet: [
-    { id: 'HeaderData',   type: #COLLECTION, label: 'Employee Profile', position: 10 },
+    { id: 'HeaderData',   type: #COLLECTION,          label: 'Employee Profile',     position: 10 },
     { id: 'PersonalData', type: #FIELDGROUP_REFERENCE, label: 'Personal Information', parentId: 'HeaderData', position: 10, targetQualifier: 'FG_PERSONAL' },
-    { id: 'StatusData',   type: #FIELDGROUP_REFERENCE, label: 'Employment Status',     parentId: 'HeaderData', position: 20, targetQualifier: 'FG_EMPLOYMENT' },
-    { id: 'Contact',      type: #LINEITEM_REFERENCE,   label: 'Contact Details',       position: 20, targetElement: '_Contact' },
-    { id: 'Bank',         type: #LINEITEM_REFERENCE,   label: 'Bank Accounts',         position: 30, targetElement: '_BankDetails' }
+    { id: 'StatusData',   type: #FIELDGROUP_REFERENCE, label: 'Employment Status',    parentId: 'HeaderData', position: 20, targetQualifier: 'FG_EMPLOYMENT' },
+    { id: 'Contact',      type: #LINEITEM_REFERENCE,   label: 'Contact Details',      position: 20, targetElement: '_Contact' },
+    { id: 'Bank',         type: #LINEITEM_REFERENCE,   label: 'Bank Accounts',        position: 30, targetElement: '_BankDetails' }
   ]
 
   @UI.hidden: true

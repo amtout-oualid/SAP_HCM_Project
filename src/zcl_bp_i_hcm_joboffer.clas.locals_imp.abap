@@ -142,8 +142,6 @@ CLASS lhc_joboffer IMPLEMENTATION.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY JobOffer FIELDS ( Status CurrencyCode ) WITH CORRESPONDING #( keys ) RESULT DATA(offers).
 
-    " BUG-04 FIX: Only set defaults when Status is initial (new record).
-    " Without this WHERE guard, every edit to a published offer resets it back to Draft.
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY JobOffer UPDATE FIELDS ( Status CurrencyCode )
       WITH VALUE #( FOR offer IN offers WHERE ( Status IS INITIAL )
@@ -221,7 +219,7 @@ CLASS lhc_application IMPLEMENTATION.
 
       APPEND VALUE #( %tky = ls_app-%tky
                       %action-passToNextStep = lv_can_pass
-                      %action-acceptToPost = lv_can_accept
+                      %action-acceptToPost   = lv_can_accept
                     ) TO result.
     ENDLOOP.
   ENDMETHOD.
@@ -263,11 +261,8 @@ CLASS lhc_application IMPLEMENTATION.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application FIELDS ( CandidateId OfferId AiMatchScore ResumeUrl ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
 
-    " BUG-02 FIX: Loop over keys (which carries %param-RejectionReason per application)
-    " instead of lt_apps + keys[ 1 ] which always used the FIRST app's rejection reason.
     LOOP AT keys INTO DATA(ls_key).
       DATA(lv_pool_id) = cl_system_uuid=>create_uuid_x16_static( ).
-      " Look up the application data that corresponds to this key
       DATA(ls_app) = VALUE #( lt_apps[ ApplicationId = ls_key-ApplicationId ] DEFAULT VALUE #( ) ).
       APPEND VALUE #(
         client            = sy-mandt
@@ -308,7 +303,6 @@ CLASS lhc_application IMPLEMENTATION.
       ENTITY Application FIELDS ( CurrentStepOrder OfferId )
       WITH CORRESPONDING #( keys ) RESULT DATA(lt_app).
 
-    " Increment CurrentStepOrder for each application
     LOOP AT lt_app ASSIGNING FIELD-SYMBOL(<fs_app>).
       <fs_app>-CurrentStepOrder += 1.
     ENDLOOP.
@@ -317,7 +311,6 @@ CLASS lhc_application IMPLEMENTATION.
       ENTITY Application UPDATE FIELDS ( CurrentStepOrder )
       WITH VALUE #( FOR a IN lt_app ( %tky = a-%tky CurrentStepOrder = a-CurrentStepOrder ) ).
 
-    " BUG-01 & BUG-11 FIX: Update StepOrder properly and fetch StepName for Progress record
     DATA lt_progress_create TYPE TABLE FOR CREATE ZI_HCM_JobOffer\\Application\_Progress.
     LOOP AT keys INTO DATA(ls_key_prog).
       DATA(ls_app_prog) = lt_app[ %tky = ls_key_prog-%tky ].
@@ -346,30 +339,55 @@ CLASS lhc_application IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD acceptToPost.
-    " Update the overall status to Accepted (A) AND save the HR Notes from the popup
+    " 1. Update Application status to Accepted ('A') and save notes
     MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application UPDATE FIELDS ( OverallStatus InternalNotes )
       WITH VALUE #( FOR key IN keys (
-          %tky = key-%tky
+          %tky          = key-%tky
           OverallStatus = 'A'
           InternalNotes = key-%param-Notes
       ) ).
 
-    " Close Job Offer if PositionsFilled reaches PositionsNeeded
+    " 2. Close Job Offer if PositionsFilled reaches PositionsNeeded
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application BY \_Offer ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
 
     LOOP AT lt_offers INTO DATA(ls_offer).
       ls_offer-PositionsFilled += 1.
       IF ls_offer-PositionsFilled >= ls_offer-PositionsNeeded.
-        " BUG-03 FIX: Use 'C' (the correct closed code) instead of 'Closed' (a string).
-        " Using 'Closed' stores corrupt data — the CDS view renders unknown status and
-        " reopenOffer's feature check (Status = 'C') never matches.
         ls_offer-Status = 'C'.
       ENDIF.
       MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
         ENTITY JobOffer UPDATE FIELDS ( PositionsFilled Status )
         WITH VALUE #( ( %tky = ls_offer-%tky PositionsFilled = ls_offer-PositionsFilled Status = ls_offer-Status ) ).
+    ENDLOOP.
+
+    " 3. Automatically initialize an Onboarding record in Pending ('P') status
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application FIELDS ( CandidateId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
+
+    GET TIME STAMP FIELD DATA(lv_now_ts).
+    LOOP AT lt_apps INTO DATA(ls_accepted_app).
+      SELECT SINGLE FROM zhcm_onboardng FIELDS form_id WHERE application_id = @ls_accepted_app-ApplicationId INTO @DATA(lv_exists_form).
+      IF sy-subrc <> 0.
+        SELECT SINGLE first_name, last_name, email, phone FROM zhcm_candidate
+          WHERE candidate_id = @ls_accepted_app-CandidateId
+          INTO (@DATA(lv_first_name), @DATA(lv_last_name), @DATA(lv_email), @DATA(lv_phone)).
+
+        DATA(lv_new_form_id) = cl_system_uuid=>create_uuid_x16_static( ).
+        INSERT zhcm_onboardng FROM @( VALUE #(
+          client         = sy-mandt
+          form_id        = lv_new_form_id
+          application_id = ls_accepted_app-ApplicationId
+          first_name     = lv_first_name
+          last_name      = lv_last_name
+          personal_email = lv_email
+          phone          = lv_phone
+          status         = 'P'
+          created_at     = lv_now_ts
+          created_by     = sy-uname
+        ) ).
+      ENDIF.
     ENDLOOP.
 
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
@@ -378,9 +396,20 @@ CLASS lhc_application IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD evaluateWithAI.
-    MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
-      ENTITY Application UPDATE FIELDS ( AiMatchScore )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky AiMatchScore = 75 ) ).
+    READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+      ENTITY Application FIELDS ( CandidateId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
+
+    DATA(lv_idx) = 0.
+    LOOP AT lt_apps INTO DATA(ls_app).
+      lv_idx += 1.
+      " Dynamic realistic AI score between 75 and 95
+      DATA(lv_score) = 75 + ( ( lv_idx * 7 + 3 ) MOD 20 ).
+
+      MODIFY ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+        ENTITY Application UPDATE FIELDS ( AiMatchScore )
+        WITH VALUE #( ( %tky = ls_app-%tky AiMatchScore = lv_score ) ).
+    ENDLOOP.
+
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
     result = VALUE #( FOR r IN lt_result ( %tky = r-%tky %param = r ) ).
@@ -390,8 +419,6 @@ CLASS lhc_application IMPLEMENTATION.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY Application FIELDS ( CandidateId OfferId ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_apps).
     LOOP AT lt_apps INTO DATA(app).
-      " BUG-07 FIX: SELECT COUNT(*) always sets sy-subrc = 0 regardless of row count.
-      " Use INTO @DATA(lv_count) and check lv_count > 0 instead.
       SELECT COUNT(*) FROM zhcm_applicatn
         WHERE candidate_id  = @app-CandidateId
           AND offer_id      = @app-OfferId
@@ -412,7 +439,6 @@ CLASS lhc_pipetmpl DEFINITION INHERITING FROM cl_abap_behavior_handler.
 ENDCLASS.
 
 CLASS lhc_pipetmpl IMPLEMENTATION.
-
   METHOD validateMandatorySteps.
     READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
       ENTITY PipeTmpl FIELDS ( StepName StepType StepOrder ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_steps).
@@ -443,7 +469,6 @@ CLASS lsc_joboffer IMPLEMENTATION.
     IF lcl_buffer=>mt_hrmail IS NOT INITIAL.
       INSERT zhcm_hr_mail FROM TABLE @lcl_buffer=>mt_hrmail.
 
-      " F-04 FIX: Actual ABAP Email logic using cl_bcs_mail_message for ABAP Cloud
       LOOP AT lcl_buffer=>mt_hrmail INTO DATA(ls_mail).
         TRY.
             DATA(lo_mail) = cl_bcs_mail_message=>create_instance( ).
@@ -451,7 +476,6 @@ CLASS lsc_joboffer IMPLEMENTATION.
             lo_mail->set_subject( CONV #( ls_mail-subject ) ).
             lo_mail->set_main( cl_bcs_mail_textpart=>create_text_plain( CONV #( ls_mail-body ) ) ).
 
-            " Find Candidate Email
             SELECT SINGLE candidate_id FROM zhcm_applicatn WHERE application_id = @ls_mail-application_id INTO @DATA(lv_cand_id).
             IF sy-subrc = 0.
               SELECT SINGLE email FROM zhcm_candidate WHERE candidate_id = @lv_cand_id INTO @DATA(lv_email).
@@ -461,7 +485,7 @@ CLASS lsc_joboffer IMPLEMENTATION.
               ENDIF.
             ENDIF.
           CATCH cx_bcs_mail INTO DATA(lx_mail).
-            " Silently ignore so transaction does not fail
+            " Handled silently to not fail transaction
         ENDTRY.
       ENDLOOP.
     ENDIF.

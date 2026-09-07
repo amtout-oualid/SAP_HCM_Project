@@ -35,22 +35,22 @@ etag master LocalLastChangedAt
 
   mapping for zhcm_employee
   {
-    EmployeeId = employee_id;
-    FirstName = first_name;
-    LastName = last_name;
-    DateOfBirth = date_of_birth;
-    PlaceOfBirth = place_of_birth;
-    MaritalStatus = marital_status;
-    Nationality = nationality;
-    Gender = gender;
-    EmployeeStatus = employee_status;
-    PhotoUrl = photo_url;
-    HireDate = hire_date;
-    TerminationDate = termination_date;
-    CreatedBy = created_by;
-    CreatedAt = created_at;
-    LastChangedBy = last_changed_by;
-    LastChangedAt = last_changed_at;
+    EmployeeId         = employee_id;
+    FirstName          = first_name;
+    LastName           = last_name;
+    DateOfBirth        = date_of_birth;
+    PlaceOfBirth       = place_of_birth;
+    MaritalStatus      = marital_status;
+    Nationality        = nationality;
+    Gender             = gender;
+    EmployeeStatus     = employee_status;
+    PhotoUrl           = photo_url;
+    HireDate           = hire_date;
+    TerminationDate    = termination_date;
+    CreatedBy          = created_by;
+    CreatedAt          = created_at;
+    LastChangedBy      = last_changed_by;
+    LastChangedAt      = last_changed_at;
     LocalLastChangedAt = local_last_changed_at;
   }
 }
@@ -69,12 +69,12 @@ etag master LocalLastChangedAt
 
   mapping for zhcm_contact
   {
-    ContactId = contact_id;
-    EmployeeId = employee_id;
-    PersonalAddress = personal_address;
-    PhoneNumber = phone_number;
-    PersonalEmail = personal_email;
-    WorkEmail = work_email;
+    ContactId          = contact_id;
+    EmployeeId         = employee_id;
+    PersonalAddress    = personal_address;
+    PhoneNumber        = phone_number;
+    PersonalEmail      = personal_email;
+    WorkEmail          = work_email;
     LocalLastChangedAt = local_last_changed_at;
   }
 }
@@ -93,12 +93,12 @@ etag master LocalLastChangedAt
 
   mapping for zhcm_bankdetl
   {
-    BankId = bank_detail_id;
-    EmployeeId = employee_id;
-    BankName = bank_name;
-    AccountNumber = account_number;
-    Iban = iban;
-    BicSwift = bic_swift;
+    BankId             = bank_detail_id;
+    EmployeeId         = employee_id;
+    BankName           = bank_name;
+    AccountNumber      = account_number;
+    Iban               = iban;
+    BicSwift           = bic_swift;
     LocalLastChangedAt = local_last_changed_at;
   }
 }

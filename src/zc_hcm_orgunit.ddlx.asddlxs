@@ -8,9 +8,9 @@
 annotate view ZC_HCM_OrgUnit with
 {
   @UI.facet: [
-    { id: 'BasicData', type: #FIELDGROUP_REFERENCE, label: 'Basic Data', position: 10, targetQualifier: 'BasicInfo' },
-    { id: 'FinanceData', type: #FIELDGROUP_REFERENCE, label: 'Financials & Status', position: 20, targetQualifier: 'FinanceInfo' },
-    { id: 'Positions', type: #LINEITEM_REFERENCE, label: 'Positions', position: 30, targetElement: '_Positions' }
+    { id: 'BasicData',   type: #FIELDGROUP_REFERENCE, label: 'Basic Data',            position: 10, targetQualifier: 'BasicInfo' },
+    { id: 'FinanceData', type: #FIELDGROUP_REFERENCE, label: 'Financials & Status',   position: 20, targetQualifier: 'FinanceInfo' },
+    { id: 'Positions',   type: #LINEITEM_REFERENCE,   label: 'Positions',             position: 30, targetElement: '_Positions' }
   ]
 
   @UI.hidden: true
@@ -32,17 +32,18 @@ annotate view ZC_HCM_OrgUnit with
   Description;
 
   @UI.fieldGroup: [{ qualifier: 'BasicInfo', position: 40 }]
-  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_OrgUnit', element: 'OrgUnitId' } }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZC_HCM_OrgUnit', element: 'OrgUnitId' } }]
   ParentOrgUnitId;
   
-  @UI.hidden: true
-  parentunitname;
+  @UI.lineItem: [{ position: 15, label: 'Parent Unit' }]
+  ParentUnitName;
 
   @UI.lineItem: [{ position: 20 }]
   @UI.fieldGroup: [{ qualifier: 'FinanceInfo', position: 10 }]
   @UI.selectionField: [{ position: 20 }]
   CostCenter;
 
+  @UI.lineItem: [{ position: 25, label: 'Budget' }]
   @UI.fieldGroup: [{ qualifier: 'FinanceInfo', position: 20 }]
   Budget;
   

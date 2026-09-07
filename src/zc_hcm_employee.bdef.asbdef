@@ -23,16 +23,6 @@ use etag
 
   use association _Contact { create; with draft; }
   use association _BankDetails { create; with draft; }
-
-  /* We comment out the other associations for now because they aren't
-     defined in the ZI Behavior Definition yet. We can add them later! */
-  // use association _OrgAssign { create; }
-  // use association _LegalContract { create; }
-  // use association _Education { create; }
-  // use association _Skills { create; }
-  // use association _Emergency { create; }
-  // use association _Dependents { create; }
-  // use association _Documents { create; }
 }
 
 define behavior for ZC_HCM_Contact alias Contact

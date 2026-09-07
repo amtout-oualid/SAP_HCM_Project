@@ -23,7 +23,7 @@ define root view entity ZC_HCM_Employee
   @Search.defaultSearchElement: true
   EmployeeStatus,
   
-  StatusCriticality, /* EXPOSED FOR UI COLORING */
+  StatusCriticality,
   
   PhotoUrl,
   HireDate,
@@ -37,6 +37,6 @@ define root view entity ZC_HCM_Employee
   LocalLastChangedAt,
 
   /* Associations */
-  _Contact : redirected to composition child ZC_HCM_Contact,
-  _BankDetails : redirected to composition child ZC_HCM_BankDetl
+  _Contact      : redirected to composition child ZC_HCM_Contact,
+  _BankDetails  : redirected to composition child ZC_HCM_BankDetl
 }
