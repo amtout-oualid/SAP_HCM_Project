@@ -1,32 +1,42 @@
 @Metadata.layer: #CUSTOMER
 @UI.headerInfo: {
-  typeName: 'Talent Pool Entry',
-  typeNamePlural: 'Talent Pool'
+  typeName: 'Talent Pool Candidate',
+  typeNamePlural: 'Talent Pool Candidates',
+  title: { type: #STANDARD, value: 'CandidateName' },
+  description: { type: #STANDARD, value: 'CandidateEmail' }
 }
-annotate view ZC_HCM_TalentPool with
+annotate view ZC_HCM_TALENTPOOL with
 {
   @UI.facet: [{ id: 'TalentDetails', type: #IDENTIFICATION_REFERENCE, label: 'Details', position: 10 }]
 
   @UI.hidden: true
   PoolId;
 
-  @UI.lineItem: [{ position: 10 }]
-  @UI.identification: [{ position: 10 }]
-  FirstName;
+  @UI.hidden: true
+  CandidateId;
 
-  @UI.lineItem: [{ position: 20 }]
-  @UI.identification: [{ position: 20 }]
-  LastName;
+  @UI.lineItem: [{ position: 10, label: 'Candidate Name' }]
+  @UI.identification: [{ position: 10, label: 'Candidate Name' }]
+  @UI.selectionField: [{ position: 10 }]
+  CandidateName;
 
-  @UI.lineItem: [{ position: 30 }]
-  @UI.identification: [{ position: 30 }]
-  Email;
+  @UI.lineItem: [{ position: 20, label: 'Email' }]
+  @UI.identification: [{ position: 20, label: 'Email' }]
+  CandidateEmail;
 
-  @UI.lineItem: [{ position: 40 }]
-  @UI.identification: [{ position: 60 }]
-  OriginalOffer;
+  @UI.lineItem: [{ position: 30, label: 'Skills' }]
+  @UI.identification: [{ position: 30, label: 'Skills' }]
+  Skills;
 
-  @UI.lineItem: [{ position: 50 }]
-  @UI.identification: [{ position: 70 }]
+  @UI.lineItem: [{ position: 40, label: 'AI Score' }]
+  @UI.identification: [{ position: 40, label: 'AI Score' }]
+  AiScore;
+
+  @UI.lineItem: [{ position: 50, label: 'Rejection Reason' }]
+  @UI.identification: [{ position: 50, label: 'Rejection Reason' }]
   RejectionReason;
+
+  @UI.lineItem: [{ position: 60, label: 'Added On' }]
+  @UI.identification: [{ position: 60, label: 'Added On' }]
+  AddedAt;
 }

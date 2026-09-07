@@ -1,5 +1,7 @@
 @EndUserText.label: 'Service Definition for Org Management UI'
 define service ZUI_HCM_ORG {
-  expose ZC_HCM_OrgUnit  as OrgUnit;
-  expose ZC_HCM_Position as Position;
+  expose ZC_HCM_OrgUnit          as OrgUnit;
+  expose ZC_HCM_Position         as Position;
+  expose I_Currency              as CurrencyVH;
+  expose ZI_HCM_VH_GenericStatus as GenericStatusVH;
 }

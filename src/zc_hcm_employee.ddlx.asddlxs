@@ -8,26 +8,43 @@
 annotate view ZC_HCM_Employee with
 {
   @UI.facet: [
-    { id: 'Core', type: #IDENTIFICATION_REFERENCE, label: 'Core Data', position: 10 },
-    { id: 'Contact', type: #LINEITEM_REFERENCE, label: 'Contact', position: 20, targetElement: '_Contact' },
-    { id: 'Bank', type: #LINEITEM_REFERENCE, label: 'Bank Details', position: 30, targetElement: '_BankDetails' }
+    { id: 'HeaderData',   type: #COLLECTION, label: 'Employee Profile', position: 10 },
+    { id: 'PersonalData', type: #FIELDGROUP_REFERENCE, label: 'Personal Information', parentId: 'HeaderData', position: 10, targetQualifier: 'FG_PERSONAL' },
+    { id: 'StatusData',   type: #FIELDGROUP_REFERENCE, label: 'Employment Status',     parentId: 'HeaderData', position: 20, targetQualifier: 'FG_EMPLOYMENT' },
+    { id: 'Contact',      type: #LINEITEM_REFERENCE,   label: 'Contact Details',       position: 20, targetElement: '_Contact' },
+    { id: 'Bank',         type: #LINEITEM_REFERENCE,   label: 'Bank Accounts',         position: 30, targetElement: '_BankDetails' }
   ]
 
   @UI.hidden: true
   EmployeeId;
   
   @UI.hidden: true
-  statuscriticality;
+  StatusCriticality;
 
   @UI.lineItem: [{ position: 10, label: 'First Name' }]
-  @UI.identification: [{ position: 10, label: 'First Name' }]
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 10, label: 'First Name' }]
   @UI.selectionField: [{ position: 10 }]
   FirstName;
 
   @UI.lineItem: [{ position: 20, label: 'Last Name' }]
-  @UI.identification: [{ position: 20, label: 'Last Name' }]
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 20, label: 'Last Name' }]
   @UI.selectionField: [{ position: 20 }]
   LastName;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 30, label: 'Date of Birth' }]
+  DateOfBirth;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 40, label: 'Place of Birth' }]
+  PlaceOfBirth;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 50, label: 'Gender' }]
+  Gender;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 60, label: 'Nationality' }]
+  Nationality;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_PERSONAL', position: 70, label: 'Marital Status' }]
+  MaritalStatus;
 
   /* Line Item Actions */
   @UI.lineItem: [{ position: 30, label: 'Status', criticality: 'StatusCriticality' },
@@ -37,16 +54,20 @@ annotate view ZC_HCM_Employee with
                  { type: #FOR_ACTION, dataAction: 'activateEmployee', label: 'Activate' },
                  { type: #FOR_ACTION, dataAction: 'terminateEmployee', label: 'Terminate' }]
   @UI.selectionField: [{ position: 30 }]
-  /* Header Actions */
-  @UI.identification: [{ position: 30, label: 'Status', criticality: 'StatusCriticality' },
-                 { type: #FOR_ACTION, dataAction: 'promoteEmployee', label: 'Promote' },
-                 { type: #FOR_ACTION, dataAction: 'transferEmployee', label: 'Transfer' },
-                 { type: #FOR_ACTION, dataAction: 'suspendEmployee', label: 'Suspend' },
-                 { type: #FOR_ACTION, dataAction: 'activateEmployee', label: 'Activate' },
-                 { type: #FOR_ACTION, dataAction: 'terminateEmployee', label: 'Terminate' }]
+
+  /* Header Page Actions & Field Group */
+  @UI.fieldGroup: [{ qualifier: 'FG_EMPLOYMENT', position: 10, label: 'Status', criticality: 'StatusCriticality' }]
+  @UI.identification: [{ type: #FOR_ACTION, dataAction: 'promoteEmployee', label: 'Promote' },
+                       { type: #FOR_ACTION, dataAction: 'transferEmployee', label: 'Transfer' },
+                       { type: #FOR_ACTION, dataAction: 'suspendEmployee', label: 'Suspend' },
+                       { type: #FOR_ACTION, dataAction: 'activateEmployee', label: 'Activate' },
+                       { type: #FOR_ACTION, dataAction: 'terminateEmployee', label: 'Terminate' }]
   EmployeeStatus;
 
   @UI.lineItem: [{ position: 40, label: 'Hire Date' }]
-  @UI.identification: [{ position: 40, label: 'Hire Date' }]
+  @UI.fieldGroup: [{ qualifier: 'FG_EMPLOYMENT', position: 20, label: 'Hire Date' }]
   HireDate;
+
+  @UI.fieldGroup: [{ qualifier: 'FG_EMPLOYMENT', position: 30, label: 'Termination Date' }]
+  TerminationDate;
 }

@@ -1,9 +1,8 @@
 CLASS lcl_buffer DEFINITION.
   PUBLIC SECTION.
-    " Buffer for employee data collected during the interaction phase.
-    " REASON: RAP strict(2) forbids cross-BO MODIFY ENTITIES in the interaction phase.
-    " approveAndCreateEmployee fills this buffer; lsc saver reads it in save_modified.
     TYPES: BEGIN OF ty_employee_data,
+             form_id         TYPE sysuuid_x16,
+             application_id  TYPE sysuuid_x16,
              first_name      TYPE string,
              last_name       TYPE string,
              nationality     TYPE string,
@@ -47,9 +46,10 @@ CLASS lhc_onboarding IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD submitForm.
+    GET TIME STAMP FIELD DATA(lv_ts).
     MODIFY ENTITIES OF ZI_HCM_Onboarding IN LOCAL MODE
-      ENTITY Onboarding UPDATE FIELDS ( Status )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'S' ) ).
+      ENTITY Onboarding UPDATE FIELDS ( Status SubmittedAt )
+      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'S' SubmittedAt = lv_ts ) ).
 
     READ ENTITIES OF ZI_HCM_Onboarding IN LOCAL MODE
       ENTITY Onboarding ALL FIELDS WITH CORRESPONDING #( keys ) RESULT DATA(lt_result).
@@ -57,22 +57,17 @@ CLASS lhc_onboarding IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD approveAndCreateEmployee.
-    " =========================================================
-    " BUG-05 FIX:
-    " ORIGINAL CODE called MODIFY ENTITIES OF ZI_HCM_Employee directly
-    " inside this action (interaction phase). RAP strict(2) forbids
-    " cross-BO MODIFY ENTITIES in the interaction phase, causing
-    " BEHAVIOR_ILLEGAL_STATEMENT at runtime.
-    "
-    " FIX: Buffer the employee data in lcl_buffer here. The saver class
-    " lsc_ZI_HCM_ONBOARDING reads the buffer in save_modified, which IS
-    " legally permitted to call cross-BO MODIFY ENTITIES.
-    " =========================================================
+    GET TIME STAMP FIELD DATA(lv_now).
 
-    " 1. Mark onboarding record as Approved
+    " 1. Mark onboarding record as Approved, stamped with Approver & Timestamp
     MODIFY ENTITIES OF ZI_HCM_Onboarding IN LOCAL MODE
-      ENTITY Onboarding UPDATE FIELDS ( Status )
-      WITH VALUE #( FOR key IN keys ( %tky = key-%tky Status = 'A' ) ).
+      ENTITY Onboarding UPDATE FIELDS ( Status ApprovedBy ApprovedAt )
+      WITH VALUE #( FOR key IN keys (
+        %tky       = key-%tky
+        Status     = 'A'
+        ApprovedBy = sy-uname
+        ApprovedAt = lv_now
+      ) ).
 
     " 2. Read full form data for all approved records
     READ ENTITIES OF ZI_HCM_Onboarding IN LOCAL MODE
@@ -81,6 +76,8 @@ CLASS lhc_onboarding IMPLEMENTATION.
     " 3. Buffer employee data — actual employee creation happens in lsc save_modified
     LOOP AT lt_forms INTO DATA(ls_form).
       APPEND VALUE #(
+        form_id        = ls_form-FormId
+        application_id = ls_form-ApplicationId
         first_name     = ls_form-FirstName
         last_name      = ls_form-LastName
         nationality    = ls_form-Nationality
@@ -113,12 +110,6 @@ CLASS lhc_onboarding IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
-*----------------------------------------------------------------------*
-* SAVER CLASS — lsc_ZI_HCM_ONBOARDING
-* Enabled by 'with additional save' in zi_hcm_onboarding.bdef.asbdef.
-* This is the ONLY place where cross-BO MODIFY ENTITIES on ZI_HCM_Employee
-* is legally permitted under RAP strict(2).
-*----------------------------------------------------------------------*
 CLASS lsc_ZI_HCM_ONBOARDING DEFINITION INHERITING FROM cl_abap_behavior_saver.
   PROTECTED SECTION.
     METHODS save_modified    REDEFINITION.
@@ -127,8 +118,6 @@ ENDCLASS.
 
 CLASS lsc_ZI_HCM_ONBOARDING IMPLEMENTATION.
   METHOD save_modified.
-    " Create Employee records from the buffered onboarding data.
-    " Cross-BO MODIFY ENTITIES is legal in the save sequence.
     IF lcl_buffer=>mt_employee_data IS INITIAL.
       RETURN.
     ENDIF.
@@ -140,6 +129,7 @@ CLASS lsc_ZI_HCM_ONBOARDING IMPLEMENTATION.
       DATA(lv_con_cid) = |CON_{ lv_counter }|.
       DATA(lv_bnk_cid) = |BNK_{ lv_counter }|.
 
+      " 1. Create Employee master, Contact, and Bank Details in ZI_HCM_Employee
       MODIFY ENTITIES OF ZI_HCM_Employee ENTITY Employee
         CREATE SET FIELDS WITH VALUE #( (
              %cid           = lv_emp_cid
@@ -165,13 +155,63 @@ CLASS lsc_ZI_HCM_ONBOARDING IMPLEMENTATION.
                   BankName      = ls_emp-bank_name
                   AccountNumber = ls_emp-bank_account
                   Iban          = ls_emp-iban ) ) ) )
+        MAPPED   DATA(lt_mapped)
         REPORTED DATA(lt_reported)
         FAILED   DATA(lt_failed).
+
+      IF lt_failed IS INITIAL AND line_exists( lt_mapped-employee[ %cid = lv_emp_cid ] ).
+        DATA(lv_new_emp_id) = lt_mapped-employee[ %cid = lv_emp_cid ]-EmployeeId.
+
+        " 2. Link newly generated Employee ID back into Onboarding form
+        UPDATE zhcm_onboardng
+          SET employee_id = @lv_new_emp_id
+          WHERE form_id = @ls_emp-form_id.
+
+        " 3. Mark Application as officially HIRED ('H')
+        UPDATE zhcm_applicatn
+          SET overall_status = 'H'
+          WHERE application_id = @ls_emp-application_id.
+
+        " 4. Automatically generate Organizational Assignment
+        SELECT SINGLE offer_id FROM zhcm_applicatn
+          WHERE application_id = @ls_emp-application_id
+          INTO @DATA(lv_offer_id).
+
+        IF sy-subrc = 0.
+          SELECT SINGLE title, department FROM zhcm_joboffer
+            WHERE offer_id = @lv_offer_id
+            INTO (@DATA(lv_job_title), @DATA(lv_dept)).
+
+          IF sy-subrc = 0.
+            SELECT SINGLE position_id, org_unit_id FROM zhcm_position
+              WHERE job_title = @lv_job_title
+              INTO (@DATA(lv_pos_id), @DATA(lv_org_id)).
+
+            DATA(lv_asg_id) = cl_system_uuid=>create_uuid_x16_static( ).
+            INSERT zhcm_orgassign FROM @( VALUE #(
+              client            = sy-mandt
+              org_assignment_id = lv_asg_id
+              employee_id       = lv_new_emp_id
+              position_id       = lv_pos_id
+              org_unit_id       = lv_org_id
+              job_title         = lv_job_title
+              department        = lv_dept
+              valid_from        = cl_abap_context_info=>get_system_date( )
+              valid_to          = '99991231'
+            ) ).
+
+            IF lv_pos_id IS NOT INITIAL.
+              UPDATE zhcm_position
+                SET status = 'F'
+                WHERE position_id = @lv_pos_id.
+            ENDIF.
+          ENDIF.
+        ENDIF.
+      ENDIF.
     ENDLOOP.
   ENDMETHOD.
 
   METHOD cleanup_finalize.
-    " Always clear the buffer after each LUW to prevent stale data leaking into the next transaction
     CLEAR lcl_buffer=>mt_employee_data.
   ENDMETHOD.
 ENDCLASS.

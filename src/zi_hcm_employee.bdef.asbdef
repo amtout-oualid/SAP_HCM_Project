@@ -8,7 +8,7 @@ draft table zhcm_employ_d
 with additional save
 lock master
 total etag LastChangedAt
-authorization master ( instance )
+authorization master ( global, instance )
 etag master LocalLastChangedAt
 {
   create; update; delete;

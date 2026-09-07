@@ -19,7 +19,7 @@ annotate view ZC_HCM_Application with
   @UI.hidden: true
   CandidateId;
   @UI.hidden: true
-  statuscriticality;
+  StatusCriticality;
 
   @UI.lineItem: [{ position: 10, label: 'First Name', importance: #HIGH }]
   @UI.identification: [{ position: 5, label: 'First Name' }]
@@ -60,14 +60,19 @@ annotate view ZC_HCM_Application with
                  { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate AI' },
                  { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Next Step' },
                  { type: #FOR_ACTION, dataAction: 'rejectCandidate', label: 'Reject' },
-                 { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept Candidate' }]
+                 { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept Candidate' },
+                 { type: #FOR_ACTION, dataAction: 'putOnHold', label: 'Put On Hold' }]
   @UI.selectionField: [{ position: 40 }]
+
   /* Header Page Actions */
   @UI.identification: [{ position: 60, label: 'Overall Status', criticality: 'StatusCriticality' },
                  { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate AI' },
                  { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Next Step' },
                  { type: #FOR_ACTION, dataAction: 'rejectCandidate', label: 'Reject' },
-                 { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept Candidate' }]
+                 { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept Candidate' },
+                 { type: #FOR_ACTION, dataAction: 'putOnHold', label: 'Put On Hold' },
+                 { type: #FOR_ACTION, dataAction: 'addNote', label: 'Add HR Note' },
+                 { type: #FOR_ACTION, dataAction: 'sendMail', label: 'Send Email' }]
   OverallStatus;
 
   @UI.identification: [{ position: 80, label: 'Notice Period' }]

@@ -18,11 +18,25 @@ CLASS lsc_ZI_HCM_EMPLOYEE IMPLEMENTATION.
       CLEAR lcl_buffer=>mt_emp_hist.
     ENDIF.
     LOOP AT lcl_buffer=>mt_orgassign_update INTO DATA(ls_org).
-      IF ls_org-position_id IS NOT INITIAL.
-        UPDATE zhcm_orgassign SET position_id = @ls_org-position_id WHERE employee_id = @ls_org-employee_id.
-      ENDIF.
-      IF ls_org-department IS NOT INITIAL.
-        UPDATE zhcm_orgassign SET department = @ls_org-department WHERE employee_id = @ls_org-employee_id.
+      SELECT SINGLE FROM zhcm_orgassign FIELDS org_assignment_id WHERE employee_id = @ls_org-employee_id INTO @DATA(lv_existing_asg).
+      IF sy-subrc = 0.
+        IF ls_org-position_id IS NOT INITIAL.
+          UPDATE zhcm_orgassign SET position_id = @ls_org-position_id WHERE employee_id = @ls_org-employee_id.
+        ENDIF.
+        IF ls_org-department IS NOT INITIAL.
+          UPDATE zhcm_orgassign SET department = @ls_org-department WHERE employee_id = @ls_org-employee_id.
+        ENDIF.
+      ELSE.
+        DATA(lv_new_asg_id) = cl_system_uuid=>create_uuid_x16_static( ).
+        INSERT zhcm_orgassign FROM @( VALUE #(
+          client = sy-mandt
+          org_assignment_id = lv_new_asg_id
+          employee_id = ls_org-employee_id
+          position_id = ls_org-position_id
+          department = ls_org-department
+          valid_from = cl_abap_context_info=>get_system_date( )
+          valid_to = '99991231'
+        ) ).
       ENDIF.
     ENDLOOP.
     CLEAR lcl_buffer=>mt_orgassign_update.
@@ -31,6 +45,9 @@ ENDCLASS.
 
 CLASS lhc_employee DEFINITION INHERITING FROM cl_abap_behavior_handler.
   PRIVATE SECTION.
+    METHODS get_global_authorizations FOR GLOBAL AUTHORIZATION
+      IMPORTING REQUEST requested_authorizations FOR Employee RESULT result.
+
     METHODS get_instance_authorizations FOR INSTANCE AUTHORIZATION
       IMPORTING keys REQUEST requested_authorizations FOR Employee RESULT result.
 
@@ -53,6 +70,18 @@ CLASS lhc_employee DEFINITION INHERITING FROM cl_abap_behavior_handler.
 ENDCLASS.
 
 CLASS lhc_employee IMPLEMENTATION.
+  METHOD get_global_authorizations.
+    IF requested_authorizations-%create = if_abap_behv=>mk-on.
+      result-%create = if_abap_behv=>auth-allowed.
+    ENDIF.
+    IF requested_authorizations-%update = if_abap_behv=>mk-on.
+      result-%update = if_abap_behv=>auth-allowed.
+    ENDIF.
+    IF requested_authorizations-%delete = if_abap_behv=>mk-on.
+      result-%delete = if_abap_behv=>auth-allowed.
+    ENDIF.
+  ENDMETHOD.
+
   METHOD get_instance_authorizations.
     LOOP AT keys INTO DATA(key).
       APPEND VALUE #( %tky = key-%tky
@@ -85,14 +114,12 @@ CLASS lhc_employee IMPLEMENTATION.
       ENTITY Employee FIELDS ( EmployeeStatus ) WITH CORRESPONDING #( keys ) RESULT DATA(employees).
 
     MODIFY ENTITIES OF ZI_HCM_Employee IN LOCAL MODE
-      ENTITY Employee UPDATE FIELDS ( EmployeeStatus )
+      ENTITY Employee UPDATE FIELDS ( EmployeeStatus HireDate )
         WITH VALUE #( FOR emp IN employees WHERE ( EmployeeStatus IS INITIAL )
             ( %tky = emp-%tky EmployeeStatus = 'A' HireDate = cl_abap_context_info=>get_system_date( ) ) ).
   ENDMETHOD.
 
   METHOD promoteEmployee.
-    " PositionId, Salary, CurrencyCode do not exist on ZI_HCM_Employee BDEF directly.
-    " Buffer the OrgAssign update for save_modified.
     LOOP AT keys INTO DATA(key).
       APPEND VALUE #(
         employee_id = key-EmployeeId
@@ -148,8 +175,6 @@ CLASS lhc_employee IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD transferEmployee.
-    " DepartmentId does not exist on ZI_HCM_Employee BDEF directly.
-    " Buffer the OrgAssign update for save_modified.
     LOOP AT keys INTO DATA(key).
       APPEND VALUE #(
         employee_id = key-EmployeeId

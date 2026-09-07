@@ -18,10 +18,12 @@ annotate view ZC_HCM_JobOffer with
 
   @UI.lineItem: [{ position: 10, importance: #HIGH, label: 'Title' }, 
                  { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' }, 
-                 { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' }]
+                 { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' },
+                 { type: #FOR_ACTION, dataAction: 'reopenOffer', label: 'Reopen Offer' }]
   @UI.identification: [{ position: 10, label: 'Job Title' },
                        { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' }, 
-                       { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' }]
+                       { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' },
+                       { type: #FOR_ACTION, dataAction: 'reopenOffer', label: 'Reopen Offer' }]
   @UI.selectionField: [{ position: 30 }]
   @Search.defaultSearchElement: true
   Title;
@@ -65,18 +67,17 @@ annotate view ZC_HCM_JobOffer with
   @UI.identification: [{ position: 110, label: 'Maximum Salary' }]
   SalaryMax;
 
-  /* Hiding this so Fiori only displays it directly inside the Min/Max Salary fields! */
   @UI.hidden: true
   @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
   CurrencyCode;
-
-  @UI.hidden: true
-  Status;
 
   @UI.lineItem: [{ position: 30, label: 'Status' }]
   @UI.identification: [{ position: 140, label: 'Status' }]
   @UI.selectionField: [{ position: 10 }]
   @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_JobStatus', element: 'Status' } }]
+  Status;
+
+  @UI.hidden: true
   StatusText;
 
   @UI.lineItem: [{ position: 60, label: 'Valid Until' }]
