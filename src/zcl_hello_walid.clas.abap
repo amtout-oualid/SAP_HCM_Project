@@ -12,7 +12,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_hello_walid IMPLEMENTATION.
+CLASS ZCL_HELLO_WALID IMPLEMENTATION.
 
 
   METHOD if_oo_adt_classrun~main.

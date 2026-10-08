@@ -7,7 +7,11 @@ CLASS zcl_print_amtout DEFINITION
     INTERFACES if_oo_adt_classrun.
 ENDCLASS.
 
-CLASS zcl_print_amtout IMPLEMENTATION.
+
+
+CLASS ZCL_PRINT_AMTOUT IMPLEMENTATION.
+
+
   METHOD if_oo_adt_classrun~main.
     out->write( 'Hello World' ).
   ENDMETHOD.
