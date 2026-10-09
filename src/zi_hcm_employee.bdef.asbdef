@@ -20,7 +20,8 @@ etag master LocalLastChangedAt
   draft determine action Prepare;
 
   field ( readonly, numbering : managed ) EmployeeId;
-  field ( readonly ) HireDate, EmployeeStatus;
+  field ( readonly ) HireDate, EmployeeStatus, TerminationDate, StatusCriticality,
+                     CreatedBy, CreatedAt, LastChangedBy, LastChangedAt, LocalLastChangedAt;
 
   determination setDefaultStatus on modify { create; }
 
@@ -32,6 +33,8 @@ etag master LocalLastChangedAt
 
   association _Contact { create; with draft; }
   association _BankDetails { create; with draft; }
+  association _Emergency { create; with draft; }
+  association _OrgAssign { create; with draft; }
 
   mapping for zhcm_employee
   {
@@ -99,6 +102,58 @@ etag master LocalLastChangedAt
     AccountNumber      = account_number;
     Iban               = iban;
     BicSwift           = bic_swift;
+    LocalLastChangedAt = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_Emergency alias Emergency
+persistent table zhcm_emergency
+draft table zhcm_d_emergency
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update; delete;
+  field ( readonly, numbering : managed ) EmContactId;
+  field ( readonly ) EmployeeId;
+  field ( mandatory ) ContactName;
+  association _Employee { with draft; }
+
+  mapping for zhcm_emergency
+  {
+    EmContactId        = em_contact_id;
+    EmployeeId         = employee_id;
+    ContactName        = contact_name;
+    Relationship       = relationship;
+    Phone              = phone_number;
+    IsPrimary          = is_primary;
+    LocalLastChangedAt = local_last_changed_at;
+  }
+}
+
+define behavior for ZI_HCM_OrgAssign alias OrgAssign
+persistent table zhcm_orgassign
+draft table zhcm_d_orgassign
+lock dependent by _Employee
+authorization dependent by _Employee
+etag master LocalLastChangedAt
+{
+  update; delete;
+  field ( readonly, numbering : managed ) AssignId;
+  field ( readonly ) EmployeeId;
+  association _Employee { with draft; }
+
+  mapping for zhcm_orgassign
+  {
+    AssignId           = org_assignment_id;
+    EmployeeId         = employee_id;
+    PositionId         = position_id;
+    OrgUnitId          = org_unit_id;
+    JobTitle           = job_title;
+    Department         = department;
+    ManagerId          = manager_id;
+    ValidFrom          = valid_from;
+    ValidTo            = valid_to;
     LocalLastChangedAt = local_last_changed_at;
   }
 }

@@ -1,15 +1,18 @@
 @EndUserText.label: 'Service Definition for Recruitment UI'
 define service ZUI_HCM_RECRUIT {
-  expose ZC_HCM_JobOffer        as JobOffer;
-  expose ZC_HCM_Application     as Application;
-  expose ZC_HCM_Candidate       as Candidate;
-  expose ZC_HCM_TALENTPOOL      as TalentPool;
-  expose ZC_HCM_Onboarding      as Onboarding;
-  expose ZC_HCM_OrgUnit         as OrgUnit;
-  expose ZI_HCM_VH_ExpLevel     as ExpLevelVH;
-  expose ZI_HCM_VH_ContractType as ContractTypeVH;
-  expose ZI_HCM_VH_JobStatus    as JobStatusVH;
-  expose I_Currency             as CurrencyVH;
-  expose ZC_HCM_PipeTmpl        as PipeTmpl;
-  expose ZI_HCM_VH_StepType     as StepTypeVH;
+  expose ZC_HCM_JobOffer          as JobOffer;
+  expose ZC_HCM_Application       as Application;
+  expose ZC_HCM_PipeTmpl          as PipeTmpl;
+  expose ZC_HCM_PipeProg          as PipeProg;
+  expose ZC_HCM_Candidate         as Candidate;
+  expose ZC_HCM_TALENTPOOL        as TalentPool;
+  expose ZC_HCM_Onboarding        as Onboarding;
+  expose ZI_HCM_VH_ExpLevel       as ExpLevelVH;
+  expose ZI_HCM_VH_ContractType   as ContractTypeVH;
+  expose ZI_HCM_VH_JobStatus      as JobStatusVH;
+  expose ZI_HCM_VH_StepType       as StepTypeVH;
+  expose ZI_HCM_VH_AppStatus      as AppStatusVH;
+  expose ZI_HCM_VH_Department     as DepartmentVH;
+  expose ZI_HCM_VH_VacantPosition as VacantPositionVH;
+  expose I_Currency               as CurrencyVH;
 }

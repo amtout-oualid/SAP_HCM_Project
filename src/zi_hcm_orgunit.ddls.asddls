@@ -6,6 +6,8 @@ define root view entity ZI_HCM_OrgUnit
   composition [0..*] of ZI_HCM_Position as _Positions
   association [0..1] to ZI_HCM_OrgUnit as _ParentUnit
     on $projection.ParentOrgUnitId = _ParentUnit.OrgUnitId
+  association [0..1] to ZI_HCM_VH_GenericStatus as _OrgStatus
+    on $projection.Status = _OrgStatus.Status
 {
   @UI.hidden: true
   key Org.org_unit_id              as OrgUnitId,
@@ -18,9 +20,10 @@ define root view entity ZI_HCM_OrgUnit
       @ObjectModel.text.element: ['ParentUnitName']
       @EndUserText.label: 'Parent Org Unit'
       Org.parent_org_unit_id          as ParentOrgUnitId,
-      
+
+      @EndUserText.label: 'Parent Unit'
       Parent.unit_name            as ParentUnitName,
-      
+
       @EndUserText.label: 'Cost Center'
       Org.cost_center              as CostCenter,
       @Semantics.amount.currencyCode: 'CurrencyCode'
@@ -42,5 +45,6 @@ define root view entity ZI_HCM_OrgUnit
       Org.local_last_changed_at        as LocalLastChangedAt,
 
       _Positions,
-      _ParentUnit
+      _ParentUnit,
+      _OrgStatus
 }

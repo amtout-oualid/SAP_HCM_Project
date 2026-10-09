@@ -9,22 +9,29 @@ define root view entity ZC_HCM_JobOffer
   Title,
   Description,
   Department,
+
+  @ObjectModel.text.element: ['PositionTitle']
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_VacantPosition', element: 'PositionId' } }]
+  PositionId,
+  _Position.JobTitle as PositionTitle,
+
   RequiredSkills,
   ExperienceLevel,
   ContractType,
   Location,
   PositionsNeeded,
   PositionsFilled,
-  
+
   @Semantics.amount.currencyCode: 'CurrencyCode'
   SalaryMin,
-  
+
   @Semantics.amount.currencyCode: 'CurrencyCode'
   SalaryMax,
-  
+
   @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
   CurrencyCode,
-  
+
+  @ObjectModel.text.element: ['StatusText']
   Status,
   StatusText,
   AppDeadline,
@@ -33,13 +40,13 @@ define root view entity ZC_HCM_JobOffer
   CreatedBy,
   CreatedAt,
   LastChangedBy,
-  
+
   @Semantics.systemDateTime.lastChangedAt: true
   LastChangedAt,
-  
+
   @Semantics.systemDateTime.localInstanceLastChangedAt: true
   LocalLastChangedAt,
-  
+
   /* Associations */
   _Steps : redirected to composition child ZC_HCM_PipeTmpl,
   _Applications : redirected to composition child ZC_HCM_Application

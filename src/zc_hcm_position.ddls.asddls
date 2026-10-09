@@ -11,9 +11,11 @@ define view entity ZC_HCM_Position
   FteValue,
   Budget,
   CurrencyCode,
+  @ObjectModel.text.element: ['StatusText']
   Status,
+  _PosStatus.Description as StatusText,
   LocalLastChangedAt,
-  
+
   /* Associations */
   _OrgUnit : redirected to parent ZC_HCM_OrgUnit
 }

@@ -6,25 +6,27 @@ define root view entity ZC_HCM_Employee
   as projection on ZI_HCM_Employee
 {
   key EmployeeId,
-  
+
   @Search.defaultSearchElement: true
   FirstName,
-  
+
   @Search.defaultSearchElement: true
   LastName,
-  
+
   DateOfBirth,
   PlaceOfBirth,
   MaritalStatus,
   Nationality,
   Gender,
-  
+
+  @ObjectModel.text.element: ['EmployeeStatusText']
   @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_EmpStatus', element: 'Status' } }]
   @Search.defaultSearchElement: true
   EmployeeStatus,
-  
+  _EmpStatus.Description as EmployeeStatusText,
+
   StatusCriticality,
-  
+
   PhotoUrl,
   HireDate,
   TerminationDate,
@@ -38,5 +40,8 @@ define root view entity ZC_HCM_Employee
 
   /* Associations */
   _Contact      : redirected to composition child ZC_HCM_Contact,
-  _BankDetails  : redirected to composition child ZC_HCM_BankDetl
+  _BankDetails  : redirected to composition child ZC_HCM_BankDetl,
+  _Emergency    : redirected to composition child ZC_HCM_Emergency,
+  _OrgAssign    : redirected to composition child ZC_HCM_OrgAssign,
+  _History
 }

@@ -11,8 +11,10 @@ define root view entity ZI_HCM_TALENTPOOL as select from zhcm_talntpool
   ai_score as AiScore,
   skills as Skills,
   status as Status,
+  @Semantics.systemDateTime.createdAt: true
   added_at as AddedAt,
   notes as Notes,
   rejection_reason as RejectionReason,
+  @Semantics.systemDateTime.lastChangedAt: true
   last_changed_at as LastChangedAt
 }

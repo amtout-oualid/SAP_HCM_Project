@@ -1,3 +1,7 @@
+"! Demo data for the job board: two organizational units with vacant positions and three
+"! published job offers linked to those positions. The class only creates new records (nothing
+"! is deleted) and goes through the business objects, so every validation and determination runs.
+"! Run ZCL_HCM_POPULATE_STATUS first.
 CLASS zcl_data DEFINITION
   PUBLIC
   FINAL
@@ -5,196 +9,127 @@ CLASS zcl_data DEFINITION
 
   PUBLIC SECTION.
     INTERFACES if_oo_adt_classrun .
-  PROTECTED SECTION.
-  PRIVATE SECTION.
 ENDCLASS.
 
 CLASS zcl_data IMPLEMENTATION.
   METHOD if_oo_adt_classrun~main.
+    DATA(lv_today)    = cl_abap_context_info=>get_system_date( ).
+    DATA(lv_deadline) = CONV d( lv_today + 60 ).
+    DATA(lv_valid)    = CONV d( lv_today + 90 ).
 
-    out->write( 'Starting massive data seed for Cognitus HCM...' ).
-
-    " ======================================================================
-    " 1. CREATE ORGANIZATIONAL UNITS & POSITIONS
-    " ======================================================================
+    " 1. Organizational units with vacant positions (status V is set by the business object)
     MODIFY ENTITIES OF zi_hcm_orgunit
       ENTITY OrgUnit
-      CREATE FIELDS ( UnitName CostCenter Status )
-      WITH VALUE #(
-        ( %cid = 'ORG_GLOBAL' UnitName = 'Cognitus Global Headquarters' CostCenter = 'CC_GL_001' Status = 'A' )
-        ( %cid = 'ORG_ENG' UnitName = 'Engineering & Technology' CostCenter = 'CC_EN_002' Status = 'A' )
-        ( %cid = 'ORG_CLOUD' UnitName = 'Cloud Infrastructure' CostCenter = 'CC_CL_003' Status = 'A' )
-        ( %cid = 'ORG_DATA' UnitName = 'Data & AI Labs' CostCenter = 'CC_DA_004' Status = 'A' )
-        ( %cid = 'ORG_PRODUCT' UnitName = 'Product & Design' CostCenter = 'CC_PR_005' Status = 'A' )
-        ( %cid = 'ORG_SALES' UnitName = 'Global Sales & Marketing' CostCenter = 'CC_SA_006' Status = 'A' )
-        ( %cid = 'ORG_HR' UnitName = 'Human Resources & Talent' CostCenter = 'CC_HR_007' Status = 'A' )
-      )
-      CREATE BY \_Positions
-      FIELDS ( JobTitle IsManager FteValue Status )
-      WITH VALUE #(
-        ( %cid_ref = 'ORG_ENG' %target = VALUE #(
-            ( %cid = 'POS_E1' JobTitle = 'VP of Engineering' IsManager = abap_true FteValue = '1.00' Status = 'F' )
-            ( %cid = 'POS_E2' JobTitle = 'Senior Full-Stack Developer' IsManager = abap_false FteValue = '1.00' Status = 'O' )
-            ( %cid = 'POS_E3' JobTitle = 'Frontend React Engineer' IsManager = abap_false FteValue = '1.00' Status = 'O' )
-            ( %cid = 'POS_E4' JobTitle = 'Backend ABAP RAP Developer' IsManager = abap_false FteValue = '1.00' Status = 'O' )
-          )
-        )
-        ( %cid_ref = 'ORG_CLOUD' %target = VALUE #(
-            ( %cid = 'POS_C1' JobTitle = 'Cloud Architect' IsManager = abap_true FteValue = '1.00' Status = 'F' )
-            ( %cid = 'POS_C2' JobTitle = 'DevOps Engineer' IsManager = abap_false FteValue = '1.00' Status = 'O' )
-            ( %cid = 'POS_C3' JobTitle = 'Site Reliability Engineer' IsManager = abap_false FteValue = '1.00' Status = 'O' )
-          )
-        )
-        ( %cid_ref = 'ORG_DATA' %target = VALUE #(
-            ( %cid = 'POS_D1' JobTitle = 'Director of AI' IsManager = abap_true FteValue = '1.00' Status = 'O' )
-            ( %cid = 'POS_D2' JobTitle = 'Data Scientist' IsManager = abap_false FteValue = '1.00' Status = 'O' )
-            ( %cid = 'POS_D3' JobTitle = 'Machine Learning Engineer' IsManager = abap_false FteValue = '1.00' Status = 'O' )
-            ( %cid = 'POS_D4' JobTitle = 'Data Engineer' IsManager = abap_false FteValue = '1.00' Status = 'O' )
-          )
-        )
-      )
-      FAILED DATA(failed_org).
+        CREATE FIELDS ( UnitName Description CostCenter Budget CurrencyCode )
+        WITH VALUE #(
+          ( %cid = 'ORG_DATA' UnitName = 'Data & AI' Description = 'Data engineering and machine learning'
+            CostCenter = 'CC-3000' Budget = '250000' CurrencyCode = 'USD' )
+          ( %cid = 'ORG_CS'   UnitName = 'Customer Success' Description = 'Support and customer onboarding'
+            CostCenter = 'CC-4000' Budget = '120000' CurrencyCode = 'USD' ) )
+        CREATE BY \_Positions
+        FIELDS ( JobTitle IsManager FteValue Budget CurrencyCode )
+        WITH VALUE #(
+          ( %cid_ref = 'ORG_DATA'
+            %target  = VALUE #(
+              ( %cid = 'POS_DE'  JobTitle = 'Data Engineer'             IsManager = abap_false FteValue = '1.00' Budget = '70000' CurrencyCode = 'USD' )
+              ( %cid = 'POS_MLE' JobTitle = 'Machine Learning Engineer' IsManager = abap_false FteValue = '1.00' Budget = '85000' CurrencyCode = 'USD' ) ) )
+          ( %cid_ref = 'ORG_CS'
+            %target  = VALUE #(
+              ( %cid = 'POS_CS1' JobTitle = 'Customer Support Specialist' IsManager = abap_false FteValue = '1.00' Budget = '45000' CurrencyCode = 'USD' )
+              ( %cid = 'POS_CS2' JobTitle = 'Customer Support Specialist' IsManager = abap_false FteValue = '1.00' Budget = '45000' CurrencyCode = 'USD' ) ) ) )
+      MAPPED DATA(ls_org_mapped)
+      FAILED DATA(ls_org_failed).
 
-    " ======================================================================
-    " 2. CREATE JOB OFFERS & PIPELINES
-    " ======================================================================
-    MODIFY ENTITIES OF zi_hcm_joboffer
-      ENTITY JobOffer
-      CREATE FIELDS ( Title Department Location ContractType ExperienceLevel SalaryMin SalaryMax CurrencyCode PositionsNeeded Status ValidUntil )
-      WITH VALUE #(
-        ( %cid = 'JOB1' Title = 'Senior Full-Stack Developer' Department = 'Engineering' Location = 'Remote, USA'
-          ContractType = 'CDI' ExperienceLevel = 'Senior' SalaryMin = '9000' SalaryMax = '12000'
-          CurrencyCode = 'USD' PositionsNeeded = 3 Status = 'P' ValidUntil = '20261231' )
-
-        ( %cid = 'JOB2' Title = 'Cloud DevOps Engineer' Department = 'Infrastructure' Location = 'New York, USA'
-          ContractType = 'CDI' ExperienceLevel = 'Mid' SalaryMin = '8000' SalaryMax = '10000'
-          CurrencyCode = 'USD' PositionsNeeded = 2 Status = 'P' ValidUntil = '20261130' )
-
-        ( %cid = 'JOB3' Title = 'UI/UX Product Designer' Department = 'Design' Location = 'San Francisco, USA (Hybrid)'
-          ContractType = 'CDD' ExperienceLevel = 'Mid' SalaryMin = '6500' SalaryMax = '8500'
-          CurrencyCode = 'USD' PositionsNeeded = 1 Status = 'P' ValidUntil = '20261015' )
-
-        ( %cid = 'JOB4' Title = 'Director of AI Labs' Department = 'Data' Location = 'Boston, USA'
-          ContractType = 'CDI' ExperienceLevel = 'Lead / Manager' SalaryMin = '15000' SalaryMax = '20000'
-          CurrencyCode = 'USD' PositionsNeeded = 1 Status = 'P' ValidUntil = '20261201' )
-
-        ( %cid = 'JOB5' Title = 'Frontend React Engineer' Department = 'Engineering' Location = 'Berlin, Germany'
-          ContractType = 'CDI' ExperienceLevel = 'Entry' SalaryMin = '4000' SalaryMax = '5500'
-          CurrencyCode = 'EUR' PositionsNeeded = 5 Status = 'P' ValidUntil = '20260930' )
-
-        ( %cid = 'JOB6' Title = 'Backend ABAP RAP Developer' Department = 'Engineering' Location = 'Walldorf, Germany'
-          ContractType = 'CDI' ExperienceLevel = 'Senior' SalaryMin = '7000' SalaryMax = '9500'
-          CurrencyCode = 'EUR' PositionsNeeded = 2 Status = 'P' ValidUntil = '20261031' )
-
-        ( %cid = 'JOB7' Title = 'Site Reliability Engineer (SRE)' Department = 'Infrastructure' Location = 'London, UK'
-          ContractType = 'CDI' ExperienceLevel = 'Mid' SalaryMin = '6000' SalaryMax = '8000'
-          CurrencyCode = 'GBP' PositionsNeeded = 2 Status = 'P' ValidUntil = '20261115' )
-
-        ( %cid = 'JOB8' Title = 'Machine Learning Engineer' Department = 'Data' Location = 'Remote, Global'
-          ContractType = 'Contract' ExperienceLevel = 'Mid' SalaryMin = '7000' SalaryMax = '11000'
-          CurrencyCode = 'USD' PositionsNeeded = 4 Status = 'P' ValidUntil = '20261231' )
-
-        ( %cid = 'JOB9' Title = 'Data Engineer' Department = 'Data' Location = 'Toronto, USA'
-          ContractType = 'CDI' ExperienceLevel = 'Junior' SalaryMin = '5000' SalaryMax = '7000'
-          CurrencyCode = 'USD' PositionsNeeded = 2 Status = 'P' ValidUntil = '20261020' )
-
-        ( %cid = 'JOB10' Title = 'HR Talent Acquisition Specialist' Department = 'Human Resources' Location = 'Chicago, USA'
-          ContractType = 'CDD' ExperienceLevel = 'Mid' SalaryMin = '4500' SalaryMax = '6000'
-          CurrencyCode = 'USD' PositionsNeeded = 1 Status = 'P' ValidUntil = '20260915' )
-
-        ( %cid = 'JOB11' Title = 'IT Support Technician' Department = 'Infrastructure' Location = 'Austin, USA'
-          ContractType = 'Intern' ExperienceLevel = 'Entry' SalaryMin = '2000' SalaryMax = '3000'
-          CurrencyCode = 'USD' PositionsNeeded = 3 Status = 'P' ValidUntil = '20260831' )
-
-        ( %cid = 'JOB12' Title = 'Enterprise Sales Executive' Department = 'Sales' Location = 'Remote, EMEA'
-          ContractType = 'CDI' ExperienceLevel = 'Senior' SalaryMin = '8000' SalaryMax = '12000'
-          CurrencyCode = 'EUR' PositionsNeeded = 2 Status = 'P' ValidUntil = '20261231' )
-      )
-      CREATE BY \_Steps
-      FIELDS ( StepName StepType StepOrder )
-      WITH VALUE #(
-        ( %cid_ref = 'JOB1' %target = VALUE #(
-            ( %cid = 'J1S1' StepOrder = 1 StepName = 'CV Screening' StepType = 'SCREENING' )
-            ( %cid = 'J1S2' StepOrder = 2 StepName = 'Technical Problem Solving' StepType = 'TEST' )
-            ( %cid = 'J1S3' StepOrder = 3 StepName = 'HR Interview' StepType = 'MEETING' )
-            ( %cid = 'J1S4' StepOrder = 4 StepName = 'System Design Interview' StepType = 'MEETING' )
-          )
-        )
-        ( %cid_ref = 'JOB2' %target = VALUE #(
-            ( %cid = 'J2S1' StepOrder = 1 StepName = 'CV Screening' StepType = 'SCREENING' )
-            ( %cid = 'J2S2' StepOrder = 2 StepName = 'AWS Architecture Test' StepType = 'TEST' )
-            ( %cid = 'J2S3' StepOrder = 3 StepName = 'Technical Interview' StepType = 'MEETING' )
-          )
-        )
-        ( %cid_ref = 'JOB3' %target = VALUE #(
-            ( %cid = 'J3S1' StepOrder = 1 StepName = 'Portfolio Review' StepType = 'SCREENING' )
-            ( %cid = 'J3S2' StepOrder = 2 StepName = 'Figma Design Challenge' StepType = 'TEST' )
-            ( %cid = 'J3S3' StepOrder = 3 StepName = 'Culture Fit Interview' StepType = 'MEETING' )
-          )
-        )
-        ( %cid_ref = 'JOB4' %target = VALUE #(
-            ( %cid = 'J4S1' StepOrder = 1 StepName = 'Executive Screening' StepType = 'SCREENING' )
-            ( %cid = 'J4S2' StepOrder = 2 StepName = 'Leadership Interview' StepType = 'MEETING' )
-            ( %cid = 'J4S3' StepOrder = 3 StepName = 'Panel Presentation' StepType = 'MEETING' )
-          )
-        )
-        ( %cid_ref = 'JOB5' %target = VALUE #(
-            ( %cid = 'J5S1' StepOrder = 1 StepName = 'CV Screening' StepType = 'SCREENING' )
-            ( %cid = 'J5S2' StepOrder = 2 StepName = 'React Coding Challenge' StepType = 'TEST' )
-            ( %cid = 'J5S3' StepOrder = 3 StepName = 'Pair Programming' StepType = 'TEST' )
-            ( %cid = 'J5S4' StepOrder = 4 StepName = 'Final Interview' StepType = 'MEETING' )
-          )
-        )
-        ( %cid_ref = 'JOB6' %target = VALUE #(
-            ( %cid = 'J6S1' StepOrder = 1 StepName = 'CV Screening' StepType = 'SCREENING' )
-            ( %cid = 'J6S2' StepOrder = 2 StepName = 'ABAP RAP Concepts' StepType = 'TEST' )
-            ( %cid = 'J6S3' StepOrder = 3 StepName = 'Technical Interview' StepType = 'MEETING' )
-          )
-        )
-        ( %cid_ref = 'JOB8' %target = VALUE #(
-            ( %cid = 'J8S1' StepOrder = 1 StepName = 'CV Screening' StepType = 'SCREENING' )
-            ( %cid = 'J8S2' StepOrder = 2 StepName = 'Python/PyTorch Test' StepType = 'TEST' )
-            ( %cid = 'J8S3' StepOrder = 3 StepName = 'Model Deployment Interview' StepType = 'MEETING' )
-          )
-        )
-      )
-      FAILED DATA(failed_job).
-
-    " ======================================================================
-    " 3. CREATE EMPLOYEES (WORKERS)
-    " ======================================================================
-    MODIFY ENTITIES OF zi_hcm_employee
-      ENTITY Employee
-      CREATE FIELDS ( FirstName LastName DateOfBirth PlaceOfBirth Nationality Gender EmployeeStatus )
-      WITH VALUE #(
-        ( %cid = 'EMP1' FirstName = 'Sarah' LastName = 'Connor' DateOfBirth = '19850512' PlaceOfBirth = 'Los Angeles' Nationality = 'US' Gender = 'Female' EmployeeStatus = 'A' )
-        ( %cid = 'EMP2' FirstName = 'Michael' LastName = 'Chang' DateOfBirth = '19920822' PlaceOfBirth = 'San Francisco' Nationality = 'US' Gender = 'Male' EmployeeStatus = 'A' )
-        ( %cid = 'EMP3' FirstName = 'Elena' LastName = 'Rodriguez' DateOfBirth = '19881130' PlaceOfBirth = 'Madrid' Nationality = 'ES' Gender = 'Female' EmployeeStatus = 'A' )
-        ( %cid = 'EMP4' FirstName = 'David' LastName = 'Kim' DateOfBirth = '19950214' PlaceOfBirth = 'Seoul' Nationality = 'KR' Gender = 'Male' EmployeeStatus = 'A' )
-      )
-      CREATE BY \_Contact
-      FIELDS ( PersonalAddress PhoneNumber PersonalEmail WorkEmail )
-      WITH VALUE #(
-        ( %cid_ref = 'EMP1' %target = VALUE #( ( %cid = 'EMP1_C' PersonalAddress = '123 Tech Blvd, LA' PhoneNumber = '+1 555-0101' PersonalEmail = 'sarah.c@gmail.com' WorkEmail = 'sarah.connor@cognitus.com' ) ) )
-        ( %cid_ref = 'EMP2' %target = VALUE #( ( %cid = 'EMP2_C' PersonalAddress = '456 Bay Area, SF' PhoneNumber = '+1 555-0102' PersonalEmail = 'm.chang92@yahoo.com' WorkEmail = 'michael.chang@cognitus.com' ) ) )
-        ( %cid_ref = 'EMP3' %target = VALUE #( ( %cid = 'EMP3_C' PersonalAddress = '789 Gran Via, Madrid' PhoneNumber = '+34 600-0103' PersonalEmail = 'elena.r@hotmail.com' WorkEmail = 'elena.rodriguez@cognitus.com' ) ) )
-        ( %cid_ref = 'EMP4' %target = VALUE #( ( %cid = 'EMP4_C' PersonalAddress = '321 Gangnam, Seoul' PhoneNumber = '+82 10-0104' PersonalEmail = 'david.kim95@naver.com' WorkEmail = 'david.kim@cognitus.com' ) ) )
-      )
-      CREATE BY \_BankDetails
-      FIELDS ( BankName AccountNumber Iban )
-      WITH VALUE #(
-        ( %cid_ref = 'EMP1' %target = VALUE #( ( %cid = 'EMP1_B' BankName = 'Bank of America' AccountNumber = '100200300' Iban = 'US12BOFA100200300' ) ) )
-        ( %cid_ref = 'EMP2' %target = VALUE #( ( %cid = 'EMP2_B' BankName = 'Chase Bank' AccountNumber = '400500600' Iban = 'US34CHAS400500600' ) ) )
-      )
-      FAILED DATA(failed_emp).
-
-    COMMIT ENTITIES.
-
-    IF failed_job IS NOT INITIAL OR failed_org IS NOT INITIAL OR failed_emp IS NOT INITIAL.
-      out->write( 'Error creating dummy data. Check logs.' ).
-    ELSE.
-      out->write( 'Successfully created 12 Job Offers, pipelines, 7 Org Units, and Employees (Workers)!' ).
+    IF ls_org_failed IS NOT INITIAL.
+      ROLLBACK ENTITIES.
+      out->write( 'The organizational units could not be created.' ).
+      RETURN.
     ENDIF.
 
+    DATA(lv_pos_de)  = ls_org_mapped-position[ %cid = 'POS_DE' ]-PositionId.
+    DATA(lv_pos_mle) = ls_org_mapped-position[ %cid = 'POS_MLE' ]-PositionId.
+    DATA(lv_pos_cs)  = ls_org_mapped-position[ %cid = 'POS_CS1' ]-PositionId.
+
+    " 2. Job offers linked to the positions, each with its recruitment pipeline
+    MODIFY ENTITIES OF zi_hcm_joboffer
+      ENTITY JobOffer
+        CREATE FIELDS ( Title Description Department PositionId RequiredSkills ExperienceLevel ContractType
+                        Location PositionsNeeded SalaryMin SalaryMax CurrencyCode AppDeadline ValidUntil )
+        WITH VALUE #(
+          ( %cid = 'JOB_DE' Title = 'Data Engineer' Department = 'Data & AI' PositionId = lv_pos_de
+            Description = 'Build and operate the data pipelines that feed our analytics and AI products.'
+            RequiredSkills = 'Python, SQL, Apache Spark, ETL, Cloud'
+            ExperienceLevel = 'Mid Level' ContractType = 'Full-time' Location = 'Rabat (Hybrid)'
+            PositionsNeeded = 1 SalaryMin = '5000' SalaryMax = '7000' CurrencyCode = 'USD'
+            AppDeadline = lv_deadline ValidUntil = lv_valid )
+          ( %cid = 'JOB_MLE' Title = 'Machine Learning Engineer' Department = 'Data & AI' PositionId = lv_pos_mle
+            Description = 'Design, train and deploy machine learning models in production.'
+            RequiredSkills = 'Python, PyTorch, MLOps, Docker, Statistics'
+            ExperienceLevel = 'Senior Level' ContractType = 'Full-time' Location = 'Remote'
+            PositionsNeeded = 1 SalaryMin = '7000' SalaryMax = '10000' CurrencyCode = 'USD'
+            AppDeadline = lv_deadline ValidUntil = lv_valid )
+          ( %cid = 'JOB_CS' Title = 'Customer Support Specialist' Department = 'Customer Success' PositionId = lv_pos_cs
+            Description = 'Help our customers succeed with the product, by chat, e-mail and phone.'
+            RequiredSkills = 'Communication, English, French, CRM tools'
+            ExperienceLevel = 'Entry Level' ContractType = 'Full-time' Location = 'Casablanca'
+            PositionsNeeded = 2 SalaryMin = '2500' SalaryMax = '3500' CurrencyCode = 'USD'
+            AppDeadline = lv_deadline ValidUntil = lv_valid ) )
+        CREATE BY \_Steps
+        FIELDS ( StepOrder StepName StepType StepDescription )
+        WITH VALUE #(
+          ( %cid_ref = 'JOB_DE'
+            %target  = VALUE #(
+              ( %cid = 'DE_1' StepOrder = 1 StepName = 'CV Screening'        StepType = 'SCREEN' StepDescription = 'Your resume is reviewed by HR and our AI assistant.' )
+              ( %cid = 'DE_2' StepOrder = 2 StepName = 'Technical Test'      StepType = 'TECH'   StepDescription = 'A SQL and Python exercise.' )
+              ( %cid = 'DE_3' StepOrder = 3 StepName = 'Final Interview'     StepType = 'INTERV' StepDescription = 'Meet the team lead and HR.' ) ) )
+          ( %cid_ref = 'JOB_MLE'
+            %target  = VALUE #(
+              ( %cid = 'ML_1' StepOrder = 1 StepName = 'CV Screening'        StepType = 'SCREEN' StepDescription = 'Your resume is reviewed by HR and our AI assistant.' )
+              ( %cid = 'ML_2' StepOrder = 2 StepName = 'Case Study'          StepType = 'TECH'   StepDescription = 'Present a model you built and its results.' )
+              ( %cid = 'ML_3' StepOrder = 3 StepName = 'Final Interview'     StepType = 'INTERV' StepDescription = 'Meet the head of Data & AI.' ) ) )
+          ( %cid_ref = 'JOB_CS'
+            %target  = VALUE #(
+              ( %cid = 'CS_1' StepOrder = 1 StepName = 'CV Screening'        StepType = 'SCREEN' StepDescription = 'Your resume is reviewed by HR.' )
+              ( %cid = 'CS_2' StepOrder = 2 StepName = 'HR Interview'        StepType = 'INTERV' StepDescription = 'A short call about your motivation.' ) ) ) )
+      MAPPED DATA(ls_job_mapped)
+      FAILED DATA(ls_job_failed).
+
+    IF ls_job_failed IS NOT INITIAL.
+      ROLLBACK ENTITIES.
+      out->write( 'The job offers could not be created.' ).
+      RETURN.
+    ENDIF.
+
+    " 3. Publication through the business action (status D -> P)
+    MODIFY ENTITIES OF zi_hcm_joboffer
+      ENTITY JobOffer
+        EXECUTE publishOffer
+        FROM VALUE #( FOR ls_job IN ls_job_mapped-joboffer ( OfferId = ls_job-OfferId ) )
+      FAILED DATA(ls_publish_failed).
+
+    IF ls_publish_failed IS NOT INITIAL.
+      ROLLBACK ENTITIES.
+      out->write( 'The job offers could not be published.' ).
+      RETURN.
+    ENDIF.
+
+    " 4. One save for both business objects (validations run here; sy-subrc covers both)
+    COMMIT ENTITIES
+      RESPONSE OF zi_hcm_joboffer
+      FAILED DATA(ls_commit_failed)
+      REPORTED DATA(ls_commit_reported).
+
+    IF sy-subrc = 0.
+      out->write( 'Demo data created: 2 organizational units, 4 vacant positions, 3 published job offers.' ).
+    ELSE.
+      out->write( 'The demo data could not be saved:' ).
+      LOOP AT ls_commit_reported-joboffer INTO DATA(ls_job_message) WHERE %msg IS BOUND.
+        out->write( ls_job_message-%msg->if_message~get_text( ) ).
+      ENDLOOP.
+      IF ls_commit_failed-joboffer IS INITIAL.
+        out->write( 'An organizational unit or position was rejected. Check that ZCL_HCM_POPULATE_STATUS was run.' ).
+      ENDIF.
+      ROLLBACK ENTITIES.
+    ENDIF.
   ENDMETHOD.
 ENDCLASS.

@@ -2,6 +2,7 @@
 @EndUserText.label: 'Value Help for Application Status'
 @ObjectModel.resultSet.sizeCategory: #XS
 define view entity ZI_HCM_VH_AppStatus as select from zhcm_appstat {
+      @ObjectModel.text.element: ['Description']
   key status as Status,
-  description as Description
+      description as Description
 }

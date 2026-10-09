@@ -1,9 +1,14 @@
 @Metadata.layer: #CUSTOMER
-@UI.headerInfo: { typeName: 'Bank Detail', typeNamePlural: 'Bank Details' }
+@UI.headerInfo: { typeName: 'Bank Detail', typeNamePlural: 'Bank Details',
+                  title: { type: #STANDARD, value: 'BankName' } }
 annotate view ZC_HCM_BankDetl with {
+  @UI.facet: [{ id: 'Details', type: #IDENTIFICATION_REFERENCE, label: 'Bank Account', position: 10 }]
+
   @UI.hidden: true BankId;
   @UI.hidden: true EmployeeId;
-  @UI.lineItem: [{ position: 10 }] @UI.identification: [{ position: 10 }] BankName;
-  @UI.lineItem: [{ position: 20 }] @UI.identification: [{ position: 20 }] AccountNumber;
-  @UI.lineItem: [{ position: 30 }] @UI.identification: [{ position: 30 }] Iban;
+  @UI.hidden: true LocalLastChangedAt;
+  @UI.lineItem: [{ position: 10, label: 'Bank' }]           @UI.identification: [{ position: 10, label: 'Bank' }]           BankName;
+  @UI.lineItem: [{ position: 20, label: 'Account Number' }] @UI.identification: [{ position: 20, label: 'Account Number' }] AccountNumber;
+  @UI.lineItem: [{ position: 30, label: 'IBAN' }]           @UI.identification: [{ position: 30, label: 'IBAN' }]           Iban;
+  @UI.lineItem: [{ position: 40, label: 'BIC / SWIFT' }]    @UI.identification: [{ position: 40, label: 'BIC / SWIFT' }]    BicSwift;
 }

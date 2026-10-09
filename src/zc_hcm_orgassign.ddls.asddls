@@ -14,9 +14,7 @@ define view entity ZC_HCM_OrgAssign
   ValidFrom,
   ValidTo,
   LocalLastChangedAt,
-  
+
   /* Associations */
-  _Employee : redirected to parent ZC_HCM_Employee,
-  _OrgUnit : redirected to ZC_HCM_OrgUnit,
-  _Position : redirected to ZC_HCM_Position
+  _Employee : redirected to parent ZC_HCM_Employee
 }

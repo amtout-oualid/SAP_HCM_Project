@@ -17,9 +17,18 @@ etag master LocalLastChangedAt
   draft action Activate optimized;
   draft action Discard;
   draft action Resume;
-  draft determine action Prepare;
+  draft determine action Prepare
+  {
+    validation validateMandatoryFields;
+    validation validateApplicationDeadline;
+    validation validatePositionVacant;
+    validation validateBeforePublish;
+    validation PipeTmpl~validateMandatorySteps;
+  }
 
   field ( readonly, numbering : managed ) OfferId;
+  field ( readonly ) Status, StatusText, PositionsFilled, PublishedAt,
+                     CreatedBy, CreatedAt, LastChangedBy, LastChangedAt, LocalLastChangedAt;
   field ( mandatory ) Title, Department;
 
   action ( features : instance, authorization : instance ) publishOffer result [1] $self;
@@ -27,11 +36,13 @@ etag master LocalLastChangedAt
   action ( features : instance, authorization : instance ) reopenOffer result [1] $self;
 
   validation validateBeforePublish on save { create; update; }
-  validation validateApplicationDeadline on save { create; update; }
+  validation validateApplicationDeadline on save { create; update; field AppDeadline, ValidUntil; }
   validation validateMandatoryFields on save { create; update; field Title, Department; }
+  validation validatePositionVacant on save { create; field PositionId; }
   determination autoCloseOnDeadline on save { field AppDeadline; }
 
   determination setDefaultValues on modify { create; }
+  determination deriveFromPosition on modify { field PositionId; }
 
   association _Applications { create; with draft; }
   association _Steps { create; with draft; }
@@ -42,6 +53,7 @@ etag master LocalLastChangedAt
     Title = title;
     Description = description;
     Department = department;
+    PositionId = position_id;
     RequiredSkills = required_skills;
     ExperienceLevel = experience_level;
     ContractType = contract_type;
@@ -70,12 +82,19 @@ lock dependent by _Offer
 authorization dependent by _Offer
 etag master LocalLastChangedAt
 {
-  update ( features : instance );
-  delete;
+  update;
+  delete ( features : instance );
+
   field ( readonly, numbering : managed ) ApplicationId;
-  field ( readonly ) OfferId, CandidateId;
+  field ( readonly ) OfferId, OverallStatus, CurrentStepOrder, AppliedAt,
+                     AiMatchScore, AiRecommendation, AiSummary,
+                     StatusCriticality, AiCriticality, LocalLastChangedAt;
+  field ( readonly : update ) CandidateId;
+
+  determination setApplicationDefaults on modify { create; }
 
   action ( features : instance, authorization : update ) evaluateWithAI result [1] $self;
+  action ( authorization : update ) setAIEvaluation parameter ZA_HCM_AIResult result [1] $self;
   action ( features : instance, authorization : update ) passToNextStep result [1] $self;
   action ( features : instance, authorization : update ) acceptToPost parameter ZA_HCM_HireInfo result [1] $self;
 
@@ -100,9 +119,13 @@ etag master LocalLastChangedAt
     CurrentStepOrder = current_step_order;
     OverallStatus = overall_status;
     AiMatchScore = ai_match_score;
+    AiRecommendation = ai_recommendation;
+    AiSummary = ai_summary;
     NoticePeriod = notice_period;
     SalaryExpectation = salary_expectation;
     CurrencyCode = currency_code;
+    RejectionReason = rejection_reason;
+    InternalNotes = internal_notes;
     LocalLastChangedAt = local_last_changed_at;
   }
 }
@@ -120,6 +143,7 @@ etag master LocalLastChangedAt
 
   field ( mandatory ) StepName, StepType, StepOrder;
 
+  determination setStepOrder on modify { create; }
   validation validateMandatorySteps on save { create; update; field StepName, StepType, StepOrder; }
 
   association _Offer { with draft; }

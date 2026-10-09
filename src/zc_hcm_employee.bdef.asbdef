@@ -23,6 +23,9 @@ use etag
 
   use association _Contact { create; with draft; }
   use association _BankDetails { create; with draft; }
+  use association _Emergency { create; with draft; }
+  // Assignments are maintained by hire, promote, transfer and terminate only
+  use association _OrgAssign { with draft; }
 }
 
 define behavior for ZC_HCM_Contact alias Contact
@@ -38,5 +41,19 @@ use etag
 {
   use update;
   use delete;
+  use association _Employee { with draft; }
+}
+
+define behavior for ZC_HCM_Emergency alias Emergency
+use etag
+{
+  use update;
+  use delete;
+  use association _Employee { with draft; }
+}
+
+define behavior for ZC_HCM_OrgAssign alias OrgAssign
+use etag
+{
   use association _Employee { with draft; }
 }

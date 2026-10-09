@@ -5,6 +5,7 @@
   title: { type: #STANDARD, value: 'CandidateName' },
   description: { type: #STANDARD, value: 'CandidateEmail' }
 }
+@UI.presentationVariant: [{ sortOrder: [{ by: 'AddedAt', direction: #DESC }] }]
 annotate view ZC_HCM_TALENTPOOL with
 {
   @UI.facet: [{ id: 'TalentDetails', type: #IDENTIFICATION_REFERENCE, label: 'Details', position: 10 }]
@@ -14,6 +15,12 @@ annotate view ZC_HCM_TALENTPOOL with
 
   @UI.hidden: true
   CandidateId;
+
+  @UI.hidden: true
+  OriginalOfferId;
+
+  @UI.hidden: true
+  LastChangedAt;
 
   @UI.lineItem: [{ position: 10, label: 'Candidate Name' }]
   @UI.identification: [{ position: 10, label: 'Candidate Name' }]
@@ -28,9 +35,17 @@ annotate view ZC_HCM_TALENTPOOL with
   @UI.identification: [{ position: 30, label: 'Skills' }]
   Skills;
 
+  @UI.lineItem: [{ position: 35, label: 'Applied Post' }]
+  @UI.identification: [{ position: 35, label: 'Applied Post' }]
+  Notes;
+
   @UI.lineItem: [{ position: 40, label: 'AI Score' }]
   @UI.identification: [{ position: 40, label: 'AI Score' }]
   AiScore;
+
+  @UI.lineItem: [{ position: 45, label: 'Resume', type: #WITH_URL, url: 'ResumeUrl' }]
+  @UI.identification: [{ position: 45, label: 'Resume', type: #WITH_URL, url: 'ResumeUrl' }]
+  ResumeUrl;
 
   @UI.lineItem: [{ position: 50, label: 'Rejection Reason' }]
   @UI.identification: [{ position: 50, label: 'Rejection Reason' }]
@@ -39,4 +54,7 @@ annotate view ZC_HCM_TALENTPOOL with
   @UI.lineItem: [{ position: 60, label: 'Added On' }]
   @UI.identification: [{ position: 60, label: 'Added On' }]
   AddedAt;
+
+  @UI.identification: [{ position: 70, label: 'Status' }]
+  Status;
 }

@@ -16,17 +16,25 @@ annotate view ZC_HCM_JobOffer with
   @UI.hidden: true
   OfferId;
 
-  @UI.lineItem: [{ position: 10, importance: #HIGH, label: 'Title' }, 
-                 { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' }, 
+  @UI.lineItem: [{ position: 10, importance: #HIGH, label: 'Title' },
+                 { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' },
                  { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' },
                  { type: #FOR_ACTION, dataAction: 'reopenOffer', label: 'Reopen Offer' }]
   @UI.identification: [{ position: 10, label: 'Job Title' },
-                       { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' }, 
+                       { type: #FOR_ACTION, dataAction: 'publishOffer', label: 'Publish' },
                        { type: #FOR_ACTION, dataAction: 'closeOffer', label: 'Close Offer' },
                        { type: #FOR_ACTION, dataAction: 'reopenOffer', label: 'Reopen Offer' }]
   @UI.selectionField: [{ position: 30 }]
   @Search.defaultSearchElement: true
   Title;
+
+  @UI.lineItem: [{ position: 15, label: 'Position' }]
+  @UI.identification: [{ position: 15, label: 'Position (Vacant)' }]
+  @UI.textArrangement: #TEXT_ONLY
+  PositionId;
+
+  @UI.hidden: true
+  PositionTitle;
 
   @UI.identification: [{ position: 20, label: 'Description' }]
   @UI.multiLineText: true
@@ -35,7 +43,7 @@ annotate view ZC_HCM_JobOffer with
   @UI.lineItem: [{ position: 20, label: 'Department' }]
   @UI.identification: [{ position: 30, label: 'Department' }]
   @UI.selectionField: [{ position: 20 }]
-  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZC_HCM_OrgUnit', element: 'UnitName' } }]
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_Department', element: 'Department' } }]
   Department;
 
   @UI.identification: [{ position: 40, label: 'Required Skills (Comma Separated)' }]
@@ -74,11 +82,15 @@ annotate view ZC_HCM_JobOffer with
   @UI.lineItem: [{ position: 30, label: 'Status' }]
   @UI.identification: [{ position: 140, label: 'Status' }]
   @UI.selectionField: [{ position: 10 }]
+  @UI.textArrangement: #TEXT_ONLY
   @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_JobStatus', element: 'Status' } }]
   Status;
 
   @UI.hidden: true
   StatusText;
+
+  @UI.identification: [{ position: 120, label: 'Application Deadline' }]
+  AppDeadline;
 
   @UI.lineItem: [{ position: 60, label: 'Valid Until' }]
   @UI.identification: [{ position: 130, label: 'Valid Until' }]

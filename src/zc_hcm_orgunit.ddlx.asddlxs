@@ -31,10 +31,10 @@ annotate view ZC_HCM_OrgUnit with
   @UI.multiLineText: true
   Description;
 
-  @UI.fieldGroup: [{ qualifier: 'BasicInfo', position: 40 }]
-  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZC_HCM_OrgUnit', element: 'OrgUnitId' } }]
+  @UI.fieldGroup: [{ qualifier: 'BasicInfo', position: 40, label: 'Parent Unit' }]
+  @UI.textArrangement: #TEXT_ONLY
   ParentOrgUnitId;
-  
+
   @UI.lineItem: [{ position: 15, label: 'Parent Unit' }]
   ParentUnitName;
 
@@ -46,12 +46,16 @@ annotate view ZC_HCM_OrgUnit with
   @UI.lineItem: [{ position: 25, label: 'Budget' }]
   @UI.fieldGroup: [{ qualifier: 'FinanceInfo', position: 20 }]
   Budget;
-  
+
   @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
   CurrencyCode;
 
   @UI.lineItem: [{ position: 30, label: 'Status' }]
   @UI.fieldGroup: [{ qualifier: 'FinanceInfo', position: 30 }]
+  @UI.textArrangement: #TEXT_ONLY
   @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_GenericStatus', element: 'Status' } }]
   Status;
+
+  @UI.hidden: true
+  StatusText;
 }

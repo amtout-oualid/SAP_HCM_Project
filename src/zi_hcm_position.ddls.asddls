@@ -4,6 +4,8 @@ define view entity ZI_HCM_Position
   as select from zhcm_position
   association to parent ZI_HCM_OrgUnit as _OrgUnit
     on $projection.OrgUnitId = _OrgUnit.OrgUnitId
+  association [0..1] to ZI_HCM_VH_PosStatus as _PosStatus
+    on $projection.Status = _PosStatus.Status
 {
   @UI.hidden: true
   key position_id              as PositionId,
@@ -25,5 +27,6 @@ define view entity ZI_HCM_Position
       @Semantics.systemDateTime.localInstanceLastChangedAt: true
       local_last_changed_at        as LocalLastChangedAt,
 
-      _OrgUnit
+      _OrgUnit,
+      _PosStatus
 }

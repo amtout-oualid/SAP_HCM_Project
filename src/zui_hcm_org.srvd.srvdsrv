@@ -2,6 +2,8 @@
 define service ZUI_HCM_ORG {
   expose ZC_HCM_OrgUnit          as OrgUnit;
   expose ZC_HCM_Position         as Position;
-  expose I_Currency              as CurrencyVH;
+  expose ZI_HCM_VH_OrgUnit       as OrgUnitVH;
   expose ZI_HCM_VH_GenericStatus as GenericStatusVH;
+  expose ZI_HCM_VH_PosStatus     as PosStatusVH;
+  expose I_Currency              as CurrencyVH;
 }

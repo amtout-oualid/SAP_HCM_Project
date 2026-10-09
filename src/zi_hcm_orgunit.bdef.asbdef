@@ -19,13 +19,22 @@ early numbering
   draft action Activate optimized;
   draft action Discard;
   draft action Resume;
-  draft determine action Prepare;
+  draft determine action Prepare
+  {
+    validation validateMandatory;
+    validation validateParent;
+    validation Position~validatePosition;
+  }
 
   field ( readonly )
-    OrgUnitId, OrgUnitNum;
+    OrgUnitId, OrgUnitNum, ParentUnitName,
+    CreatedBy, CreatedAt, LastChangedBy, LastChangedAt, LocalLastChangedAt;
+  field ( mandatory ) UnitName;
 
   determination CalculateOrgUnitNum on modify { create; }
   determination DefaultStatus on modify { create; }
+  determination setParentUnitName on modify { field ParentOrgUnitId; }
+  validation validateMandatory on save { create; update; field UnitName; }
   validation validateDelete on save { delete; }
   validation validateParent on save { create; update; field ParentOrgUnitId; }
 
@@ -59,12 +68,14 @@ etag master LocalLastChangedAt
 early numbering
 {
   update;
-  delete;
+  delete ( features : instance );
 
   field ( readonly )
     PositionId, OrgUnitId;
+  field ( mandatory ) JobTitle;
 
   determination DefaultPosStatus on modify { create; }
+  validation validatePosition on save { create; update; field JobTitle, Status; }
 
   association _OrgUnit { with draft; }
 

@@ -11,9 +11,11 @@ early numbering
   create;
   delete;
 
-  field ( readonly )
-    PoolId, CandidateId, OriginalOfferId, CandidateName, CandidateEmail,
-    ResumeUrl, AiScore, Skills, Status, AddedAt, Notes, RejectionReason, LastChangedAt;
+  field ( readonly ) PoolId, AddedAt, LastChangedAt;
+  field ( readonly : update ) CandidateId, OriginalOfferId, CandidateName, CandidateEmail,
+                              ResumeUrl, AiScore, Skills, Status, Notes, RejectionReason;
+
+  determination setDefaults on modify { create; }
 
   mapping for zhcm_talntpool
   {

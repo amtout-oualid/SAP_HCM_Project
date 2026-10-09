@@ -1,38 +1,47 @@
 @Metadata.layer: #CUSTOMER
 @UI.headerInfo: {
   typeName: 'Progress',
-  typeNamePlural: 'Progress Steps'
+  typeNamePlural: 'Progress Steps',
+  title: { type: #STANDARD, value: 'StepName' }
 }
+@UI.presentationVariant: [{ sortOrder: [{ by: 'StepOrder', direction: #ASC }] }]
 annotate view ZC_HCM_PipeProg with
 {
   @UI.facet: [{ id: 'ProgDetails', type: #IDENTIFICATION_REFERENCE, label: 'Progress Details', position: 10 }]
 
   @UI.hidden: true
   ProgressId;
-  
+
   @UI.hidden: true
   ApplicationId;
-  
+
   @UI.hidden: true
   OfferId;
 
-  @UI.lineItem: [{ position: 10 }]
-  @UI.identification: [{ position: 10 }]
+  @UI.lineItem: [{ position: 10, label: 'Step' }]
+  @UI.identification: [{ position: 10, label: 'Step' }]
   StepOrder;
 
-  @UI.lineItem: [{ position: 20 }]
-  @UI.identification: [{ position: 20 }]
+  @UI.lineItem: [{ position: 20, label: 'Step Name' }]
+  @UI.identification: [{ position: 20, label: 'Step Name' }]
   StepName;
 
-  @UI.lineItem: [{ position: 30 }]
-  @UI.identification: [{ position: 30 }]
+  @UI.lineItem: [{ position: 30, label: 'Status' }]
+  @UI.identification: [{ position: 30, label: 'Status' }]
   Status;
 
-  @UI.lineItem: [{ position: 40 }]
-  @UI.identification: [{ position: 40 }]
+  @UI.lineItem: [{ position: 40, label: 'Score' }]
+  @UI.identification: [{ position: 40, label: 'Score' }]
   Score;
 
-  @UI.lineItem: [{ position: 50 }]
-  @UI.identification: [{ position: 50 }]
+  @UI.lineItem: [{ position: 50, label: 'Notes' }]
+  @UI.identification: [{ position: 50, label: 'Notes' }]
   Notes;
+
+  @UI.lineItem: [{ position: 60, label: 'Completed On' }]
+  @UI.identification: [{ position: 60, label: 'Completed On' }]
+  CompletedAt;
+
+  @UI.hidden: true
+  LocalLastChangedAt;
 }

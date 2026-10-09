@@ -1,10 +1,13 @@
 @EndUserText.label: 'Service Definition for Personnel Admin UI'
 define service ZUI_HCM_PA {
-  expose ZC_HCM_Employee     as Employee;
-  expose ZC_HCM_Contact      as Contact;
-  expose ZC_HCM_BankDetl     as BankDetails;
-  expose ZC_HCM_Position     as PositionVH;
-  expose ZC_HCM_OrgUnit      as OrgUnitVH;
-  expose ZI_HCM_VH_EmpStatus as EmpStatusVH;
-  expose I_Currency          as CurrencyVH;
+  expose ZC_HCM_Employee          as Employee;
+  expose ZC_HCM_Contact           as Contact;
+  expose ZC_HCM_BankDetl          as BankDetails;
+  expose ZC_HCM_Emergency         as Emergency;
+  expose ZC_HCM_OrgAssign         as OrgAssignment;
+  expose ZI_HCM_EmpHistory        as EmploymentHistory;
+  expose ZI_HCM_VH_VacantPosition as VacantPositionVH;
+  expose ZI_HCM_VH_Department     as DepartmentVH;
+  expose ZI_HCM_VH_EmpStatus      as EmpStatusVH;
+  expose I_Currency               as CurrencyVH;
 }

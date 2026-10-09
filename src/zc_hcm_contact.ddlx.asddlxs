@@ -1,9 +1,14 @@
 @Metadata.layer: #CUSTOMER
-@UI.headerInfo: { typeName: 'Contact', typeNamePlural: 'Contacts' }
+@UI.headerInfo: { typeName: 'Contact', typeNamePlural: 'Contacts',
+                  title: { type: #STANDARD, value: 'PersonalEmail' } }
 annotate view ZC_HCM_Contact with {
+  @UI.facet: [{ id: 'Details', type: #IDENTIFICATION_REFERENCE, label: 'Contact Details', position: 10 }]
+
   @UI.hidden: true ContactId;
   @UI.hidden: true EmployeeId;
-  @UI.lineItem: [{ position: 10 }] @UI.identification: [{ position: 10 }] PersonalAddress;
-  @UI.lineItem: [{ position: 20 }] @UI.identification: [{ position: 20 }] PhoneNumber;
-  @UI.lineItem: [{ position: 30 }] @UI.identification: [{ position: 30 }] PersonalEmail;
+  @UI.hidden: true LocalLastChangedAt;
+  @UI.lineItem: [{ position: 10, label: 'Address' }]        @UI.identification: [{ position: 10, label: 'Address' }]        PersonalAddress;
+  @UI.lineItem: [{ position: 20, label: 'Phone' }]          @UI.identification: [{ position: 20, label: 'Phone' }]          PhoneNumber;
+  @UI.lineItem: [{ position: 30, label: 'Personal Email' }] @UI.identification: [{ position: 30, label: 'Personal Email' }] PersonalEmail;
+  @UI.lineItem: [{ position: 40, label: 'Work Email' }]     @UI.identification: [{ position: 40, label: 'Work Email' }]     WorkEmail;
 }

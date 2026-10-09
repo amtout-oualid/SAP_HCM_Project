@@ -3,13 +3,16 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_HCM_CLEANUP</CLSNAME>
+    <CLSNAME>ZCL_HCM_RAP_TEST</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>none</DESCRIPT>
+    <DESCRIPT>ABAP Unit tests of the RAP business objects</DESCRIPT>
+    <CATEGORY>05</CATEGORY>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
+    <DURATION_TYPE>24</DURATION_TYPE>
+    <RISK_LEVEL>11</RISK_LEVEL>
    </VSEOCLASS>
   </asx:values>
  </asx:abap>

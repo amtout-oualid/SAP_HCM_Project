@@ -4,11 +4,14 @@ define root view entity ZI_HCM_JobOffer
   as select from zhcm_joboffer
   composition [0..*] of ZI_HCM_PipeTmpl as _Steps
   composition [0..*] of ZI_HCM_Application as _Applications
+  association [0..1] to ZI_HCM_Position as _Position
+    on $projection.PositionId = _Position.PositionId
 {
   key offer_id                as OfferId,
       title                   as Title,
       description             as Description,
       department              as Department,
+      position_id             as PositionId,
       required_skills         as RequiredSkills,
       experience_level        as ExperienceLevel,
       contract_type           as ContractType,
@@ -21,15 +24,15 @@ define root view entity ZI_HCM_JobOffer
       salary_max              as SalaryMax,
       currency_code           as CurrencyCode,
       status                  as Status,
-      
+
       cast( case status
         when 'P' then 'Published'
         when 'C' then 'Closed'
         when 'D' then 'Draft'
         else 'Unknown'
       end as abap.char(20) )  as StatusText,
-      
-      app_deadline            as AppDeadline, 
+
+      app_deadline            as AppDeadline,
       valid_until             as ValidUntil,
       published_at            as PublishedAt,
 
@@ -45,5 +48,6 @@ define root view entity ZI_HCM_JobOffer
       local_last_changed_at   as LocalLastChangedAt,
 
       _Steps,
-      _Applications
+      _Applications,
+      _Position
 }

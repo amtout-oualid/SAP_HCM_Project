@@ -12,7 +12,7 @@ annotate view ZC_HCM_Position with
 
   @UI.hidden: true
   PositionId;
-  
+
   @UI.hidden: true
   OrgUnitId;
 
@@ -27,16 +27,20 @@ annotate view ZC_HCM_Position with
   @UI.lineItem: [{ position: 30 }]
   @UI.identification: [{ position: 30 }]
   FteValue;
-  
+
   @UI.lineItem: [{ position: 40 }]
   @UI.identification: [{ position: 40 }]
   budget;
-  
+
   @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Currency', element: 'Currency' } }]
   currencycode;
 
   @UI.lineItem: [{ position: 50, label: 'Status' }]
   @UI.identification: [{ position: 50, label: 'Status' }]
-  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_GenericStatus', element: 'Status' } }]
+  @UI.textArrangement: #TEXT_ONLY
+  @Consumption.valueHelpDefinition: [{ entity: { name: 'ZI_HCM_VH_PosStatus', element: 'Status' } }]
   Status;
+
+  @UI.hidden: true
+  StatusText;
 }

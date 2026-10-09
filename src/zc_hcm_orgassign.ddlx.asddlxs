@@ -1,9 +1,18 @@
 @Metadata.layer: #CUSTOMER
-@UI.headerInfo: { typeName: 'Org Assignment', typeNamePlural: 'Org Assignments' }
+@UI.headerInfo: { typeName: 'Org Assignment', typeNamePlural: 'Org Assignments',
+                  title: { type: #STANDARD, value: 'JobTitle' } }
+@UI.presentationVariant: [{ sortOrder: [{ by: 'ValidFrom', direction: #DESC }] }]
 annotate view ZC_HCM_OrgAssign with {
+  @UI.facet: [{ id: 'Details', type: #IDENTIFICATION_REFERENCE, label: 'Assignment', position: 10 }]
+
   @UI.hidden: true AssignId;
   @UI.hidden: true EmployeeId;
-  @UI.lineItem: [{ position: 10 }] @UI.identification: [{ position: 10 }] JobTitle;
-  @UI.lineItem: [{ position: 20 }] @UI.identification: [{ position: 20 }] Department;
-  @UI.lineItem: [{ position: 30 }] @UI.identification: [{ position: 30 }] ValidFrom;
+  @UI.hidden: true PositionId;
+  @UI.hidden: true OrgUnitId;
+  @UI.hidden: true ManagerId;
+  @UI.hidden: true LocalLastChangedAt;
+  @UI.lineItem: [{ position: 10, label: 'Job Title' }]  @UI.identification: [{ position: 10, label: 'Job Title' }]  JobTitle;
+  @UI.lineItem: [{ position: 20, label: 'Department' }] @UI.identification: [{ position: 20, label: 'Department' }] Department;
+  @UI.lineItem: [{ position: 30, label: 'Valid From' }] @UI.identification: [{ position: 30, label: 'Valid From' }] ValidFrom;
+  @UI.lineItem: [{ position: 40, label: 'Valid To' }]   @UI.identification: [{ position: 40, label: 'Valid To' }]   ValidTo;
 }

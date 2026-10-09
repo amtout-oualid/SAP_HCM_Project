@@ -19,10 +19,18 @@ etag master LocalLastChangedAt
   draft action Activate optimized;
   draft action Discard;
   draft action Resume;
-  draft determine action Prepare;
+  draft determine action Prepare
+  {
+    validation validateSubmission;
+  }
 
   field ( readonly, numbering : managed ) FormId;
-  field ( readonly ) CreatedAt, LastChangedAt, LocalLastChangedAt;
+  field ( readonly ) EmployeeId, Status, SubmittedAt, ApprovedBy, ApprovedAt, JobTitle, StatusCriticality,
+                     CreatedBy, CreatedAt, LastChangedBy, LastChangedAt, LocalLastChangedAt;
+  field ( readonly : update ) ApplicationId;
+
+  determination setDefaultStatus on modify { create; }
+  validation validateSubmission on save { create; field Status; }
 
   action ( features : instance, authorization : instance ) submitForm result [1] $self;
   action ( features : instance, authorization : instance ) approveAndCreateEmployee result [1] $self;

@@ -8,8 +8,10 @@
 annotate view ZC_HCM_Application with
 {
   @UI.facet: [
-    { id: 'General', type: #IDENTIFICATION_REFERENCE, label: 'Application Details', position: 10 },
-    { id: 'Pipeline', type: #LINEITEM_REFERENCE, label: 'Pipeline Progress', position: 20, targetElement: '_Progress' }
+    { id: 'General',  type: #IDENTIFICATION_REFERENCE, label: 'Application Details', position: 10 },
+    { id: 'AIResult', type: #FIELDGROUP_REFERENCE,     label: 'AI Evaluation',       position: 20, targetQualifier: 'AI' },
+    { id: 'HRNotes',  type: #FIELDGROUP_REFERENCE,     label: 'HR Notes',            position: 30, targetQualifier: 'HR' },
+    { id: 'Pipeline', type: #LINEITEM_REFERENCE,       label: 'Pipeline Progress',   position: 40, targetElement: '_Progress' }
   ]
 
   @UI.hidden: true
@@ -20,6 +22,10 @@ annotate view ZC_HCM_Application with
   CandidateId;
   @UI.hidden: true
   StatusCriticality;
+  @UI.hidden: true
+  AiCriticality;
+  @UI.hidden: true
+  OverallStatusText;
 
   @UI.lineItem: [{ position: 10, label: 'First Name', importance: #HIGH }]
   @UI.identification: [{ position: 5, label: 'First Name' }]
@@ -41,6 +47,7 @@ annotate view ZC_HCM_Application with
   ResumeUrl;
 
   @UI.identification: [{ position: 30, label: 'Cover Letter' }]
+  @UI.multiLineText: true
   CoverLetter;
 
   @UI.lineItem: [{ position: 50, label: 'Applied On' }]
@@ -51,13 +58,21 @@ annotate view ZC_HCM_Application with
   @UI.identification: [{ position: 50, label: 'Current Step' }]
   CurrentStepOrder;
 
-  @UI.lineItem: [{ position: 70, label: 'AI Score', importance: #HIGH }]
-  @UI.identification: [{ position: 70, label: 'AI Match Score' }]
+  @UI.lineItem: [{ position: 70, label: 'AI Score', importance: #HIGH, criticality: 'AiCriticality' }]
+  @UI.fieldGroup: [{ qualifier: 'AI', position: 10, label: 'AI Match Score', criticality: 'AiCriticality' }]
   AiMatchScore;
+
+  @UI.lineItem: [{ position: 75, label: 'AI Recommendation', criticality: 'AiCriticality' }]
+  @UI.fieldGroup: [{ qualifier: 'AI', position: 20, label: 'Recommendation', criticality: 'AiCriticality' }]
+  AiRecommendation;
+
+  @UI.fieldGroup: [{ qualifier: 'AI', position: 30, label: 'Summary' }]
+  @UI.multiLineText: true
+  AiSummary;
 
   /* Line Item Actions */
   @UI.lineItem: [{ position: 80, label: 'Status', importance: #HIGH, criticality: 'StatusCriticality' },
-                 { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate AI' },
+                 { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Request AI Evaluation' },
                  { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Next Step' },
                  { type: #FOR_ACTION, dataAction: 'rejectCandidate', label: 'Reject' },
                  { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept Candidate' },
@@ -66,13 +81,14 @@ annotate view ZC_HCM_Application with
 
   /* Header Page Actions */
   @UI.identification: [{ position: 60, label: 'Overall Status', criticality: 'StatusCriticality' },
-                 { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Evaluate AI' },
+                 { type: #FOR_ACTION, dataAction: 'evaluateWithAI', label: 'Request AI Evaluation' },
                  { type: #FOR_ACTION, dataAction: 'passToNextStep', label: 'Next Step' },
                  { type: #FOR_ACTION, dataAction: 'rejectCandidate', label: 'Reject' },
                  { type: #FOR_ACTION, dataAction: 'acceptToPost', label: 'Accept Candidate' },
                  { type: #FOR_ACTION, dataAction: 'putOnHold', label: 'Put On Hold' },
                  { type: #FOR_ACTION, dataAction: 'addNote', label: 'Add HR Note' },
                  { type: #FOR_ACTION, dataAction: 'sendMail', label: 'Send Email' }]
+  @UI.textArrangement: #TEXT_ONLY
   OverallStatus;
 
   @UI.identification: [{ position: 80, label: 'Notice Period' }]
@@ -80,4 +96,11 @@ annotate view ZC_HCM_Application with
 
   @UI.identification: [{ position: 90, label: 'Salary Expectation' }]
   SalaryExpectation;
+
+  @UI.fieldGroup: [{ qualifier: 'HR', position: 10, label: 'Internal Notes' }]
+  @UI.multiLineText: true
+  InternalNotes;
+
+  @UI.fieldGroup: [{ qualifier: 'HR', position: 20, label: 'Rejection Reason' }]
+  RejectionReason;
 }
