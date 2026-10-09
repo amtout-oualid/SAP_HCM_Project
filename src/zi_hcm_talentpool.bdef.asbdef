@@ -12,10 +12,6 @@ early numbering
   delete;
 
   field ( readonly ) PoolId, AddedAt, LastChangedAt;
-  field ( readonly : update ) CandidateId, OriginalOfferId, CandidateName, CandidateEmail,
-                              ResumeUrl, AiScore, Skills, Status, Notes, RejectionReason;
-
-  determination setDefaults on modify { create; }
 
   mapping for zhcm_talntpool
   {

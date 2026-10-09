@@ -6,8 +6,6 @@ CLASS lhc_talentpool DEFINITION INHERITING FROM cl_abap_behavior_handler.
     METHODS earlynumbering_create FOR NUMBERING
       IMPORTING entities FOR CREATE TalentPool.
 
-    METHODS setDefaults FOR DETERMINE ON MODIFY
-      IMPORTING keys FOR TalentPool~setDefaults.
 ENDCLASS.
 
 CLASS lhc_talentpool IMPLEMENTATION.
@@ -29,18 +27,4 @@ CLASS lhc_talentpool IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
-  METHOD setDefaults.
-    READ ENTITIES OF ZI_HCM_TalentPool IN LOCAL MODE
-      ENTITY TalentPool FIELDS ( Status ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_entries).
-
-    DELETE lt_entries WHERE Status IS NOT INITIAL.
-    IF lt_entries IS INITIAL.
-      RETURN.
-    ENDIF.
-
-    " A: available for future offers
-    MODIFY ENTITIES OF ZI_HCM_TalentPool IN LOCAL MODE
-      ENTITY TalentPool UPDATE FIELDS ( Status )
-      WITH VALUE #( FOR entry IN lt_entries ( %tky = entry-%tky Status = 'A' ) ).
-  ENDMETHOD.
 ENDCLASS.
