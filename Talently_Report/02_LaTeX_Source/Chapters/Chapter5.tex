@@ -1,0 +1,519 @@
+\chapter{Implementation, Testing, and Results}
+\label{chap:implementation}
+
+% ── chapter-local helpers ─────────────────────────────────────────────
+\providecommand{\code}[1]{\texttt{\detokenize{#1}}}
+\providecommand{\imgslot}[3]{\IfFileExists{#1}{\includegraphics[width=#2]{#1}}%
+  {\fbox{\parbox[c][#3][c]{\dimexpr#2-2\fboxsep-2\fboxrule\relax}{\centering\color{gray}\footnotesize\texttt{\detokenize{#1}}}}}}
+% all measured values are filled in (placeholders are no longer highlighted)
+\newcommand{\tofill}[1]{#1}
+% logo figure:  \logo{file}{caption}{label}
+\newcommand{\logo}[3]{%
+  \begin{figure}[H]\centering
+    \IfFileExists{Figures/logos/#1}{\includegraphics[width=4.5cm]{Figures/logos/#1}}%
+      {\imgslot{Figures/logos/#1}{7cm}{2.2cm}}
+    \caption{#2}\label{#3}
+  \end{figure}}
+% screenshot figure:  \shot[max height, default 0.40]{file}{caption}{label}
+% (92% of the text width, at most 40% of the page height, thin frame around the capture)
+\newcommand{\shot}[4][0.40]{%
+  \begin{figure}[H]\centering
+    \IfFileExists{Figures/screens/#2}%
+      {{\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.4pt}%
+        \fbox{\includegraphics[width=\dimexpr0.92\textwidth-0.8pt\relax,height=#1\textheight,keepaspectratio]{Figures/screens/#2}}}}%
+      {\imgslot{Figures/screens/#2}{\textwidth}{7cm}}
+    \caption{#3}\label{#4}
+  \end{figure}}
+% technology heading (bold bullet on its own line, as in the reference report)
+\newcommand{\tech}[1]{\par\medskip\noindent{\large\bfseries$\bullet$\ #1}\par\nopagebreak}
+\newcolumntype{F}[1]{>{\footnotesize\raggedright\arraybackslash}p{#1}}
+\setlength{\LTcapwidth}{\textwidth}
+\sloppy
+
+% ─────────────────────────────────────────────
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+% ─────────────────────────────────────────────
+
+This chapter presents the realization of Talently. It first introduces the tools and technologies used to build the platform. It then demonstrates the solution through a complete end-to-end scenario, from the creation of the organizational structure to the creation of a new employee. Finally, it presents the tests carried out and validates the functional and non-functional requirements defined in Chapter~\ref{chap:analysis_specifications}.
+
+\newpage
+
+% ═══════════════════════════════════════════════
+\section{Development Environment}
+\label{sec:dev_environment}
+% ═══════════════════════════════════════════════
+
+The platform combines the SAP cloud ecosystem, used for the transactional core and the HR cockpit, with open-source web and AI technologies, used for the candidate portal and the evaluation engine.
+
+% ──────────────────────────────────────────────
+\subsection{SAP Cloud Ecosystem}
+\label{subsec:sap_ecosystem}
+% ──────────────────────────────────────────────
+
+\tech{SAP BTP ABAP Environment}
+% LOGO: official "SAP Business Technology Platform" logo -> Figures/logos/sap_btp.png
+\logo{sap_btp.png}{SAP Business Technology Platform Logo}{fig:logo_btp}
+SAP Business Technology Platform (BTP) is SAP's cloud platform for building extensions around SAP solutions. Its ABAP Environment provides a managed ABAP runtime in the cloud, restricted to the ABAP Cloud development model and to released APIs. In Talently, it hosts the whole backend: the CDS data model, the behavior definitions, the business logic, and the OData V4 services. It was chosen because it allows the HCM extension to be built side by side with the ERP core, in line with SAP's Clean Core strategy.
+
+\tech{SAP HANA Cloud}
+% LOGO: official "SAP HANA Cloud" logo -> Figures/logos/sap_hana_cloud.png
+\logo{sap_hana_cloud.png}{SAP HANA Cloud Logo}{fig:logo_hana}
+SAP HANA Cloud is the in-memory, column-oriented database provided with the ABAP Environment. It stores the active and draft tables of all Talently business objects. Its in-memory processing gives fast reads for the Fiori list reports, and it is fully managed by the platform, so no database administration was required.
+
+\tech{Eclipse with ABAP Development Tools (ADT)}
+% LOGO: Eclipse IDE logo (optionally with the "ABAP Development Tools" text) -> Figures/logos/eclipse_adt.png
+\logo{eclipse_adt.png}{Eclipse and ABAP Development Tools Logo}{fig:logo_adt}
+ABAP Development Tools (ADT) is the official Eclipse-based environment for ABAP Cloud development. It was used to create and activate all development objects (tables, CDS views, behavior definitions, classes, service definitions, and service bindings), to preview the Fiori applications, and to debug the business logic. The sources were versioned with abapGit~\cite{abapgit}, which serializes the ABAP objects into files stored in the GitHub repository.
+
+\tech{SAP Fiori Elements}
+% LOGO: SAP Fiori logo -> Figures/logos/sap_fiori.png
+\logo{sap_fiori.png}{SAP Fiori Logo}{fig:logo_fiori}
+SAP Fiori Elements generates enterprise user interfaces from OData services and CDS annotations, using predefined floorplans such as the List Report and the Object Page. It was used to build the whole HR cockpit without writing user interface code: the layouts, tables, action buttons, and draft handling are derived from the metadata extensions of the projection views. This guarantees a consistent SAP user experience and greatly reduces development time.
+
+\tech{SAP Cloud Identity Services}
+SAP Cloud Identity Services (Identity Authentication Service, IAS) manages the identities of the HR users. It provides single sign-on to the Fiori cockpit and is the trusted identity provider of the ABAP Environment, so internal users never share the authentication mechanism of the external candidates.
+
+% ──────────────────────────────────────────────
+\subsection{Web, AI and DevOps Tooling}
+\label{subsec:web_ai_tooling}
+% ──────────────────────────────────────────────
+
+\tech{React 19 and Vite}
+% LOGO: React logo and Vite logo side by side -> Figures/logos/react_vite.png
+\logo{react_vite.png}{Vite Logo}{fig:logo_react}
+React is the most widely used JavaScript library for building component-based user interfaces, and Vite is a fast build tool and development server~\cite{react}. Together, they were used to build the candidate portal: job board, job details, application form, progress tracking, and onboarding form. React was chosen for its large ecosystem and component reuse, and Vite for its near-instant reload during development and its optimized production build.
+
+\tech{Tailwind CSS}
+% LOGO: Tailwind CSS logo -> Figures/logos/tailwind.png
+\logo{tailwind.png}{Tailwind CSS Logo}{fig:logo_tailwind}
+Tailwind CSS is a utility-first CSS framework. It was used to style the portal directly inside the components and to make every page responsive, without maintaining separate style sheets.
+
+\tech{Clerk}
+% LOGO: Clerk logo -> Figures/logos/clerk.png
+\logo{clerk.png}{Clerk Logo}{fig:logo_clerk}
+Clerk is an authentication service for web applications~\cite{clerk}. It provides the sign-in and sign-up screens, social login, and session management of the candidate portal. Delegating candidate authentication to Clerk keeps external identities separate from the SAP identity provider and avoids implementing password management.
+
+\tech{Python 3.12 and FastAPI}
+% LOGO: Python logo and FastAPI logo side by side -> Figures/logos/python_fastapi.png
+\logo{python_fastapi.png}{FastAPI Logo}{fig:logo_fastapi}
+FastAPI is a modern Python framework for building REST APIs~\cite{fastapi}. It validates every request and response with Pydantic models and automatically generates interactive documentation (Swagger). It was chosen for the AI microservice because Python offers the richest ecosystem for document processing and LLM integration, and because FastAPI is fast, lightweight, and easy to test.
+
+\tech{OpenAI GPT-4o-mini}
+% LOGO: OpenAI logo -> Figures/logos/openai.png
+\logo{openai.png}{OpenAI Logo}{fig:logo_openai}
+GPT-4o-mini is a compact large language model from OpenAI. It parses the resume sections, selects the most relevant GitHub projects, and scores the candidate against the rubric. It was chosen for its good reasoning quality at a low cost per evaluation and for its support of structured outputs, which forces the model to answer in a strict JSON schema~\cite{openai_structured}.
+
+\tech{PyMuPDF and python-docx}
+% LOGO: PyMuPDF logo (python-docx has none; the PyMuPDF logo alone is fine) -> Figures/logos/pymupdf.png
+\logo{pymupdf.png}{PyMuPDF Logo}{fig:logo_pymupdf}
+PyMuPDF~\cite{pymupdf} and python-docx are Python libraries for reading PDF and Word documents. They convert the submitted resumes into clean Markdown text, preserving headings and lists, before the text is sent to the language model.
+
+\tech{Docker}
+% LOGO: Docker logo -> Figures/logos/docker.png
+\logo{docker.png}{Docker Logo}{fig:logo_docker}
+Docker packages an application with all its dependencies into a portable container. The AI microservice is delivered as a Docker image, so it runs identically on the development machine and on any server, independently of the local Python installation.
+
+\tech{Git and GitHub}
+% LOGO: Git logo and GitHub logo side by side -> Figures/logos/git_github.png
+\logo{git_github.png}{GitHub Logo}{fig:logo_github}
+Git was used for version control and GitHub as the central repository of the three components of the project: the ABAP sources (through abapGit), the AI microservice, and the React portal. GitHub also kept the full history of every change.
+
+% ═══════════════════════════════════════════════
+\section{End-to-End Walkthrough}
+\label{sec:walkthrough}
+% ═══════════════════════════════════════════════
+
+This section demonstrates Talently through a complete scenario executed on the SAP BTP ABAP trial system. Two actors take part: the HR administrator, who works in the SAP Fiori applications of the HR cockpit, and the candidates, who use the React portal. The test data are three organizational units (Information Technology, SAP Development, and Data \& AI), three vacant positions in SAP Development, one job offer \emph{SAP ABAP Developer (RAP)} for two positions with a three-step pipeline, and two candidates with different profiles: Salma Idrissi, a junior developer with a first RAP experience, and Omar Tazi, a sales assistant without IT experience. The journey is the following:
+
+\begin{enumerate}\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}
+    \item \textbf{Organization:} the HR administrator models the organizational units and their vacant positions.
+    \item \textbf{Job offer:} the HR administrator creates the job offer, defines its pipeline, and publishes it.
+    \item \textbf{Application:} the candidates find the offer on the portal, sign in, and apply.
+    \item \textbf{AI evaluation:} the AI engine scores each resume, and the HR administrator reviews the applications.
+    \item \textbf{Decision:} the HR administrator moves the candidates through the pipeline, accepts one, and rejects the other.
+    \item \textbf{Onboarding:} the accepted candidate completes the onboarding form, and the HR administrator reviews it.
+    \item \textbf{Employee administration:} the approval creates the employee, who is then managed in the Personnel Administration application.
+\end{enumerate}
+
+Each screenshot is followed by a description of the actions performed by the user and of the options available on the screen.
+
+% ──────────────────────────────────────────────
+\subsection{Organizational Structure Setup}
+\label{subsec:wt_org}
+% ──────────────────────────────────────────────
+
+The organization is modeled by the HR administrator in the \emph{Organizational Management} application, exposed by the service binding \code{ZUI_HCM_ORG}.
+
+\shot[0.33]{org_unit_create.png}{Creation of an Organizational Unit in Draft Mode}{fig:wt_org_create}
+
+The HR administrator opens the Organizational Management application and clicks \emph{Create} to add the first unit, Information Technology (Figure~\ref{fig:wt_org_create}). The object page opens in draft mode and has three sections, reached from the tabs at the top: \emph{Basic Data}, \emph{Financials \& Status}, and \emph{Positions}. The unit number (000001) is assigned automatically. The user enters the unit name, which is mandatory, a description, the cost center (CC-100), the budget with its currency (5,000 MAD), and the status, and can select a parent unit with the value help. Every change is kept in the draft, as the \emph{Draft updated} indicator shows, so no data is lost. The user saves the unit with the \emph{Create} button at the bottom of the page or cancels it with \emph{Discard Draft}.
+
+\shot{org_units_first.png}{Organizational Units List After the First Creation}{fig:wt_org_list1}
+
+After saving, the HR administrator returns to the list report, which now shows the Information Technology unit with its number, cost center, budget, and status (Figure~\ref{fig:wt_org_list1}). The filter bar at the top searches the units by editing status, unit number, unit name, or cost center: the user fills the filters and clicks \emph{Go}, and \emph{Adapt Filters} adds more filter fields. Above the table, \emph{Create} adds a new unit and \emph{Delete} removes the selected units. The settings icon changes the visible columns, and the export icon exports the list to a spreadsheet. The arrow at the end of a row opens the unit.
+
+\shot{org_units_list.png}{List of the Three Organizational Units}{fig:wt_org_units}
+
+The HR administrator repeats the same steps to create the units SAP Development (cost center CC-1100, budget 30,000 MAD) and Data \& AI (cost center CC-1200, budget 25,000 MAD). The list report now contains the three units, all with the status \emph{Active} (Figure~\ref{fig:wt_org_units}). At this stage, the units are still independent: the \emph{Parent Unit} column is empty, and the hierarchy is built in the next step by editing the two sub-units.
+
+\shot{org_parent_valuehelp.png}{Value Help of the Parent Unit}{fig:wt_org_parent}
+
+To build the hierarchy, the HR administrator opens SAP Development, clicks \emph{Edit}, and opens the value help of the \emph{Parent Unit} field (Figure~\ref{fig:wt_org_parent}). A dialog lists the existing units with their name, number, and cost center. The user can search a unit with the search field and \emph{Go}, display more filters with \emph{Show Filters}, select the parent by clicking its row, or close the dialog with \emph{Cancel}. Information Technology is selected as the parent of SAP Development, and the same is done for Data \& AI.
+
+\shot{org_validation_parent.png}{Validation Error on the Parent Unit}{fig:wt_org_validation}
+
+The business rules are checked when the draft is saved. If the HR administrator selects SAP Development as its own parent and clicks \emph{Save}, the backend validation blocks the save (Figure~\ref{fig:wt_org_validation}). The wrong field is highlighted in red, a banner asks to resolve the data inconsistencies, and the message popover, opened from the red counter at the bottom left, lists the errors, here \emph{An organizational unit cannot be its own parent}. Clicking a message leads to the related field, so the user corrects the value and saves again.
+
+\shot{org_unit_display.png}{Data \& AI Unit in Display Mode}{fig:wt_org_display}
+
+Once saved, the unit is displayed in read-only mode (Figure~\ref{fig:wt_org_display}). The Data \& AI unit now shows Information Technology as its parent unit, together with its description, cost center, budget, and status. In display mode, the header offers two buttons: \emph{Edit} (shortcut Ctrl+E), which opens a new draft of the unit, and \emph{Delete}, which removes it. The \emph{Positions} section is still empty, because positions are added in edit mode.
+
+\shot{org_positions_edit.png}{Positions Section of SAP Development in Edit Mode}{fig:wt_org_pos_edit}
+
+The HR administrator then opens SAP Development and clicks \emph{Edit} to create its positions (Figure~\ref{fig:wt_org_pos_edit}). In edit mode, the \emph{Positions} table offers the \emph{Create} button, which adds a new position, and \emph{Delete}, which removes the selected positions. For each position, the table shows the job title, which is mandatory, the manager flag, the full-time equivalent (FTE), the position budget, and the status. The unit stays in draft until the user saves it.
+
+\shot{position_details.png}{Details of a Position}{fig:wt_position_detail}
+
+Each position also has its own details page, linked to its unit by the breadcrumb \emph{SAP Development} at the top (Figure~\ref{fig:wt_position_detail}). The HR administrator enters the job title \emph{SAP ABAP Developer}, the FTE value (1.00), and the position budget (12,000 MAD), selects the status \emph{Vacant} in the drop-down list, and can tick \emph{Is Manager} for a management position. The \emph{Apply} button returns to the unit with the new position, and \emph{Delete} removes the position.
+
+\shot{org_positions_one.png}{First Position in the Positions Table}{fig:wt_org_pos_one}
+
+After \emph{Apply}, the position appears as a row of the \emph{Positions} table of SAP Development, where its fields can still be edited directly (Figure~\ref{fig:wt_org_pos_one}). The unit is still a draft, as the \emph{Draft} label next to its name shows. The HR administrator can add more positions with \emph{Create} and confirms all the changes with \emph{Save} at the bottom of the page, or cancels them with \emph{Discard Draft}.
+
+\shot{org_positions.png}{Positions of the SAP Development Unit}{fig:wt_org_positions}
+
+The HR administrator adds a second \emph{SAP ABAP Developer} position and one \emph{SAP Senior Developer} position (budget 18,000 MAD), then clicks \emph{Save} (Figure~\ref{fig:wt_org_positions}). The unit returns to display mode with its three positions, all with the status \emph{Vacant}. The two SAP ABAP Developer positions are the ones to fill through the recruitment, and the senior position can later be used for a promotion. The \emph{Edit} and \emph{Delete} buttons are available again in the header.
+
+\shot{org_delete_confirm.png}{Deletion Request of an Organizational Unit}{fig:wt_org_delete}
+
+Back in the list report, the \emph{Parent Unit} column now shows Information Technology for the two sub-units. To test the integrity rules, the HR administrator selects SAP Development and clicks \emph{Delete} (Figure~\ref{fig:wt_org_delete}). Before anything is deleted, a dialog asks for a confirmation and shows the name and number of the unit. The user confirms with \emph{Delete} or stops with \emph{Cancel}.
+
+\shot{org_delete_refused.png}{Deletion Refused for a Unit That Still Has Positions}{fig:wt_org_delete_refused}
+
+After the confirmation, the backend refuses the deletion and returns the error \emph{Cannot delete an organizational unit that still has positions} (Figure~\ref{fig:wt_org_delete_refused}). The same rule protects a unit that still has sub-units. The user closes the message with \emph{Close}, and the unit stays unchanged. In this way, a position can never lose its organizational unit.
+
+% ──────────────────────────────────────────────
+\subsection{Job Offer Creation and Publication}
+\label{subsec:wt_offer}
+% ──────────────────────────────────────────────
+
+Recruitment starts in the \emph{Job Offers} application of the HR cockpit, exposed by the service binding \code{ZUI_HCM_RECRUIT}.
+
+\shot{offer_list.png}{Job Offers List Report}{fig:wt_offer_list}
+
+The HR administrator opens the Job Offers application, which is empty at the start of the scenario (Figure~\ref{fig:wt_offer_list}). The filter bar searches the offers by editing status, status, department, and title. For each offer, the table shows the title, the position, the department, the status, the number of positions needed and filled, and the validity date. The toolbar groups the actions of the offer life cycle: \emph{Publish}, \emph{Close Offer}, and \emph{Reopen Offer} are enabled only when an offer with a suitable status is selected, \emph{Create} starts a new offer, and \emph{Delete} removes the selected offers.
+
+\shot{offer_draft.png}{Job Offer in Draft Mode}{fig:wt_offer_draft}
+
+Clicking \emph{Create} opens a new job offer in draft mode (Figure~\ref{fig:wt_offer_draft}). The HR administrator fills the \emph{General Information} section: the title \emph{SAP ABAP Developer (RAP)}, the department \emph{SAP Development} chosen in a drop-down list, the description, the required skills separated by commas, the experience level (\emph{Mid Level}), the contract type (\emph{Full-time}), the location (Rabat, hybrid), two positions needed, a salary range from 9,000 to 13,000 MAD, the application deadline, and the validity date. The \emph{Position (Vacant)} field offers a value help limited to vacant positions. \emph{Positions Filled} and \emph{Status} are read-only, because the system manages them. The \emph{Pipeline Steps} and \emph{Applications} sections are still empty.
+
+\shot{offer_step_details.png}{Details of a Pipeline Step}{fig:wt_offer_step}
+
+In the \emph{Pipeline Steps} section, the HR administrator clicks \emph{Create} to define the recruitment steps (Figure~\ref{fig:wt_offer_step}). Each step has an order, a name, a type chosen with a value help (here \emph{SCREEN} for the CV screening), and a message to the candidate, which the portal displays while the candidate is at this step. The \emph{Apply} button adds the step to the offer, and the breadcrumb \emph{SAP ABAP Developer (RAP)} returns to the offer.
+
+\shot{offer_pipeline.png}{Pipeline Steps of the Job Offer}{fig:wt_offer_pipeline}
+
+The HR administrator creates three steps: CV Screening (SCREEN), Technical Test (TECH, a 60-minute ABAP and CDS exercise), and HR Interview (INTERV) (Figure~\ref{fig:wt_offer_pipeline}). The steps can still be edited directly in the table, and the arrow of each row opens its details. The user saves the offer with \emph{Save} and then clicks \emph{Publish} in the header. An offer cannot be published without at least one pipeline step. Once published, it appears immediately on the candidate portal.
+
+% ──────────────────────────────────────────────
+\subsection{Candidate Application on the Portal}
+\label{subsec:wt_apply}
+% ──────────────────────────────────────────────
+
+The candidates use the Talently portal, a React application that reads and writes the same SAP data through the OData services.
+
+\shot{portal_job_board.png}{Job Board of the Candidate Portal}{fig:wt_portal_board}
+
+The published offer appears on the job board of the portal (Figure~\ref{fig:wt_portal_board}). The candidate can search the offers by keyword, location, and salary range, sort them with \emph{Sort by}, or use the popular searches. The \emph{Filter} panel on the left narrows the list by job type, experience level, and work type, and \emph{Clear filter} resets it. Each offer card shows the department, the contract type, the location, the main skills, the salary range, the time since publication, and the number of open spots and applicants. \emph{Apply} opens the offer, the bookmark icon saves it, and \emph{View my offers} lists the applications of the candidate.
+
+\shot{portal_visitor.png}{Job Board for a Visitor Who Is Not Signed In}{fig:wt_portal_visitor}
+
+A visitor who is not signed in can also browse the job board and read the offers (Figure~\ref{fig:wt_portal_visitor}). In this case, a \emph{Sign in} button is shown at the top right instead of the user avatar. Applying to an offer requires an account, so that each application is linked to a known candidate who can follow it later.
+
+\shot{portal_sign_in.png}{Candidate Sign-In with Clerk}{fig:wt_portal_signin}
+
+Clicking \emph{Sign in} opens the Clerk sign-in window (Figure~\ref{fig:wt_portal_signin}). The candidate can sign in with an Apple, Google, or LinkedIn account, or enter an e-mail address or user name and click \emph{Continue}. A new candidate creates an account with the \emph{Sign up} link, and the cross at the top right closes the window. The authentication of the candidates is fully handled by Clerk, separately from the SAP users of the HR team.
+
+\shot{portal_job_details.png}{Job Details Page}{fig:wt_portal_details}
+
+Once signed in, the candidate opens the offer (Figure~\ref{fig:wt_portal_details}). The details page shows the department, the title, the contract type, the location, the salary range, and the description, followed by the experience level, the headcount with the number of filled positions, the publication date, and the deadline. The \emph{Required Skills} section lists the skills entered by HR, and the \emph{Hiring Pipeline} section shows the three steps of the recruitment. The candidate can go back with \emph{Back to Jobs}, bookmark or share the offer with the icons at the top right, and start the application with \emph{Smart Apply}.
+
+\shot{portal_smart_apply.png}{Smart Apply Form}{fig:wt_portal_apply}
+
+\emph{Smart Apply} opens the application form (Figure~\ref{fig:wt_portal_apply}). The first name, the last name, and the e-mail address are pre-filled from the Clerk account and can be changed. The candidate adds a phone number, the national identity card number (CIN), the link to the resume on Google Drive, a cover letter, the notice period, and the salary expectation. The resume must be shared with \emph{Anyone with the link}, so that the AI engine can read it. The candidate sends the application with \emph{Submit Application} or closes the form with \emph{Cancel}.
+
+\shot{portal_applied.png}{Application Confirmation on the Portal}{fig:wt_portal_applied}
+
+After the submission, the message \emph{Application submitted successfully!} confirms that the application has been created in SAP (Figure~\ref{fig:wt_portal_applied}). On the offer page, the \emph{Smart Apply} button is replaced by two buttons: \emph{Withdraw}, which lets the candidate withdraw the application, and \emph{Progress}, which shows the current step of the application in the pipeline. In the background, the portal sends the resume to the AI microservice for evaluation. The second candidate applies to the same offer in the same way with another account.
+
+% ──────────────────────────────────────────────
+\subsection{AI Evaluation and Recruiter Review}
+\label{subsec:wt_ai}
+% ──────────────────────────────────────────────
+
+Back in the HR cockpit, the HR administrator follows the applications in the object page of the job offer.
+
+\shot{offer_published.png}{Published Job Offer with Its Applications}{fig:wt_offer_published}
+
+In the HR cockpit, the job offer now has the status \emph{Published} (Figure~\ref{fig:wt_offer_published}). The header buttons follow the status of the offer: \emph{Publish} and \emph{Reopen Offer} are disabled, while \emph{Close Offer}, \emph{Edit}, and \emph{Delete} are enabled. The \emph{Applications} section lists the two applications received from the portal, with the name and e-mail of each candidate, the current step (1, CV Screening), the AI score, and the status \emph{New}. The AI score stays at 0.00 until the result of the AI evaluation is received.
+
+\shot{cockpit_request_ai.png}{Selection of Applications and AI Evaluation Request}{fig:wt_request_ai}
+
+The HR administrator can select one or several applications to act on them (Figure~\ref{fig:wt_request_ai}). The toolbar actions are enabled according to the state of the selected applications: \emph{Request AI Evaluation}, \emph{Next Step}, \emph{Reject}, and \emph{Put On Hold} are available, while \emph{Accept Candidate} stays disabled, because the candidates have not reached the last step of the pipeline. \emph{Request AI Evaluation} asks for a new evaluation of the selected resumes: the recommendation is set to \emph{PENDING} until the AI engine returns its result.
+
+\shot{cockpit_applications.png}{Applications with Their AI Scores}{fig:wt_cockpit_apps}
+
+When the AI engine has evaluated the resumes, the scores are written back to SAP with the \code{setAIEvaluation} action and appear in the \emph{AI Score} column (Figure~\ref{fig:wt_cockpit_apps}). Salma Idrissi, who has a first RAP experience, obtains 38 out of 100, while Omar Tazi, who has no IT experience, obtains 0. The engine therefore clearly separates the two profiles, and the HR administrator can sort the table by this column to review the best candidates first.
+
+\shot{cockpit_application.png}{Application Details in the HR Cockpit}{fig:wt_cockpit_app}
+
+Clicking a row opens the application (Figure~\ref{fig:wt_cockpit_app}). \emph{Application Details} shows the candidate data, the resume link, the cover letter, the application date, the current step, the overall status, the notice period, and the salary expectation. \emph{AI Evaluation} shows the match score (38), the recommendation, and the summary; here a new evaluation has just been requested, so the recommendation is \emph{PENDING} and the summary records who requested it and when. \emph{HR Notes} and \emph{Pipeline Progress} complete the page. From the header, the HR administrator can edit the application, send an e-mail, add an HR note, put it on hold, reject it, move it to the next step, or request an AI evaluation.
+
+% ──────────────────────────────────────────────
+\subsection{Pipeline Progression and Hiring Decision}
+\label{subsec:wt_decision}
+% ──────────────────────────────────────────────
+
+The selection is done step by step, following the pipeline defined in the job offer.
+
+\shot{cockpit_next_step.png}{Moving a Candidate to the Next Step}{fig:wt_next_step}
+
+After the CV screening, the HR administrator selects Salma Idrissi and clicks \emph{Next Step} (Figure~\ref{fig:wt_next_step}). The application moves to step 2, the Technical Test, and the completed step is recorded in the \emph{Pipeline Progress} section of the application. The same action is also available in the header of the application page, so the HR administrator can move a candidate forward from the list or from the details.
+
+\shot{portal_progress.png}{Candidate Progress on the Portal}{fig:wt_portal_progress}
+
+On the portal, the candidate clicks \emph{Progress} on the offer page to follow the application (Figure~\ref{fig:wt_portal_progress}). The \emph{Application Progress} window shows the three steps of the pipeline: the steps already reached are marked, the current step, Technical Test, is highlighted, and the box below shows the message defined by HR for this step, \emph{A 60-minute ABAP and CDS exercise}. The candidate closes the window with \emph{Close} or the cross. The progress is read directly from SAP, so the candidate always sees the real state of the application.
+
+\shot{cockpit_last_step.png}{Last Step of the Pipeline with Accept Candidate Enabled}{fig:wt_last_step}
+
+The HR administrator moves Salma Idrissi to step 3, the HR Interview, which is the last step of the pipeline (Figure~\ref{fig:wt_last_step}). The feature control of the backend then changes the available actions: \emph{Next Step} is disabled, because there is no further step, and \emph{Accept Candidate} becomes enabled. In this way, a candidate can only be accepted after going through the whole pipeline.
+
+\shot{cockpit_accept.png}{Accept Candidate Dialog}{fig:wt_accept}
+
+Clicking \emph{Accept Candidate} opens a dialog where the HR administrator enters the hiring information: the offered annual salary, the start date chosen with a calendar, and HR notes (Figure~\ref{fig:wt_accept}). The user confirms with \emph{Accept Candidate} or cancels with \emph{Cancel}. After the confirmation, the status of the application becomes \emph{Accepted}, the number of filled positions of the offer increases by one, and an onboarding form is created for the candidate. When all the positions of an offer are filled, the offer is closed automatically.
+
+\shot{cockpit_reject.png}{Rejection of a Candidate}{fig:wt_reject}
+
+Omar Tazi, whose profile does not match the offer, was moved to the Technical Test and then put on hold with \emph{Put On Hold}, as the status \emph{On Hold} shows (Figure~\ref{fig:wt_reject}). The HR administrator selects this application and clicks \emph{Reject}. A dialog asks for the rejection reason, here \emph{Weak technical test, few projects in ABAP}. The user confirms with \emph{Reject} or cancels with \emph{Cancel}. The status becomes \emph{Rejected}, and the reason is kept in the HR notes of the application. The same table shows Salma Idrissi with the status \emph{Accepted}.
+
+\shot{cockpit_talent_pool.png}{Talent Pool}{fig:wt_talent_pool}
+
+A rejected candidate is not lost: the rejection automatically adds the candidate to the talent pool (Figure~\ref{fig:wt_talent_pool}). The \emph{Talent Pool} application lists these candidates with their e-mail, the skills of the post, and the post they applied for, so HR can contact them for a future offer. The HR administrator can search a candidate by name with the filter and \emph{Go}, open an entry with the arrow, or remove the selected entries with \emph{Delete}.
+
+% ──────────────────────────────────────────────
+\subsection{Digital Onboarding}
+\label{subsec:wt_onboarding}
+% ──────────────────────────────────────────────
+
+Once accepted, the candidate provides the administrative data needed for the hiring through the portal.
+
+\shot{portal_accepted.png}{Accepted Application on the Portal}{fig:wt_portal_accepted}
+
+On the portal, the accepted candidate sees the status \emph{Accepted} on the offer page, and the headcount now shows one filled position out of two (Figure~\ref{fig:wt_portal_accepted}). A new button, \emph{Fill Form}, gives access to the onboarding form, which collects the administrative data needed for the hiring.
+
+\shot{portal_onboarding.png}{Onboarding Form of the Candidate Portal}{fig:wt_portal_onboarding}
+
+The \emph{Fill Form} button opens the onboarding form (Figure~\ref{fig:wt_portal_onboarding}). The candidate enters the personal data (date of birth, place of birth, nationality, gender, and marital status) and the contact data (home address, phone number, and personal e-mail, which is pre-filled), then the legal and bank details and the emergency contact in the next sections. The fields marked with an asterisk are mandatory. Once submitted, the form is stored in SAP with the status \emph{Submitted} and waits for the review of HR.
+
+\shot{cockpit_onboarding.png}{Submitted Onboarding Form in the HR Cockpit}{fig:wt_cockpit_onboarding}
+
+The HR administrator opens the \emph{Onboarding} application, where the submitted form appears with the name entered by the candidate, the job role of the offer, the personal e-mail, and the status \emph{S} (Submitted) (Figure~\ref{fig:wt_cockpit_onboarding}). The forms can be filtered by status, name, nationality, or creation date. After checking the form, the user selects it and clicks \emph{Approve \& Hire}. If some information is wrong, \emph{Reject} sends the form back to the candidate with the status \emph{Pending}, for correction.
+
+% ──────────────────────────────────────────────
+\subsection{Employee Creation and Personnel Administration}
+\label{subsec:wt_employee}
+% ──────────────────────────────────────────────
+
+The approval of the onboarding form creates the employee, who is then managed in the \emph{Personnel Administration} application, exposed by the service binding \code{ZUI_HCM_PA}.
+
+\shot{employee_list.png}{Employees List After the Hiring}{fig:wt_employee}
+
+\emph{Approve \& Hire} creates the employee master record in a single transaction, together with the contact, bank, emergency contact, organizational assignment, and employment history records, without any manual re-entry. The new employee appears in the Personnel Administration application with the status \emph{Active} and the hire date (Figure~\ref{fig:wt_employee}). The list can be filtered by first name, last name, and employee status. When an employee is selected, the toolbar offers the life-cycle actions \emph{Promote}, \emph{Transfer}, \emph{Suspend}, \emph{Activate}, and \emph{Terminate}, in addition to \emph{Create} and \emph{Delete}.
+
+\shot{employee_promote.png}{Employee Object Page and Promote Dialog}{fig:wt_employee_promote}
+
+Clicking the employee opens the object page, with six sections: \emph{Employee Profile}, \emph{Organizational Assignment}, \emph{Contact Details}, \emph{Bank Accounts}, \emph{Emergency Contacts}, and \emph{Employment History} (Figure~\ref{fig:wt_employee_promote}). The profile contains the data of the onboarding form, and the assignment shows the post \emph{SAP ABAP Developer (RAP)} in SAP Development from the hire date. The header buttons follow the status of the employee: \emph{Activate} is disabled, because the employee is already active. \emph{Promote} opens a dialog where HR selects a new vacant position with the value help, the new salary, and the currency. The promotion closes the current assignment, opens a new one, and records the change in the employment history.
+
+% ═══════════════════════════════════════════════
+\section{Testing}
+\label{sec:testing}
+% ═══════════════════════════════════════════════
+
+Two levels of tests were carried out: unit tests on the backend and the microservice, and an evaluation of the capability of the AI engine.
+
+% ──────────────────────────────────────────────
+\subsection{Unit Testing}
+\label{subsec:unit_tests}
+% ──────────────────────────────────────────────
+
+The AI microservice is covered by 19 automated tests written with pytest, which run without network access. The RAP backend is tested with an ABAP Unit test class covering the main business rules. Table~\ref{tab:unit_tests} summarizes the test suites and their results.
+
+\begingroup
+\linespread{1}\selectfont
+\renewcommand{\arraystretch}{1.4}
+\begin{longtable}{@{}F{4.4cm}F{1.2cm}F{8.8cm}F{2.6cm}@{}}
+\caption{Unit Test Suites and Results}\label{tab:unit_tests}\\
+\toprule
+\textbf{Test suite} & \textbf{Tests} & \textbf{Scope} & \textbf{Result} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Test suite} & \textbf{Tests} & \textbf{Scope} & \textbf{Result} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\code{test_api_endpoints.py} & 7 & Root, health, and roles endpoints; error handling of \code{/evaluate/score}, \code{/evaluate/full}, and \code{/evaluate/csv}; missing payload & 7 passed \\
+\code{test_converters.py} & 7 & TXT and DOCX conversion, Google Drive link parsing, format detection & 7 passed \\
+\code{test_github_enricher.py} & 5 & Extraction of the GitHub username from URLs and handles & 5 passed \\
+ABAP Unit class \code{ZCL_HCM_RAP_TEST} (RAP behavior) & 4 & Publication refused without pipeline steps; duplicate application refused; offer closed when all positions are filled; employee created with its child records & 4 passed \\
+\end{longtable}
+\endgroup
+
+The 19 tests of the microservice pass in 16.3 seconds (Figure~\ref{fig:test_pytest}), and the four ABAP Unit tests pass in 9.4 seconds (Figure~\ref{fig:test_abap}). The ABAP Unit tests run in an isolated test environment with test doubles of the database tables, so they do not change the data of the system.
+
+% SCREENSHOT -> Figures/screens/pytest_run.png
+% Terminal in sap-evaluator-api: "python -m pytest tests -v" -> 19 passed.
+\shot{pytest_run.png}{Execution of the Microservice Unit Tests (pytest)}{fig:test_pytest}
+
+% SCREENSHOT -> Figures/screens/abap_unit.png
+% ADT "ABAP Unit" view after running the test class of the job offer behavior:
+% all tests green.
+\shot{abap_unit.png}{Execution of the RAP Unit Tests (ABAP Unit)}{fig:test_abap}
+
+% ──────────────────────────────────────────────
+\subsection{AI Engine Capability}
+\label{subsec:ai_capability}
+% ──────────────────────────────────────────────
+
+The capability of the AI engine was evaluated on five criteria, summarized in Table~\ref{tab:ai_capability}. The tests use four fictitious resumes written for this purpose: a strong, a medium, and a weak SAP profile, and a copy of the medium resume with another name and gender, city, and university. They run the real evaluation pipeline of the microservice with the text of the walkthrough job offer. For the consistency, format, and fairness tests, the GitHub data of the candidate is fetched once and reused, so that the only input that changes is the one under test. In total, 70 evaluations were run, for a cost of 0.19~USD.
+
+\begingroup
+\linespread{1}\selectfont
+\renewcommand{\arraystretch}{1.4}
+\begin{longtable}{@{}F{3.3cm}F{6.4cm}F{7.8cm}@{}}
+\caption{Evaluation of the AI Engine}\label{tab:ai_capability}\\
+\toprule
+\textbf{Criterion} & \textbf{Protocol} & \textbf{Result} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Criterion} & \textbf{Protocol} & \textbf{Result} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+Consistency & The medium resume is evaluated 10 times. & Mean 47.5/100, standard deviation 6.0, range 43--63; recommendation DO\_NOT\_HIRE in 9 runs and CONSIDER in 1. \\
+Format robustness & The medium resume is submitted as PDF (10 runs), DOCX, and TXT (3 runs each). & Means 47.5 (PDF), 44.7 (DOCX), and 49.7 (TXT): largest difference 5.0 points, within the run-to-run spread. \\
+Fairness & The medium resume and its copy with another name, gender, city, and university, 10 runs each. & First version: $+5.3$ points for the copy (Welch $t = 2.3$). After removing personal data from the scoring input: $-4.0$ points ($t = -1.4$), not significant. \\
+Ranking of known profiles & The strong, medium, and weak resumes, 3 full runs each. & 61.7, 44.7, and 0.0 out of 100: expected order in every run; HIRE or CONSIDER, DO\_NOT\_HIRE, and DO\_NOT\_HIRE. \\
+Latency and cost & Full pipeline with GitHub calls (9 runs). & 28.0~s per resume on average (12 to 47~s); about 13\,800 input and 1\,500 output tokens; about 0.003~USD per resume. \\
+\end{longtable}
+\endgroup
+
+The engine ranks the three profiles in the expected order in every run, and the format of the resume has no significant effect. The engine is stable but not fully deterministic. Most of the spread comes from one category: with exactly the same GitHub evidence, the language model scores open source contributions sometimes 10 and sometimes 25 out of 35. One run out of ten therefore reaches the CONSIDER band. The low temperature (0.1), the evidence required for each category, and the computation of the final score in Python limit this variation. A further step would be to use the median of three scoring calls, which would still cost less than 0.01~USD per resume.
+
+The fairness test revealed a real defect in the first version of the engine. The prompt forbade using personal details, but the name, contact details, location, institution, and grades were still sent to the scoring model, and the copy of the resume obtained 5.3 more points on average. The scoring input was then anonymized, and the test was run again: the difference fell to $-4.0$ points in the other direction, within the run-to-run spread. The remaining difference comes from the parsing step, which structured the two near-identical resumes slightly differently: the GitHub profile was kept for one of them and dropped for the other. Always adding the GitHub link found by the pipeline to the parsed profile would remove this cause.
+
+% ═══════════════════════════════════════════════
+\section{Validation}
+\label{sec:validation}
+% ═══════════════════════════════════════════════
+
+% ──────────────────────────────────────────────
+\subsection{Functional Validation}
+\label{subsec:functional_validation}
+% ──────────────────────────────────────────────
+
+Table~\ref{tab:functional_validation} links each group of functional requirements defined in Chapter~\ref{chap:analysis_specifications} to the walkthrough figures that demonstrate it.
+
+\begingroup
+\linespread{1}\selectfont
+\renewcommand{\arraystretch}{1.4}
+\begin{longtable}{@{}F{5.6cm}F{8.4cm}F{3.5cm}@{}}
+\caption{Validation of the Functional Requirements}\label{tab:functional_validation}\\
+\toprule
+\textbf{Functional requirement} & \textbf{Evidence} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Functional requirement} & \textbf{Evidence} & \textbf{Status} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+Organizational structure and positions & Figures~\ref{fig:wt_org_create} to~\ref{fig:wt_org_delete_refused} & Validated \\
+Job requisition and pipeline lifecycle & Figures~\ref{fig:wt_offer_list} to~\ref{fig:wt_offer_pipeline} and \ref{fig:wt_offer_published} & Validated \\
+Public candidate portal & Figures~\ref{fig:wt_portal_board} to~\ref{fig:wt_portal_applied}, \ref{fig:wt_portal_progress}, and \ref{fig:wt_portal_accepted} & Validated \\
+AI resume analysis & Figures~\ref{fig:wt_request_ai} to~\ref{fig:wt_cockpit_app}, Table~\ref{tab:ai_capability} & Validated \\
+Candidate evaluation and stage progression & Figures~\ref{fig:wt_next_step} to~\ref{fig:wt_reject} & Validated \\
+Automated onboarding and employee creation & Figures~\ref{fig:wt_portal_accepted} to~\ref{fig:wt_employee} & Validated \\
+Employee lifecycle and talent pool & Figures~\ref{fig:wt_talent_pool}, \ref{fig:wt_employee}, and \ref{fig:wt_employee_promote} & Validated \\
+\end{longtable}
+\endgroup
+
+% ──────────────────────────────────────────────
+\subsection{Non-Functional Validation}
+\label{subsec:nonfunctional_validation}
+% ──────────────────────────────────────────────
+
+Table~\ref{tab:nonfunctional_validation} shows how each non-functional requirement is satisfied and how it was verified.
+
+\begingroup
+\linespread{1}\selectfont
+\renewcommand{\arraystretch}{1.4}
+\begin{longtable}{@{}F{3.2cm}F{7.6cm}F{6.7cm}@{}}
+\caption{Validation of the Non-Functional Requirements}\label{tab:nonfunctional_validation}\\
+\toprule
+\textbf{Requirement} & \textbf{Mechanism} & \textbf{Verification} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Requirement} & \textbf{Mechanism} & \textbf{Verification} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+Security & CSRF token on every modifying request; ETag (\code{If-Match}) optimistic locking; separate identity providers (Clerk for candidates, SAP IAS for HR); instance authorization; technical communication user for the Web API; no personal data sent to the scoring model & Tested on the system: an action sent with an outdated ETag is rejected (HTTP 412), a write without \code{If-Match} header is rejected (HTTP 428), and a write without CSRF token is rejected (HTTP 403) \\
+Performance & In-memory SAP HANA Cloud database; asynchronous AI evaluation & Measured times in Table~\ref{tab:performance} \\
+Maintainability and Clean Core & ABAP for Cloud Development with released APIs only; layered RAP model & All development objects activate without errors in ADT; the four ABAP Unit tests pass; no SAP standard object modified \\
+Availability & Draft handling of organizational units, job offers, onboarding forms, and employees & Every change is kept in the draft (\emph{Draft updated}, Figure~\ref{fig:wt_offer_draft}), which stays available until it is saved or discarded \\
+Interoperability & Standard OData V4 and REST services & The same OData V4 services are consumed by the SAP Fiori apps and by the React portal; the AI microservice is called through its REST API \\
+\end{longtable}
+\endgroup
+
+The response times of the main operations were measured on the SAP BTP trial system with a script that calls the OData services with the same session as the portal (Table~\ref{tab:performance}). The list was loaded 10 times, an application was submitted 5 times, and the AI evaluation and the hiring were each run 3 times. The write operations used temporary test records, which were deleted after the measurement.
+
+\begingroup
+\linespread{1}\selectfont
+\renewcommand{\arraystretch}{1.4}
+\begin{longtable}{@{}F{12.5cm}F{5cm}@{}}
+\caption{Measured Response Times}\label{tab:performance}\\
+\toprule
+\textbf{Operation} & \textbf{Average time} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Operation} & \textbf{Average time} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+Loading the job offers list in the HR cockpit & 226~ms (213 to 238~ms) \\
+Submitting an application (\code{applyToJob}) & 306~ms (269 to 380~ms) \\
+AI evaluation of one resume, end to end (offer read, \code{/evaluate/score} with the Google Drive download, \code{setAIEvaluation}) & 64.7~s (59.9 to 67.8~s) \\
+Hiring: \code{approveAndCreateEmployee} (employee and its child records) & 428~ms (359 to 518~ms) \\
+\end{longtable}
+\endgroup
+
+All SAP operations answer in less than half a second. The AI evaluation takes about one minute end to end, and 95\,\% of this time (61.8~s on average) is spent in the AI microservice: downloading the resume from Google Drive, seven to eight calls to GPT-4o-mini, and the calls to the GitHub API. This is longer than in Table~\ref{tab:ai_capability}, where the resumes were read from local files. Since the portal runs the evaluation in the background, the candidate never waits for it.
+
+% ─────────────────────────────────────────────
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+% ─────────────────────────────────────────────
+
+This chapter presented the realization of Talently. The development environment combined the SAP cloud ecosystem for the transactional core with open-source web and AI tools for the portal and the evaluation engine. The end-to-end walkthrough demonstrated the complete recruitment process, from the creation of the organization to the automatic creation of the employee master record. Finally, the unit tests, the evaluation of the AI engine, and the validation tables linked every requirement of Chapter~\ref{chap:analysis_specifications} to a concrete piece of evidence.
+
+\fussy

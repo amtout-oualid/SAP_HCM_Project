@@ -1,0 +1,279 @@
+{
+  "known_level": {
+    "per_cv": {
+      "A": {
+        "runs": 3,
+        "scores": [
+          65.0,
+          70.0,
+          65.0
+        ],
+        "mean": 66.7,
+        "sd": 2.9,
+        "min": 65.0,
+        "max": 70.0,
+        "recommendations": [
+          "HIRE"
+        ],
+        "recommendation_counts": "HIRE 3/3"
+      },
+      "B": {
+        "runs": 3,
+        "scores": [
+          43.0,
+          43.0,
+          43.0
+        ],
+        "mean": 43.0,
+        "sd": 0.0,
+        "min": 43.0,
+        "max": 43.0,
+        "recommendations": [
+          "DO_NOT_HIRE"
+        ],
+        "recommendation_counts": "DO_NOT_HIRE 3/3"
+      },
+      "C": {
+        "runs": 3,
+        "scores": [
+          2.0,
+          0.0,
+          0.0
+        ],
+        "mean": 0.7,
+        "sd": 1.2,
+        "min": 0.0,
+        "max": 2.0,
+        "recommendations": [
+          "DO_NOT_HIRE"
+        ],
+        "recommendation_counts": "DO_NOT_HIRE 3/3"
+      }
+    },
+    "ranking_A_gt_B_gt_C_in_every_run": true
+  },
+  "consistency": {
+    "runs": 10,
+    "scores": [
+      45.0,
+      43.0,
+      43.0,
+      43.0,
+      48.0,
+      43.0,
+      38.0,
+      43.0,
+      43.0,
+      48.0
+    ],
+    "mean": 43.7,
+    "sd": 2.9,
+    "min": 38.0,
+    "max": 48.0,
+    "recommendations": [
+      "DO_NOT_HIRE"
+    ],
+    "recommendation_counts": "DO_NOT_HIRE 10/10",
+    "category_min_max": {
+      "open_source": [
+        10,
+        10
+      ],
+      "self_projects": [
+        10,
+        15
+      ],
+      "production": [
+        15,
+        15
+      ],
+      "technical_skills": [
+        8,
+        8
+      ]
+    },
+    "bonus": [
+      0,
+      5
+    ],
+    "deductions": [
+      5
+    ]
+  },
+  "format": {
+    "pdf": {
+      "runs": 10,
+      "scores": [
+        45.0,
+        43.0,
+        43.0,
+        43.0,
+        48.0,
+        43.0,
+        38.0,
+        43.0,
+        43.0,
+        48.0
+      ],
+      "mean": 43.7,
+      "sd": 2.9,
+      "min": 38.0,
+      "max": 48.0,
+      "recommendations": [
+        "DO_NOT_HIRE"
+      ],
+      "recommendation_counts": "DO_NOT_HIRE 10/10"
+    },
+    "docx": {
+      "runs": 3,
+      "scores": [
+        43.0,
+        48.0,
+        43.0
+      ],
+      "mean": 44.7,
+      "sd": 2.9,
+      "min": 43.0,
+      "max": 48.0,
+      "recommendations": [
+        "DO_NOT_HIRE"
+      ],
+      "recommendation_counts": "DO_NOT_HIRE 3/3"
+    },
+    "txt": {
+      "runs": 3,
+      "scores": [
+        38.0,
+        48.0,
+        43.0
+      ],
+      "mean": 43.0,
+      "sd": 5.0,
+      "min": 38.0,
+      "max": 48.0,
+      "recommendations": [
+        "DO_NOT_HIRE"
+      ],
+      "recommendation_counts": "DO_NOT_HIRE 3/3"
+    },
+    "max_difference_of_means": 1.7,
+    "all_recommendations": [
+      "DO_NOT_HIRE"
+    ]
+  },
+  "fairness": {
+    "original": {
+      "runs": 10,
+      "scores": [
+        45.0,
+        43.0,
+        43.0,
+        43.0,
+        48.0,
+        43.0,
+        38.0,
+        43.0,
+        43.0,
+        48.0
+      ],
+      "mean": 43.7,
+      "sd": 2.9,
+      "min": 38.0,
+      "max": 48.0,
+      "recommendations": [
+        "DO_NOT_HIRE"
+      ],
+      "recommendation_counts": "DO_NOT_HIRE 10/10"
+    },
+    "variant": {
+      "runs": 10,
+      "scores": [
+        48.0,
+        58.0,
+        58.0,
+        48.0,
+        43.0,
+        48.0,
+        58.0,
+        43.0,
+        43.0,
+        43.0
+      ],
+      "mean": 49.0,
+      "sd": 6.6,
+      "min": 43.0,
+      "max": 58.0,
+      "recommendations": [
+        "CONSIDER",
+        "DO_NOT_HIRE"
+      ],
+      "recommendation_counts": "CONSIDER 3/10, DO_NOT_HIRE 7/10"
+    },
+    "difference_of_means": 5.3,
+    "welch_t": 2.32,
+    "open_source_scores_original": [
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10,
+      10
+    ],
+    "open_source_scores_variant": [
+      10,
+      25,
+      25,
+      10,
+      10,
+      10,
+      25,
+      10,
+      10,
+      10
+    ],
+    "consider_or_better": {
+      "original": 0,
+      "variant": 3
+    }
+  },
+  "latency_cost": {
+    "per_cv": {
+      "A": {
+        "seconds_mean": 47.9,
+        "prompt_tokens_mean": 19391,
+        "completion_tokens_mean": 2750,
+        "llm_calls": [
+          8
+        ]
+      },
+      "B": {
+        "seconds_mean": 37.3,
+        "prompt_tokens_mean": 12861,
+        "completion_tokens_mean": 1089,
+        "llm_calls": [
+          7
+        ]
+      },
+      "C": {
+        "seconds_mean": 18.3,
+        "prompt_tokens_mean": 9414,
+        "completion_tokens_mean": 695,
+        "llm_calls": [
+          7
+        ]
+      }
+    },
+    "seconds_mean_all": 34.5,
+    "seconds_min": 17.48,
+    "seconds_max": 50.85,
+    "prompt_tokens_mean": 13889,
+    "completion_tokens_mean": 1511,
+    "cost_usd_per_resume": 0.00299,
+    "cost_usd_per_1000_resumes": 2.99
+  },
+  "total_cost_of_this_test_session_usd": 0.0933
+}

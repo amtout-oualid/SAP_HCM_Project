@@ -1,0 +1,56 @@
+\chapter{Glossary}
+\label{chap:Glossary}
+
+\begingroup
+\setlength{\parskip}{6pt}
+\sloppy
+
+\noindent\textbf{abapGit:} Open-source Git client for ABAP. It serializes the ABAP development objects into files so that they can be versioned on GitHub and pulled into another system.
+
+\noindent\textbf{Action (RAP):} Non-standard operation of a business object, such as \emph{publishOffer} or \emph{approveAndCreateEmployee}. It may take parameters (an abstract entity) and return a result.
+
+\noindent\textbf{Behavior definition (BDEF):} Source that declares the transactional behavior of a business object: the standard operations, actions, validations, determinations, locking, ETag, authorization, and draft handling.
+
+\noindent\textbf{Behavior pool:} ABAP class that implements a behavior definition. Its handler classes run during the interaction phase and its saver classes during the save sequence.
+
+\noindent\textbf{Business object (RAP):} Tree of CDS entities linked by compositions (for example, a job offer with its pipeline steps and applications) that is created, locked, and saved as one unit.
+
+\noindent\textbf{CDS view entity:} Data model defined with Core Data Services on top of the database tables. Interface views (\texttt{ZI\_}) define the data model, projection views (\texttt{ZC\_}) adapt it to one service.
+
+\noindent\textbf{Clean Core:} SAP principle that keeps the ERP standard unmodified: extensions are built with released APIs only, on SAP BTP or with ABAP Cloud, so that the core remains upgradable.
+
+\noindent\textbf{Composition:} Parent-child relationship in which the child cannot exist without its parent; it is created, locked, and deleted with it.
+
+\noindent\textbf{Determination:} Logic that computes or completes data automatically when an instance is created or changed, for example the default status of a new job offer.
+
+\noindent\textbf{Draft:} Temporary version of a business object, stored in a draft table, that keeps the changes of a user until they are activated (saved) or discarded.
+
+\noindent\textbf{ETag (optimistic locking):} Version stamp sent with every modifying request (\texttt{If-Match} header). A request based on an outdated version is rejected, so that one user cannot overwrite the changes of another one.
+
+\noindent\textbf{Feature control:} Mechanism that enables or disables an action or a field for each instance according to its state, for example \emph{Accept Candidate} only at the last pipeline step.
+
+\noindent\textbf{Human-in-the-loop:} Design in which an automated system only supports the decision: the AI score helps the recruiter, who keeps the final decision.
+
+\noindent\textbf{List Report and Object Page:} Standard SAP Fiori Elements floorplans: a filterable list of instances, and the detail page of one instance with its sections and actions.
+
+\noindent\textbf{Onboarding form:} Form completed by an accepted candidate with the personal, legal, bank, and emergency contact data needed to create the employee record.
+
+\noindent\textbf{Rubric:} Set of scoring categories with a maximum number of points each (open source, personal projects, production experience, and technical skills) used by the AI engine to score a candidate.
+
+\noindent\textbf{Save sequence:} Second phase of a RAP transaction, in which the validations run and the transactional buffer is written to the database in a single commit.
+
+\noindent\textbf{Service binding:} Object that publishes a service definition through a protocol, here OData V4, either as a UI service for Fiori or as a Web API.
+
+\noindent\textbf{Side-by-side extension:} Application built next to the ERP, here on SAP BTP, instead of inside it, which keeps the ERP standard untouched.
+
+\noindent\textbf{Structured output:} Mode of a language model in which the answer must follow a given JSON schema, so that it can be validated and processed by a program.
+
+\noindent\textbf{Talent pool:} List of candidates who were not selected for an offer but are kept for future offers.
+
+\noindent\textbf{Transactional buffer:} In-memory area in which RAP collects the changes of a request during the interaction phase, before the save sequence.
+
+\noindent\textbf{Validation:} Check that runs before data is saved and rejects inconsistent data with a message, for example a job offer without any pipeline step.
+
+\endgroup
+
+\pagebreak

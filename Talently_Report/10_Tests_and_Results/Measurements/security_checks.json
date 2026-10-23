@@ -1,0 +1,14 @@
+{
+  "outdated ETag (If-Match)": {
+    "status": 412,
+    "message": "State of entity CDS~ZC_HCM_APPLICATION with key 9A9D2FDD63DA1FE1B1B74511F5D3FFE5 X was already changed (stale If-Match)"
+  },
+  "no If-Match header": {
+    "status": 428,
+    "message": "The Data Service Request is required to be conditional. Try using the \"If-Match\" header"
+  },
+  "no CSRF token": {
+    "status": 403,
+    "message": "Required"
+  }
+}

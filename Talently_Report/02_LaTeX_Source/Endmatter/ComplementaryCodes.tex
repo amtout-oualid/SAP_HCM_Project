@@ -1,0 +1,168 @@
+\chapter{Complementary Code Excerpts}
+\label{chap:code_excerpts}
+
+This appendix gives four short excerpts of the source code of Talently, chosen to illustrate the design decisions described in Chapters~\ref{chap:solution_design} and~\ref{chap:implementation}. The complete sources are versioned on GitHub: the ABAP objects through abapGit, and the AI microservice and the React portal as standard repositories.
+
+\lstdefinelanguage{ABAPRAP}{
+  morekeywords={managed,implementation,in,class,unique,strict,with,draft,define,behavior,for,alias,persistent,table,
+    additional,save,lock,master,total,etag,authorization,instance,create,update,delete,action,determine,validation,
+    field,readonly,numbering,mandatory,features,result,on,determination,modify,association,mapping,optimized,
+    METHOD,ENDMETHOD,READ,ENTITIES,OF,IN,LOCAL,MODE,ENTITY,FIELDS,WITH,CORRESPONDING,RESULT,DATA,BY,LOOP,AT,INTO,
+    APPEND,VALUE,TO,IF,AND,NOT,ENDIF,ENDLOOP},
+  sensitive=true,
+  morecomment=[l]{"},
+  morecomment=[l]{//},
+  morestring=[b]',
+}
+\lstset{style=mystyle, columns=fullflexible}
+
+\section{Behavior Definition of the Job Offer}
+
+The behavior definition declares the managed implementation in strict mode with draft, the optimistic locking with an ETag, the instance-based feature control of the lifecycle actions, and the validations that run before an offer is saved (excerpt of \texttt{ZI\_HCM\_JOBOFFER}).
+
+\begin{lstlisting}[language=ABAPRAP, caption={Behavior definition of the job offer (excerpt)}, label={lst:bdef_joboffer}]
+managed implementation in class zcl_bp_i_hcm_joboffer unique;
+strict ( 2 );
+with draft;
+
+define behavior for ZI_HCM_JobOffer alias JobOffer
+persistent table zhcm_joboffer
+draft table zhcm_d_joboffer
+with additional save
+lock master
+total etag LastChangedAt
+authorization master ( instance )
+etag master LocalLastChangedAt
+{
+  create; update; delete;
+
+  draft action Edit;
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare
+  {
+    validation validateMandatoryFields;
+    validation validateApplicationDeadline;
+    validation validatePositionVacant;
+    validation validateBeforePublish;
+    validation PipeTmpl~validateMandatorySteps;
+  }
+
+  field ( readonly, numbering : managed ) OfferId;
+  field ( mandatory ) Title, Department;
+
+  action ( features : instance, authorization : instance ) publishOffer result [1] $self;
+  action ( features : instance, authorization : instance ) closeOffer result [1] $self;
+  action ( features : instance, authorization : instance ) reopenOffer result [1] $self;
+
+  validation validateBeforePublish on save { create; update; }
+  validation validateApplicationDeadline on save { create; update; field AppDeadline, ValidUntil; }
+
+  association _Applications { create; with draft; }
+  association _Steps { create; with draft; }
+}
+\end{lstlisting}
+
+\section{Validation Before Publication}
+
+A job offer cannot be published without at least one pipeline step. The steps are read from the transactional buffer, so steps that are not saved yet are counted too; the message is attached to the offer and displayed by Fiori Elements.
+
+\begin{lstlisting}[language=ABAPRAP, caption={Validation \texttt{validateBeforePublish} of the job offer}, label={lst:validate_publish}]
+METHOD validateBeforePublish.
+  READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+    ENTITY JobOffer FIELDS ( Status ) WITH CORRESPONDING #( keys ) RESULT DATA(lt_offers).
+
+  " Steps are read from the transactional buffer, so new (unsaved) steps are counted too
+  READ ENTITIES OF ZI_HCM_JobOffer IN LOCAL MODE
+    ENTITY JobOffer BY \_Steps FIELDS ( OfferId )
+    WITH CORRESPONDING #( keys ) RESULT DATA(lt_steps).
+
+  LOOP AT lt_offers INTO DATA(offer).
+    APPEND VALUE #( %tky = offer-%tky %state_area = 'VALIDATE_PUBLISH' ) TO reported-joboffer.
+
+    IF offer-Status = 'P'
+       AND NOT line_exists( lt_steps[ OfferId = offer-OfferId %is_draft = offer-%is_draft ] ).
+      APPEND VALUE #( %tky = offer-%tky ) TO failed-joboffer.
+      APPEND VALUE #( %tky        = offer-%tky
+                      %state_area = 'VALIDATE_PUBLISH'
+                      %msg        = new_message_with_text(
+                        severity = if_abap_behv_message=>severity-error
+                        text     = 'Cannot publish: define at least one pipeline step.' ) )
+      TO reported-joboffer.
+    ENDIF.
+  ENDLOOP.
+ENDMETHOD.
+\end{lstlisting}
+
+\section{Score Computation in the AI Microservice}
+
+The language model only returns the score and the evidence of each category; the final score and the recommendation are computed in Python, so that they always respect the limits of the rubric.
+
+\begin{lstlisting}[language=Python, caption={Deterministic score computation (\texttt{services/scoring\_engine.py})}, label={lst:compute_score}]
+def _compute_score(self, evaluation_data: Any) -> Dict[str, Any]:
+    """Compute total score, cap bounds, and recommendation."""
+    base_score = 0.0
+    max_score = sum(cat.max for cat in self.role.categories)
+
+    if hasattr(evaluation_data, "scores") and evaluation_data.scores:
+        scores_dict = evaluation_data.scores.model_dump()
+        for cat in self.role.categories:
+            cat_score_data = scores_dict.get(cat.key, {})
+            awarded = float(cat_score_data.get("score", 0.0))
+            # Ensure category score does not exceed its maximum
+            base_score += min(awarded, float(cat.max))
+
+    # Add bonus points (capped at role.bonus_max)
+    bonus_points = 0.0
+    if hasattr(evaluation_data, "bonus_points") and evaluation_data.bonus_points:
+        bonus_points = min(float(evaluation_data.bonus_points.total), float(self.role.bonus_max))
+
+    # Subtract deductions
+    deductions = 0.0
+    if hasattr(evaluation_data, "deductions") and evaluation_data.deductions:
+        deductions = float(evaluation_data.deductions.total)
+
+    final_score = base_score + bonus_points - deductions
+    max_possible = max_score + self.role.bonus_max
+    final_score = max(float(self.role.min_final_score), min(final_score, float(max_possible)))
+
+    percentage = round((final_score / max_score) * 100.0, 1) if max_score > 0 else 0.0
+
+    # Recommendation logic
+    if percentage >= 80.0:
+        recommendation = "STRONG_HIRE"
+    elif percentage >= 65.0:
+        recommendation = "HIRE"
+    elif percentage >= 50.0:
+        recommendation = "CONSIDER"
+    else:
+        recommendation = "DO_NOT_HIRE"
+
+    return {"final_score": round(final_score, 1), "max_score": max_score,
+            "percentage": percentage, "recommendation": recommendation}
+\end{lstlisting}
+
+\section{Anonymized Scoring Input}
+
+After the fairness test of Chapter~\ref{chap:implementation}, the text sent to the scoring model no longer contains the name, contact details, or location of the candidate (and, further in the same function, the name and grades of the institution). The skills, experience, projects, and links are kept.
+
+\begin{lstlisting}[language=Python, caption={Start of the text sent to the scoring model (\texttt{data/transform.py})}, label={lst:anonymized_input}]
+def convert_json_resume_to_text(resume_data: JSONResume) -> str:
+    """Format JSONResume object into human-readable text block for LLM evaluation."""
+    text_parts = []
+
+    if resume_data.basics:
+        basics = resume_data.basics
+        # Fairness: name, e-mail, phone and location are not sent to the scoring model
+        text_parts.append("=== BASIC INFORMATION ===")
+        text_parts.append(f"Website: {basics.url or 'Not provided'}")
+
+        if basics.summary:
+            text_parts.append(f"Summary: {basics.summary}")
+
+        if basics.profiles:
+            text_parts.append("Profiles:")
+            for profile in basics.profiles:
+                text_parts.append(f"  - {profile.network}: {profile.username or 'N/A'} ({profile.url})")
+\end{lstlisting}

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Talently - SAP BTP HCM Extension (Stage INE1)" company="Cognitus Corporation" webLink="" view-date="2026-06-08" view-index="0" gantt-divider-location="420" resource-divider-location="300" version="3.2.3200" locale="en">
+  <description><![CDATA[Internship planning, 15 June - 15 August 2026 (Cognitus Tangier, INPT).]]></description>
+  <view zooming-state="default:3" id="gantt-chart">
+    <field id="tpd3" name="Name" width="300" order="0"/>
+    <field id="tpd4" name="Begin date" width="80" order="1"/>
+    <field id="tpd5" name="End date" width="80" order="2"/>
+  </view>
+  <view id="resource-table">
+    <field id="0" name="Name" width="200" order="0"/>
+    <field id="1" name="Default role" width="120" order="1"/>
+  </view>
+  <calendars>
+    <day-types>
+      <day-type id="0"/>
+      <day-type id="1"/>
+      <default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+      <only-show-weekends value="false"/>
+      <overriden-day-types/>
+      <days/>
+    </day-types>
+  </calendars>
+  <tasks empty-milestones="true">
+    <taskproperties>
+      <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+      <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+      <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+      <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+      <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+      <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+      <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+      <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+      <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+      <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+    </taskproperties>
+    <task id="100" name="Phase 1 - Onboarding &amp; Training (Weeks 1-4)" color="#4472C4" meeting="false" start="2026-06-15" duration="20" complete="100" expand="true">
+      <task id="1" name="Integration at Cognitus Tangier &amp; SAP BTP trial account" color="#4472C4" meeting="false" start="2026-06-15" duration="2" complete="100" expand="true">
+        <depend id="2" type="2" difference="0" hardness="Rubber"/>
+        <depend id="3" type="2" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="2" name="D1 - Project charter" color="#4472C4" meeting="false" start="2026-06-17" duration="3" complete="100" expand="true">
+      </task>
+      <task id="3" name="SAP course: Exploring SAP BTP (BTP100)" color="#4472C4" meeting="false" start="2026-06-17" duration="3" complete="100" expand="true">
+        <depend id="4" type="2" difference="0" hardness="Rubber"/>
+        <depend id="6" type="2" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="4" name="SAP course: Learning Basic ABAP Programming (S4D400)" color="#4472C4" meeting="false" start="2026-06-22" duration="7" complete="100" expand="true">
+        <depend id="5" type="2" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="5" name="SAP course: Building Transactional Apps with RAP (S4D437)" color="#4472C4" meeting="false" start="2026-07-01" duration="6" complete="100" expand="true">
+      </task>
+      <task id="6" name="D2 - SAP HCM research &amp; requirements scoping" color="#4472C4" meeting="false" start="2026-07-06" duration="5" complete="100" expand="true">
+        <depend id="11" type="2" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="7" name="Milestone - Training completed" color="#4472C4" meeting="true" start="2026-07-10" duration="0" complete="100" expand="true">
+      </task>
+    </task>
+    <task id="200" name="Phase 2 - Analysis &amp; Data Modeling (Weeks 5-6)" color="#70AD47" meeting="false" start="2026-07-13" duration="8" complete="100" expand="true">
+      <task id="11" name="D3 - Functional &amp; non-functional requirements, use cases" color="#70AD47" meeting="false" start="2026-07-13" duration="2" complete="100" expand="true">
+        <depend id="12" type="2" difference="0" hardness="Rubber"/>
+        <depend id="13" type="2" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="12" name="D4 - Software Development Plan (SDP) &amp; sprint backlog" color="#70AD47" meeting="false" start="2026-07-15" duration="1" complete="100" expand="true">
+        <depend id="24" type="2" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="13" name="D5 - CDS data model (tables, interface &amp; projection views)" color="#70AD47" meeting="false" start="2026-07-15" duration="5" complete="100" expand="true">
+        <depend id="14" type="1" difference="0" hardness="Rubber"/>
+        <depend id="21" type="1" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="14" name="Organizational structure modeling (units, positions)" color="#70AD47" meeting="false" start="2026-07-20" duration="3" complete="100" expand="true">
+      </task>
+    </task>
+    <task id="300" name="Phase 3 - Development &amp; Integration (Weeks 6-7)" color="#ED7D31" meeting="false" start="2026-07-20" duration="12" complete="100" expand="true">
+      <task id="21" name="D6 - RAP behavior: validations, determinations, actions, draft" color="#ED7D31" meeting="false" start="2026-07-20" duration="8" complete="100" expand="true">
+        <depend id="22" type="1" difference="0" hardness="Rubber"/>
+        <depend id="25" type="1" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="22" name="D7 - OData V4 services (definitions &amp; bindings)" color="#ED7D31" meeting="false" start="2026-07-27" duration="3" complete="100" expand="true">
+        <depend id="23" type="1" difference="0" hardness="Rubber"/>
+        <depend id="26" type="1" difference="0" hardness="Rubber"/>
+        <depend id="31" type="2" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="23" name="D8 - SAP Fiori Elements apps (recruitment, organization, personnel)" color="#ED7D31" meeting="false" start="2026-07-27" duration="5" complete="100" expand="true">
+        <depend id="32" type="2" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="24" name="D9 - AI microservice (FastAPI, resume parsing &amp; scoring)" color="#ED7D31" meeting="false" start="2026-07-22" duration="8" complete="100" expand="true">
+      </task>
+      <task id="25" name="D10 - Personnel administration (employee, promotion, transfer)" color="#ED7D31" meeting="false" start="2026-07-29" duration="3" complete="100" expand="true">
+      </task>
+      <task id="26" name="D11 - Candidate portal (React, Clerk, apply, tracking, onboarding)" color="#ED7D31" meeting="false" start="2026-07-27" duration="7" complete="100" expand="true">
+      </task>
+      <task id="27" name="Milestone - Integrated prototype" color="#ED7D31" meeting="true" start="2026-08-04" duration="0" complete="100" expand="true">
+      </task>
+    </task>
+    <task id="400" name="Phase 4 - Testing &amp; Finalization (Week 8) and Closure" color="#A5A5A5" meeting="false" start="2026-08-03" duration="10" complete="100" expand="true">
+      <task id="31" name="D12 - Security: SAP IAS, Clerk, CSRF &amp; ETag" color="#A5A5A5" meeting="false" start="2026-08-03" duration="2" complete="100" expand="true">
+      </task>
+      <task id="32" name="D13 - Tests: ABAP Unit, pytest, end-to-end scenario" color="#A5A5A5" meeting="false" start="2026-08-03" duration="4" complete="100" expand="true">
+        <depend id="33" type="3" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="33" name="D14 - Deployment on SAP BTP &amp; technical documentation" color="#A5A5A5" meeting="false" start="2026-08-06" duration="2" complete="100" expand="true">
+        <depend id="34" type="2" difference="0" hardness="Rubber"/>
+      </task>
+      <task id="34" name="D15 - Internship report &amp; presentation" color="#A5A5A5" meeting="false" start="2026-08-10" duration="5" complete="100" expand="true">
+      </task>
+      <task id="35" name="Milestone - End of internship" color="#A5A5A5" meeting="true" start="2026-08-14" duration="0" complete="100" expand="true">
+      </task>
+    </task>
+  </tasks>
+  <resources>
+    <resource id="0" name="Oualid AMTOUT (intern)" function="Default:1" contacts="" phone=""/>
+    <resource id="1" name="Karim Ait Alla (industrial supervisor)" function="Default:0" contacts="" phone=""/>
+  </resources>
+  <allocations>
+    <allocation task-id="1" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="2" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="3" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="4" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="5" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="6" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="11" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="12" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="13" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="14" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="21" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="22" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="23" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="24" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="25" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="26" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="31" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="32" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="33" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+    <allocation task-id="34" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+  </allocations>
+  <vacations/>
+  <previous/>
+  <roles roleset-name="Default"/>
+</project>

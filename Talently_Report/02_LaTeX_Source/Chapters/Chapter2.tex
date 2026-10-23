@@ -1,0 +1,72 @@
+\chapter{Project Context and Objectives}
+\label{chap:project_context_objectives}
+
+% ─────────────────────────────────────────────
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+% ─────────────────────────────────────────────
+
+This chapter delineates the foundational context and strategic perimeter of the project. It begins by establishing the general context of enterprise software modernization, examining how digital transformation and cloud architectures intersect with corporate talent acquisition. Next, it details the core operational and architectural problem statement that motivated this work, analyzing the systemic bottlenecks of manual screening, rigid legacy ERP workflows, semantic keyword limitations, and master data isolation. Finally, it articulates the primary project objectives guiding the design and development of the proposed cloud-native, AI-powered recruitment platform built on SAP BTP using ABAP RAP.
+
+\newpage
+
+% ─────────────────────────────────────────────
+\section{General Project}
+\label{sec:general_project}
+% ─────────────────────────────────────────────
+
+\subsection{General Context}
+\label{subsec:general_context}
+
+Enterprise Resource Planning (ERP) systems constitute the central digital backbone of modern organizations, orchestrating mission-critical financial and human capital processes. However, while core transactional systems have largely transitioned to scalable cloud architectures, corporate recruitment workflows often remain fragmented, relying on manual screening methods, disconnected point solutions, and legacy procedures that introduce substantial administrative overhead and hiring latency.
+
+Building upon intensive technical upskilling on SAP Business Technology Platform (SAP BTP), ABAP Cloud, and the ABAP RESTful Application Programming Model (RAP), this project addresses these operational hurdles. It aims to design and implement an AI-powered talent acquisition platform that unifies modern candidate self-service with robust enterprise SAP HCM governance, while strictly adhering to SAP's Clean Core extensibility principles.
+
+\subsection{Problem Statement}
+\label{subsec:problem_statement}
+
+Despite the strategic importance of talent acquisition, enterprise recruitment workflows face several operational and architectural bottlenecks that can be synthesized as follows:
+
+\begin{itemize}
+    \item \textbf{Manual Screening Overload and Latency:} Inundated by large application volumes, recruiters face severe cognitive fatigue from manual resume review, substantially inflating time-to-hire and introducing subjective evaluation biases.
+
+    \item \textbf{Workflow Rigidity and Poor Ergonomics:} Legacy ERP systems feature complex transactional interfaces designed strictly for back-office administration, lacking candidate self-service portals and agile pipeline tracking workflows.
+
+    \item \textbf{Semantic Inadequacy in Traditional ATS:} Conventional keyword-matching tools lack semantic reasoning, frequently rejecting qualified applicants due to vocabulary mismatches while rewarding candidates who practice artificial keyword stuffing.
+
+    \item \textbf{Enterprise ERP Isolation and Manual Re-entry:} Disconnected third-party recruitment tools force manual transcription of hired candidate data into SAP HCM records, creating data discrepancies, operational delays, and Clean Core upgrade risks.
+\end{itemize}
+
+\subsection{Project Objectives}
+\label{subsec:project_objectives}
+
+In direct response to the operational bottlenecks and technological limitations identified in the problem statement, this project aims to design and implement an enterprise-grade, cloud-native recruitment and talent acquisition platform. The primary objectives guiding the realization of this system are defined as follows:
+
+\begin{itemize}
+    \item \textbf{Needs Analysis and Technology Selection}
+    
+    Conduct a rigorous requirements analysis across the recruitment and onboarding lifecycle, evaluating and selecting an optimal technology stack capable of supporting enterprise scalability, multi-cloud flexibility, and intelligent automation.
+
+    \item \textbf{Native SAP Ecosystem and ERP Integrability}
+    
+    Build the platform natively within the SAP cloud ecosystem (SAP BTP) using modern ABAP Cloud, ensuring seamless integration with existing enterprise ERP infrastructure while strictly adhering to Clean Core principles.
+
+    \item \textbf{Organizational Structure and Job Offer Governance}
+    
+    Enable HR administrators to model organizational units, create and allocate positions linked to those units, define and publish job offers, and oversee the full recruitment pipeline directly anchored to organizational vacancies.
+
+    \item \textbf{AI Resume Analysis Engine}
+
+    Develop a multi-stage AI microservice that uses a large language model to parse resumes into structured profiles, enrich them with the candidate's GitHub projects, and score each candidate against the job offer with explainable results.
+
+    \item \textbf{Comprehensive Quality Assurance, Verification, and Cloud Deployment}
+
+    Test the backend business logic, the AI microservice, and the complete recruitment process at several levels (unit tests, an end-to-end scenario, an evaluation of the AI engine, and measurements of security and response times) to verify the reliability and data integrity of the platform deployed on SAP BTP.
+\end{itemize}
+\newpage
+% ─────────────────────────────────────────────
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+% ─────────────────────────────────────────────
+
+This chapter has established the foundational framework of the project, analyzing the general context of enterprise ERP and recruitment modernization. It has articulated the core problem statement, highlighting the operational bottlenecks, user experience deficiencies, semantic limitations of keyword ATS, and architectural disconnects with central HR systems. In response to these challenges, the chapter defined the strategic objectives of the project, spanning technology selection, native SAP BTP Clean Core integration, organizational structure modeling, AI resume analysis, and rigorous end-to-end verification. Having delineated the contextual perimeter and goals of the initiative, the next chapter will present the comprehensive analysis and detailed specifications of the proposed platform.

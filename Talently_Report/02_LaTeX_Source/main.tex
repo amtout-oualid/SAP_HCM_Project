@@ -1,0 +1,225 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Welcome to Overleaf --- just edit your LaTeX on the left,
+% and we'll compile it for you on the right. If you open the
+% 'Share' menu, you can invite other users to edit at the same
+% time. See www.overleaf.com/learn for more info. Enjoy!
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[12pt,a4paper,oneside]{book}
+
+
+\input{Packages}
+
+
+%\makenoidxglossaries 
+
+%\newglossaryentry{latex}
+%{
+       % name=latex,
+        %description={Is a mark up language specially suited for scientific documents}
+%}
+
+
+
+%\selectlanguage{English}
+
+
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdfauthor={Oualid AMTOUT},
+    pdftitle={Design and Development of an AI-Powered Recruitment Platform Built on SAP BTP using ABAP RAP},
+    pdfpagemode=FullScreen,
+    }
+
+
+
+\begin{document}
+
+
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+    \definecolor{codegray}{rgb}{0.5,0.5,0.5}
+    \definecolor{codepurple}{rgb}{0.58,0,0.82}
+    \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+    
+    \lstdefinestyle{mystyle}{
+        backgroundcolor=\color{backcolour},   
+        keywordstyle=\color{magenta},
+        numberstyle=\tiny\color{codegreen},
+        stringstyle=\color{codepurple},
+        basicstyle=\ttfamily\footnotesize,
+        breakatwhitespace=false,         
+        breaklines=true,                 
+        captionpos=b,                    
+        keepspaces=true,                 
+        numbers=left,                    
+        numbersep=5pt,                  
+        showspaces=false,                
+        showstringspaces=false,
+        showtabs=false,                  
+        tabsize=2
+    }
+
+
+
+
+%\include{Frontmatter/Page_de_garde} %FRENCH ONE
+
+\include{Frontmatter/Page_de_Garde_EN} % ENGLISH
+
+\afterpage{\blankpage}  %page vide obligatoire
+
+\frontmatter
+
+
+\input{Frontmatter/Dedication}
+
+
+\input{Frontmatter/Acknowledgements}
+
+
+\input{Frontmatter/Résumé}
+
+% \cleardoublepage
+%
+
+\input{Frontmatter/Abstract}
+
+% \cleardoublepage
+%
+
+\input{Frontmatter/Molakhas}
+
+% \cleardoublepage
+%
+
+
+
+
+
+
+\listoffigures
+\addcontentsline{toc}{chapter}{List of Figures} 
+%figures are added automatically here
+
+\listoftables
+\addcontentsline{toc}{chapter}{List of Tables} 
+%tables are added automatically here
+
+\lstlistoflistings
+\addcontentsline{toc}{chapter}{List of Listings} 
+%Code snippets are added automatically here
+
+\tableofcontents
+\addcontentsline{toc}{chapter}{Table of Contents}
+%contents are added automatically here
+
+\mainmatter
+
+%debut of chapters
+
+\input{Chapters/Chapter1}
+
+\input{Chapters/Chapter2}
+
+\input{Chapters/Chapter3}
+
+\input{Chapters/Chapter4}
+
+\input{Chapters/Chapter5}
+
+
+\input{Chapters/Conclusion}
+
+\appendix
+
+
+\input{Endmatter/Glossary}
+
+\input{Endmatter/Acronyms}
+
+\input{Endmatter/ComplementaryCodes}
+
+\begin{thebibliography}{99}
+\addcontentsline{toc}{chapter}{Bibliography}
+\raggedright % long URLs cannot be hyphenated
+
+
+\bibitem{sap_rap}
+SAP SE, \emph{ABAP RESTful Application Programming Model}, SAP Help Portal, ABAP Cloud documentation.
+\url{https://help.sap.com/docs/abap-cloud/abap-rap/abap-restful-application-programming-model}
+
+\bibitem{sap_btp_abap}
+SAP SE, \emph{SAP BTP, ABAP Environment}, SAP Help Portal.
+\url{https://help.sap.com/docs/btp/sap-business-technology-platform/abap-environment}
+
+\bibitem{sap_cds}
+SAP SE, \emph{ABAP CDS -- View Entities}, ABAP Keyword Documentation.
+\url{https://help.sap.com/doc/abapdocu_latest_index_htm/latest/en-US/index.htm}
+
+\bibitem{sap_fiori_elements}
+SAP SE, \emph{SAP Fiori Elements for OData V4}, SAPUI5 Software Development Kit documentation.
+\url{https://ui5.sap.com/}
+
+\bibitem{sap_fiori_design}
+SAP SE, \emph{SAP Fiori Design Guidelines}.
+\url{https://www.sap.com/design-system/fiori-design-web/}
+
+\bibitem{sap_learning}
+SAP SE, SAP Learning courses \emph{Exploring SAP Business Technology Platform} (BTP100), \emph{Learning Basic ABAP Programming} (S4D400), and \emph{Building Transactional Apps with the ABAP RESTful Application Programming Model} (S4D437).
+\url{https://learning.sap.com/}
+
+\bibitem{odata}
+OASIS, \emph{OData Version 4.01. Part 1: Protocol}, OASIS Standard, 2020.
+\url{https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html}
+
+\bibitem{abapgit}
+abapGit project, \emph{abapGit Documentation}.
+\url{https://docs.abapgit.org/}
+
+\bibitem{fastapi}
+S. Ram\'irez, \emph{FastAPI Documentation}.
+\url{https://fastapi.tiangolo.com/}
+
+\bibitem{openai_structured}
+OpenAI, \emph{Structured Outputs} and \emph{GPT-4o mini} model documentation, OpenAI API Platform.
+\url{https://platform.openai.com/docs/guides/structured-outputs}
+
+\bibitem{jsonresume}
+JSON Resume, \emph{JSON Resume Schema}.
+\url{https://jsonresume.org/schema}
+
+\bibitem{pymupdf}
+Artifex Software, \emph{PyMuPDF Documentation}.
+\url{https://pymupdf.readthedocs.io/}
+
+\bibitem{github_api}
+GitHub, \emph{GitHub REST API Documentation}.
+\url{https://docs.github.com/en/rest}
+
+\bibitem{react}
+Meta Open Source, \emph{React Documentation}, and Vite, \emph{Vite Guide}.
+\url{https://react.dev/}, \url{https://vite.dev/}
+
+\bibitem{clerk}
+Clerk, \emph{Clerk Documentation}.
+\url{https://clerk.com/docs}
+
+\bibitem{scrum_guide}
+K. Schwaber and J. Sutherland, \emph{The Scrum Guide}, November 2020.
+\url{https://scrumguides.org/scrum-guide.html}
+
+\bibitem{ganttproject}
+GanttProject, \emph{GanttProject: Free Project Scheduling and Management Software}.
+\url{https://www.ganttproject.biz/}
+
+
+
+\end{thebibliography}
+
+\end{document}

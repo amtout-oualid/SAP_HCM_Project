@@ -1,0 +1,79 @@
+{
+  "measured_at": "2026-10-14 14:19",
+  "host": "your-system-id",
+  "job_offers_list_ms": {
+    "runs": 10,
+    "mean": 226.0,
+    "median": 227.7,
+    "min": 212.6,
+    "max": 238.3,
+    "values": [
+      236.9,
+      212.6,
+      229.7,
+      220.8,
+      232.3,
+      225.6,
+      214.5,
+      219.2,
+      230.4,
+      238.3
+    ]
+  },
+  "apply_to_job_ms": {
+    "runs": 5,
+    "mean": 305.7,
+    "median": 287.8,
+    "min": 269.3,
+    "max": 379.7,
+    "values": [
+      304.4,
+      287.4,
+      269.3,
+      379.7,
+      287.8
+    ]
+  },
+  "ai_evaluation_end_to_end_s": {
+    "runs": 3,
+    "mean": 64.7,
+    "median": 66.4,
+    "min": 59.9,
+    "max": 67.8,
+    "values": [
+      67.8,
+      66.4,
+      59.9
+    ]
+  },
+  "ai_service_only_s": {
+    "runs": 3,
+    "mean": 61.8,
+    "median": 63.1,
+    "min": 58.8,
+    "max": 63.6,
+    "values": [
+      63.6,
+      63.1,
+      58.8
+    ]
+  },
+  "ai_scores": [
+    43.0,
+    43.0,
+    43.0
+  ],
+  "approve_and_create_employee_ms": {
+    "runs": 3,
+    "mean": 428.3,
+    "median": 408.2,
+    "min": 358.7,
+    "max": 518.1,
+    "values": [
+      518.1,
+      408.2,
+      358.7
+    ]
+  },
+  "cleanup_left": []
+}
